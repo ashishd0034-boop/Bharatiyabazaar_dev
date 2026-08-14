@@ -271,25 +271,43 @@ model VendorReferralBonus {
 }
 
 model PlatformSetting {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     String
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
 
   @@map("platform_settings")
 }
 
 model AuditLog {
   id          String   @id @default(cuid())
+  actorId     String?  // Null for SYSTEM actions
+  actorType   String   // ADMIN, SYSTEM, MEMBER
   action      String
-  entity      String
+  entityType  String?
   entityId    String?
-  oldValue    String?
-  newValue    String?
-  performedBy String?
+  metadata    Json?
+  ipAddress   String?
   createdAt   DateTime @default(now())
 
+  @@index([entityType, entityId])
+  @@index([actorId])
   @@map("audit_logs")
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("SUPPORT") // SUPER_ADMIN, ADMIN, SUPPORT
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_users")
 }
 
 model SystemCounter {
