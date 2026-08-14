@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const memberService = require("../services/memberservices");
+const memberService = require("../services/memberService");
 const prisma = require("../lib/prisma");
 
 // POST /api/members/register

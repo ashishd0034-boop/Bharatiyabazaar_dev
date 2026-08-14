@@ -1,6 +1,6 @@
 const prisma = require("../lib/prisma");
-
-async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide = null) {
+const commissionService = require("./commissionService");
+const acbService = require("./acbService");async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide = null) {
   // 1. Check if member already has a MAIN ID
   const existingCards = await prisma.memberIdCard.findMany({
     where: { memberId }
@@ -57,7 +57,31 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
     });
 
     // ===== MY SYSTEM PLACEMENT =====
-    await placeInMySystem(idCard, memberId, type, sponsorIdCardId, sponsorSide);
+    const mySystemNode = await placeInMySystem(idCard, memberId, type, sponsorIdCardId, sponsorSide);
+
+    // ===== COMMISSION ENGINE HOOKS =====
+    // 1. Trigger AutoPool completion check FIRST (tie-breaker logic)
+    await commissionService.checkAutoPoolLevelCompletion(globalPosition);
+
+    // 2. Trigger MY SYSTEM completion check SECOND
+    await commissionService.checkMySystemLevelCompletion(mySystemNode.id);
+
+    // ===== ACB UNLOCK HOOK =====
+    // After placing a SUB ID, it may have satisfied the ACB condition for the MAIN ID.
+    // We check the MAIN ID for ACB status.
+    const mainCard = await prisma.memberIdCard.findFirst({
+      where: { memberId, type: "MAIN" }
+    });
+    
+    if (mainCard && !mainCard.acbStatus) {
+      const isAcb = await acbService.checkAcbStatus(mainCard.id);
+      if (isAcb) {
+        await prisma.$transaction(async (tx) => {
+          await acbService.unlockAcb(tx, mainCard.id);
+          await acbService.unlockLockedEarnings(tx, mainCard.id);
+        });
+      }
+    }
 
     newCards.push(idCard);
   }
@@ -75,7 +99,7 @@ async function placeInMySystem(idCard, memberId, type, sponsorIdCardId, sponsorS
       });
 
       if (sponsorNode) {
-        await prisma.mySystemNode.create({
+        const newNode = await prisma.mySystemNode.create({
           data: {
             idCardId: idCard.id,
             parentNodeId: sponsorNode.id,
@@ -83,12 +107,12 @@ async function placeInMySystem(idCard, memberId, type, sponsorIdCardId, sponsorS
             placementType: "SPONSOR"
           }
         });
-        return;
+        return newNode;
       }
     }
 
     // No sponsor — this is the root of member's own tree
-    await prisma.mySystemNode.create({
+    const newNode = await prisma.mySystemNode.create({
       data: {
         idCardId: idCard.id,
         parentNodeId: null,
@@ -96,7 +120,7 @@ async function placeInMySystem(idCard, memberId, type, sponsorIdCardId, sponsorS
         placementType: "ROOT"
       }
     });
-    return;
+    return newNode;
   }
 
   // CASE 2: This is a SUB ID — place under member's MAIN ID
@@ -122,7 +146,7 @@ async function placeInMySystem(idCard, memberId, type, sponsorIdCardId, sponsorS
   // Find next available position under MAIN using breadth-first
   const position = await findNextMySystemPosition(mainNode.id);
 
-  await prisma.mySystemNode.create({
+  const newNode = await prisma.mySystemNode.create({
     data: {
       idCardId: idCard.id,
       parentNodeId: position.parentNodeId,
@@ -130,6 +154,7 @@ async function placeInMySystem(idCard, memberId, type, sponsorIdCardId, sponsorS
       placementType: "AUTO"
     }
   });
+  return newNode;
 }
 
 async function findNextMySystemPosition(rootNodeId) {
