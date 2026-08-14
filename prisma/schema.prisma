@@ -93,13 +93,14 @@ model SetuKoshNode {
 }
 
 model SetuKoshCounter {
-  id           String   @id @default(cuid())
-  memberId     String   @unique
-  counterPaise Int      @default(0)
-  idsCreated   Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  member       Member   @relation(fields: [memberId], references: [id])
+  id                     String   @id @default(cuid())
+  memberId               String   @unique
+  counterPaise           Int      @default(0)
+  idsCreated             Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  accumulatedMarginPaise Int      @default(0)
+  member                 Member   @relation(fields: [memberId], references: [id])
 
   @@map("setukosh_counters")
 }

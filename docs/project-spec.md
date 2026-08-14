@@ -145,7 +145,8 @@ Purchases through MAIN, SUB, or REBIRTH all count to same member counter
 Overflow carries forward automatically
 PIN code activation: requires N members (admin-configurable) in PIN code
 Commission Formula:
-Base rate = vendor margin × 0.071428
+Base rate = weighted vendor margin × 0.071428
+(Weighted margin calculated strictly in integers over the accumulated Rs. 1,000 purchases to prevent manipulation)
 
 Level structure:
 L1 = full rate
@@ -161,7 +162,7 @@ L10 = full rate
 
 Total potential = 9/14 of vendor margin (64.29%)
 
-Referral bonus = 0.25% of purchase amount (to MY SYSTEM sponsor)
+Referral bonus = 0.25% of purchase amount (to MY SYSTEM sponsor, marked PENDING_SETTLEMENT)
 Total payout capped by vendor margin from that purchase
 Status rules:
 Commissions PENDING until Monday vendor settlement
