@@ -1,5 +1,6 @@
 const prisma = require("../lib/prisma");
 const payOnceService = require("./payOnceService");
+const walletService = require("./walletService");
 
 const L_AMOUNTS = {
   1: 30000,
@@ -117,11 +118,13 @@ async function calculateAndCreateCommissions(idCardId, level, stream, amountPais
         // If not ACB, lock it.
         if (!idCard.acbStatus) {
           initialStatus = "LOCKED_ACB";
+        } else {
+          initialStatus = "WITHDRAWABLE";
         }
       }
       
       // Create commission entry
-      await tx.commissionEntry.create({
+      const commission = await tx.commissionEntry.create({
         data: {
           idCardId,
           stream,
@@ -130,6 +133,11 @@ async function calculateAndCreateCommissions(idCardId, level, stream, amountPais
           status: initialStatus
         }
       });
+
+      // If immediately withdrawable, credit the wallet
+      if (initialStatus === "WITHDRAWABLE") {
+        await walletService.credit(tx, idCard.memberId, amountPaise, stream, commission.id, `Commission for ${stream} Level ${level}`);
+      }
     }
   });
 }

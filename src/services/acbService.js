@@ -1,7 +1,7 @@
 const prisma = require("../lib/prisma");
+const walletService = require("./walletService");
 
 async function checkAcbStatus(idCardId) {
-  // Find the MY SYSTEM node for this ID
   const mySystemNode = await prisma.mySystemNode.findUnique({
     where: { idCardId }
   });
@@ -10,7 +10,6 @@ async function checkAcbStatus(idCardId) {
     return false;
   }
 
-  // Find direct children
   const children = await prisma.mySystemNode.findMany({
     where: { parentNodeId: mySystemNode.id }
   });
@@ -32,15 +31,28 @@ async function unlockAcb(tx, idCardId) {
 }
 
 async function unlockLockedEarnings(tx, idCardId) {
-  await tx.commissionEntry.updateMany({
+  // Find all locked commissions for this ID
+  const lockedCommissions = await tx.commissionEntry.findMany({
     where: {
       idCardId,
       status: "LOCKED_ACB"
-    },
-    data: {
-      status: "CONFIRMED"
     }
   });
+
+  if (lockedCommissions.length === 0) return;
+
+  const idCard = await tx.memberIdCard.findUnique({ where: { id: idCardId }});
+
+  for (const commission of lockedCommissions) {
+    // 1. Update commission to WITHDRAWABLE
+    await tx.commissionEntry.update({
+      where: { id: commission.id },
+      data: { status: "WITHDRAWABLE" }
+    });
+
+    // 2. Credit wallet
+    await walletService.credit(tx, idCard.memberId, commission.amountPaise, commission.stream, commission.id, `ACB Unlocked ${commission.stream} Level ${commission.level}`);
+  }
 }
 
 module.exports = {

@@ -151,6 +151,8 @@ model LedgerEntry {
   walletId        String
   type            String   // CREDIT or DEBIT
   amountPaise     Int
+  balanceBeforePaise Int
+  balanceAfterPaise  Int
   source          String   // AUTOPOOL, MY_SYSTEM, SETU_KOSH, WITHDRAWAL, TDS, ADMIN_CHARGE
   referenceId     String?
   description     String?
