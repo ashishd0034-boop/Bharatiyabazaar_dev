@@ -1,8 +1,8 @@
 const prisma = require("../lib/prisma");
 const walletService = require("./walletService");
 
-async function checkAcbStatus(idCardId) {
-  const mySystemNode = await prisma.mySystemNode.findUnique({
+async function checkAcbStatus(tx, idCardId) {
+  const mySystemNode = await tx.mySystemNode.findUnique({
     where: { idCardId }
   });
 
@@ -10,7 +10,7 @@ async function checkAcbStatus(idCardId) {
     return false;
   }
 
-  const children = await prisma.mySystemNode.findMany({
+  const children = await tx.mySystemNode.findMany({
     where: { parentNodeId: mySystemNode.id }
   });
 

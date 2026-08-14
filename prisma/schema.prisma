@@ -359,3 +359,13 @@ model AuditLog {
 
   @@map("audit_logs")
 }
+
+// ==================== SYSTEM COUNTERS ====================
+
+model SystemCounter {
+  id              String   @id // e.g., "AUTOPOOL_POSITION"
+  currentValue    Int      @default(0)
+  updatedAt       DateTime @updatedAt
+
+  @@map("system_counters")
+}
