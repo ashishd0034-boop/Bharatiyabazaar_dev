@@ -233,6 +233,7 @@ model VendorSale {
   memberId    String
   idCardId    String?
   amountPaise Int
+  status      String   @default("COMPLETED") // COMPLETED, REFUNDED, CANCELLED
   createdAt   DateTime @default(now())
   vendor      Vendor   @relation(fields: [vendorId], references: [id])
 
@@ -297,4 +298,16 @@ model SystemCounter {
   updatedAt    DateTime @updatedAt
 
   @@map("system_counters")
+}
+
+model SettlementRun {
+  id            String    @id @default(cuid())
+  runDate       DateTime  @unique
+  status        String    // RUNNING, COMPLETED, FAILED
+  totalEntries  Int       @default(0)
+  totalPaise    Int       @default(0)
+  startedAt     DateTime  @default(now())
+  completedAt   DateTime?
+
+  @@map("settlement_runs")
 }
