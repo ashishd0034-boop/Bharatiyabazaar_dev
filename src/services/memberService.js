@@ -1,16 +1,16 @@
 const prisma = require("../lib/prisma");
 
-async function createMember({ name, mobile, email, address, pinCode }) {
+async function createMember(args) {
   // Create member
   const member = await prisma.member.create({
     data: {
-      name,
-      mobile,
-      email,
-      address,
-      pinCode,
+      name: args.name,
+      mobile: args.mobile,
+      email: args.email,
+      address: args.address,
+      pinCode: args.pinCode,
       kycTier: 1,
-      kycStatus: "PENDING",
+      kycStatus: args.kycStatus || "PENDING",
       status: "ACTIVE"
     }
   });

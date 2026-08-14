@@ -14,8 +14,8 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
 
   await prisma.$transaction(async (tx) => {
     // Check if we need to seed the AutoPool counter (first run)
-    const counterExists = await tx.systemCounter.findUnique({
-      where: { id: "AUTOPOOL_POSITION" }
+    let counterExists = await tx.systemCounter.findUnique({
+      where: { id: "AUTOPOOL_GLOBAL" }
     });
 
     if (!counterExists) {
@@ -24,9 +24,22 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
       });
       const seedPosition = maxNode ? maxNode.globalPosition : 0;
       
-      await tx.systemCounter.create({
-        data: { id: "AUTOPOOL_POSITION", currentValue: seedPosition }
-      });
+      try {
+        counterExists = await tx.systemCounter.upsert({
+          where: { id: "AUTOPOOL_GLOBAL" },
+          update: {},
+          create: { id: "AUTOPOOL_GLOBAL", currentValue: seedPosition }
+        });
+      } catch (e) {
+        if (e.code === 'P2002') {
+          // Another concurrent transaction just created it. Refetch.
+          counterExists = await tx.systemCounter.findUnique({
+            where: { id: "AUTOPOOL_GLOBAL" }
+          });
+        } else {
+          throw e;
+        }
+      }
     }
 
     // Build the initial queue of purchased IDs
@@ -53,7 +66,7 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
 
       // 1. Get next global position atomically
       const counter = await tx.systemCounter.update({
-        where: { id: "AUTOPOOL_POSITION" },
+        where: { id: "AUTOPOOL_GLOBAL" },
         data: { currentValue: { increment: 1 } }
       });
       const globalPosition = counter.currentValue;

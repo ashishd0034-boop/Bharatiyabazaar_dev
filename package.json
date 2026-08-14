@@ -4,7 +4,8 @@
   "description": "Bharatiya Bazaar backend",
   "main": "src/server.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest tests/scenarios",
+    "test:integration": "jest tests/integration --runInBand --detectOpenHandles --coverage --collectCoverageFrom='src/services/**/*.js'",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "prisma:migrate": "prisma migrate dev",
@@ -31,5 +32,15 @@
     "jest": "^30.4.2",
     "nodemon": "^3.1.10",
     "prisma": "^7.9.1"
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 70,
+        "statements": 70
+      }
+    }
   }
 }
