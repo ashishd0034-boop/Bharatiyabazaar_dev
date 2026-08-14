@@ -35,14 +35,22 @@ async function debit(tx, memberId, amountPaise, source, referenceId = null, desc
 
   // Since we don't upsert on debit (can't debit if wallet doesn't exist),
   // we do an update with decrement. This is atomic at the database level.
-  const updatedWallet = await tx.wallet.update({
-    where: { memberId },
-    data: {
-      balancePaise: {
-        decrement: amountPaise
+  let updatedWallet;
+  try {
+    updatedWallet = await tx.wallet.update({
+      where: { memberId },
+      data: {
+        balancePaise: {
+          decrement: amountPaise
+        }
       }
+    });
+  } catch (error) {
+    if (error.code === 'P2025') { // Prisma RecordNotFound
+      throw new Error(`Insufficient funds for member ${memberId}.`);
     }
-  });
+    throw error;
+  }
 
   // Insufficient Funds Validation
   // If the atomic decrement drops balance below 0, we immediately rollback

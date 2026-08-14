@@ -6,366 +6,294 @@ datasource db {
   provider = "postgresql"
 }
 
-// ==================== MEMBER ====================
-
 model Member {
-  id              String   @id @default(cuid())
+  id              String                @id @default(cuid())
   name            String
-  mobile          String   @unique
+  mobile          String                @unique
   email           String?
   address         String?
   pinCode         String?
   gender          String?
   dateOfBirth     DateTime?
   panNumber       String?
-  panVerified     Boolean  @default(false)
-  kycTier         Int      @default(1)
-  kycStatus       String   @default("PENDING")
-  status          String   @default("ACTIVE")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
+  panVerified     Boolean               @default(false)
+  kycTier         Int                   @default(1)
+  kycStatus       String                @default("PENDING")
+  status          String                @default("ACTIVE")
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
   idCards         MemberIdCard[]
-  mainWallet      Wallet?
-  setuKoshNodes   SetuKoshNode[]
   setuKoshCounter SetuKoshCounter?
-  vouchers        Voucher[]
-  withdrawals     Withdrawal[]
+  setuKoshNodes   SetuKoshNode[]
   tdsLedgers      TdsLedger[]
   referralBonus   VendorReferralBonus[]
   vendor          Vendor?
+  vouchers        Voucher[]
+  mainWallet      Wallet?
+  withdrawals     Withdrawal[]
 
   @@map("members")
 }
 
-// ==================== MEMBER ID CARDS ====================
-
 model MemberIdCard {
-  id              String   @id @default(cuid())
-  memberId        String
-  cardNumber      String   @unique
-  type            String   // MAIN, SUB, REBIRTH
-  status          String   @default("ACTIVE")
-  acbStatus       Boolean  @default(false)
-  acbUnlockedAt   DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  member          Member   @relation(fields: [memberId], references: [id])
-  autoPoolNode    AutoPoolNode?
-  mySystemNode    MySystemNode?
-  commissions     CommissionEntry[]
-  payOnceEntries  PayOnceLedger[]
+  id             String            @id @default(cuid())
+  memberId       String
+  cardNumber     String            @unique
+  type           String
+  status         String            @default("ACTIVE")
+  acbStatus      Boolean           @default(false)
+  acbUnlockedAt  DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  autoPoolNode   AutoPoolNode?
+  commissions    CommissionEntry[]
+  member         Member            @relation(fields: [memberId], references: [id])
+  mySystemNode   MySystemNode?
+  payOnceEntries PayOnceLedger[]
 
   @@map("member_id_cards")
 }
 
-// ==================== GLOBAL AUTOPOOL TREE ====================
-
 model AutoPoolNode {
-  id              String   @id @default(cuid())
-  idCardId        String   @unique
-  parentNodeId    String?
-  side            String?  // LEFT or RIGHT
-  globalPosition  Int      @unique
-  depthLevel      Int      @default(0)
-  createdAt       DateTime @default(now())
-
-  // Relations
-  idCard          MemberIdCard @relation(fields: [idCardId], references: [id])
+  id             String       @id @default(cuid())
+  idCardId       String       @unique
+  parentNodeId   String?
+  side           String?
+  globalPosition Int          @unique
+  depthLevel     Int          @default(0)
+  createdAt      DateTime     @default(now())
+  idCard         MemberIdCard @relation(fields: [idCardId], references: [id])
 
   @@map("autopool_nodes")
 }
 
-// ==================== MY SYSTEM TREE ====================
-
 model MySystemNode {
-  id              String   @id @default(cuid())
-  idCardId        String   @unique
-  parentNodeId    String?
-  side            String?  // LEFT or RIGHT
-  placementType   String   @default("AUTO") // AUTO or MANUAL
-  createdAt       DateTime @default(now())
-
-  // Relations
-  idCard          MemberIdCard @relation(fields: [idCardId], references: [id])
+  id            String       @id @default(cuid())
+  idCardId      String       @unique
+  parentNodeId  String?
+  side          String?
+  placementType String       @default("AUTO")
+  createdAt     DateTime     @default(now())
+  idCard        MemberIdCard @relation(fields: [idCardId], references: [id])
 
   @@map("mysystem_nodes")
 }
 
-// ==================== SETU KOSH TREE ====================
-
 model SetuKoshNode {
-  id              String   @id @default(cuid())
-  memberId        String
-  parentNodeId    String?
-  side            String?
-  globalPosition  Int      @unique
-  depthLevel      Int      @default(0)
-  createdAt       DateTime @default(now())
-
-  // Relations
-  member          Member   @relation(fields: [memberId], references: [id])
+  id             String   @id @default(cuid())
+  memberId       String
+  parentNodeId   String?
+  side           String?
+  globalPosition Int      @unique
+  depthLevel     Int      @default(0)
+  createdAt      DateTime @default(now())
+  member         Member   @relation(fields: [memberId], references: [id])
 
   @@map("setukosh_nodes")
 }
 
-// ==================== SETU KOSH COUNTER ====================
-
 model SetuKoshCounter {
-  id              String   @id @default(cuid())
-  memberId        String   @unique
-  counterPaise    Int      @default(0)
-  idsCreated      Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  member          Member   @relation(fields: [memberId], references: [id])
+  id           String   @id @default(cuid())
+  memberId     String   @unique
+  counterPaise Int      @default(0)
+  idsCreated   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  member       Member   @relation(fields: [memberId], references: [id])
 
   @@map("setukosh_counters")
 }
 
-// ==================== WALLET ====================
-
 model Wallet {
-  id              String   @id @default(cuid())
-  memberId        String   @unique
-  balancePaise    Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  member          Member   @relation(fields: [memberId], references: [id])
-  ledgerEntries   LedgerEntry[]
+  id            String        @id @default(cuid())
+  memberId      String        @unique
+  balancePaise  Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  ledgerEntries LedgerEntry[]
+  member        Member        @relation(fields: [memberId], references: [id])
 
   @@map("wallets")
 }
 
-// ==================== LEDGER ENTRIES ====================
-
 model LedgerEntry {
-  id              String   @id @default(cuid())
-  walletId        String
-  type            String   // CREDIT or DEBIT
-  amountPaise     Int
-  balanceBeforePaise Int
+  id                 String   @id @default(cuid())
+  walletId           String
+  type               String
+  amountPaise        Int
+  source             String
+  referenceId        String?
+  description        String?
+  createdAt          DateTime @default(now())
   balanceAfterPaise  Int
-  source          String   // AUTOPOOL, MY_SYSTEM, SETU_KOSH, WITHDRAWAL, TDS, ADMIN_CHARGE
-  referenceId     String?
-  description     String?
-  createdAt       DateTime @default(now())
-
-  // Relations
-  wallet          Wallet   @relation(fields: [walletId], references: [id])
+  balanceBeforePaise Int
+  wallet             Wallet   @relation(fields: [walletId], references: [id])
 
   @@map("ledger_entries")
 }
 
-// ==================== COMMISSION ENTRIES ====================
-
 model CommissionEntry {
-  id              String   @id @default(cuid())
-  idCardId        String
-  stream          String   // AUTOPOOL, MY_SYSTEM, SETU_KOSH
-  level           Int
-  amountPaise     Int
-  status          String   // PENDING_7_DAY, LOCKED_ACB, CONFIRMED, WITHDRAWABLE, PAY_ONCE_BLOCKED, REVERSED
-  sourceIdCardId  String?
-  confirmedAt     DateTime?
-  createdAt       DateTime @default(now())
-
-  // Relations
-  idCard          MemberIdCard @relation(fields: [idCardId], references: [id])
+  id             String       @id @default(cuid())
+  idCardId       String
+  stream         String
+  level          Int
+  amountPaise    Int
+  status         String
+  sourceIdCardId String?
+  confirmedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  idCard         MemberIdCard @relation(fields: [idCardId], references: [id])
 
   @@map("commission_entries")
 }
 
-// ==================== PAY-ONCE LEDGER ====================
-
 model PayOnceLedger {
-  id              String   @id @default(cuid())
-  idCardId        String
-  level           Int
-  paidVia         String   // AUTOPOOL or MY_SYSTEM
-  paidAt          DateTime @default(now())
-
-  // Relations
-  idCard          MemberIdCard @relation(fields: [idCardId], references: [id])
+  id       String       @id @default(cuid())
+  idCardId String
+  level    Int
+  paidVia  String
+  paidAt   DateTime     @default(now())
+  idCard   MemberIdCard @relation(fields: [idCardId], references: [id])
 
   @@unique([idCardId, level])
   @@map("payonce_ledger")
 }
 
-// ==================== VOUCHERS ====================
-
 model Voucher {
-  id              String   @id @default(cuid())
-  memberId        String
-  idCardId        String?
-  sourceType      String   // AUTOPOOL_LEVEL_5, AUTOPOOL_LEVEL_6, AUTOPOOL_LEVEL_7
-  faceValuePaise  Int
-  status          String   @default("ACTIVE") // ACTIVE, REDEEMED, EXPIRED
-  issuedAt        DateTime @default(now())
-  expiresAt       DateTime
-  redeemedAt      DateTime?
-
-  // Relations
-  member          Member   @relation(fields: [memberId], references: [id])
+  id             String    @id @default(cuid())
+  memberId       String
+  idCardId       String?
+  sourceType     String
+  faceValuePaise Int
+  status         String    @default("ACTIVE")
+  issuedAt       DateTime  @default(now())
+  expiresAt      DateTime
+  redeemedAt     DateTime?
+  member         Member    @relation(fields: [memberId], references: [id])
 
   @@map("vouchers")
 }
 
-// ==================== WITHDRAWALS ====================
-
 model Withdrawal {
-  id              String   @id @default(cuid())
-  memberId        String
-  idCardId        String
-  method          String   // BANK, MEMBER_WALLET, VOUCHER_CONVERSION
-  grossPaise      Int
-  tdsPaise        Int
+  id               String    @id @default(cuid())
+  memberId         String
+  idCardId         String
+  method           String
+  grossPaise       Int
+  tdsPaise         Int
   adminChargePaise Int
-  netPaise        Int
-  status          String   @default("REQUESTED") // REQUESTED, PROCESSING, COMPLETED, REJECTED
-  requestedAt     DateTime @default(now())
-  completedAt     DateTime?
-
-  // Relations
-  member          Member   @relation(fields: [memberId], references: [id])
+  netPaise         Int
+  status           String    @default("REQUESTED")
+  requestedAt      DateTime  @default(now())
+  completedAt      DateTime?
+  paymentDetails   String?
+  rejectionReason  String?
+  member           Member    @relation(fields: [memberId], references: [id])
 
   @@map("withdrawals")
 }
 
-// ==================== TDS LEDGER ====================
-
 model TdsLedger {
-  id              String   @id @default(cuid())
-  memberId        String
-  section         String   // SECTION_194H, SECTION_194R, SECTION_194C
-  amountPaise     Int
-  status          String   @default("HELD") // HELD, DEPOSITED, REVERSED
-  referenceId     String?
-  createdAt       DateTime @default(now())
-
-  // Relations
-  member          Member   @relation(fields: [memberId], references: [id])
+  id          String   @id @default(cuid())
+  memberId    String
+  section     String
+  amountPaise Int
+  status      String   @default("HELD")
+  referenceId String?
+  createdAt   DateTime @default(now())
+  member      Member   @relation(fields: [memberId], references: [id])
 
   @@map("tds_ledger")
 }
 
-// ==================== VENDOR ====================
-
 model Vendor {
-  id              String   @id @default(cuid())
-  memberId        String   @unique
-  businessName    String
-  category        String
-  gstin           String?
-  address         String?
-  pinCode         String?
-  marginRatePct   Float
-  status          String   @default("PROVISIONAL") // PROVISIONAL, UNDER_REVIEW, TRAINING, VERIFIED, FROZEN, DEACTIVATED
-  securityDepositPaise Int @default(500000)
-  joinedAt        DateTime @default(now())
-  verifiedAt      DateTime?
-
-  // Relations
-  member          Member   @relation(fields: [memberId], references: [id])
-  sales           VendorSale[]
-  settlements     VendorSettlement[]
+  id                   String             @id @default(cuid())
+  memberId             String             @unique
+  businessName         String
+  category             String
+  gstin                String?
+  address              String?
+  pinCode              String?
+  marginRatePct        Float
+  status               String             @default("PROVISIONAL")
+  securityDepositPaise Int                @default(500000)
+  joinedAt             DateTime           @default(now())
+  verifiedAt           DateTime?
+  sales                VendorSale[]
+  settlements          VendorSettlement[]
+  member               Member             @relation(fields: [memberId], references: [id])
 
   @@map("vendors")
 }
 
-// ==================== VENDOR SALE ====================
-
 model VendorSale {
-  id              String   @id @default(cuid())
-  vendorId        String
-  memberId        String
-  idCardId        String?
-  amountPaise     Int
-  createdAt       DateTime @default(now())
-
-  // Relations
-  vendor          Vendor   @relation(fields: [vendorId], references: [id])
+  id          String   @id @default(cuid())
+  vendorId    String
+  memberId    String
+  idCardId    String?
+  amountPaise Int
+  createdAt   DateTime @default(now())
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
 
   @@map("vendor_sales")
 }
 
-// ==================== VENDOR SETTLEMENT ====================
-
 model VendorSettlement {
-  id              String   @id @default(cuid())
-  vendorId        String
-  grossSalesPaise Int
-  marginPaise     Int
-  postMarginPaise Int
+  id               String    @id @default(cuid())
+  vendorId         String
+  grossSalesPaise  Int
+  marginPaise      Int
+  postMarginPaise  Int
   adminChargePaise Int
-  tdsPaise        Int
-  netPayablePaise Int
-  status          String   @default("PENDING") // PENDING, PAID
-  periodStart     DateTime
-  periodEnd       DateTime
-  settledAt       DateTime?
-
-  // Relations
-  vendor          Vendor   @relation(fields: [vendorId], references: [id])
+  tdsPaise         Int
+  netPayablePaise  Int
+  status           String    @default("PENDING")
+  periodStart      DateTime
+  periodEnd        DateTime
+  settledAt        DateTime?
+  vendor           Vendor    @relation(fields: [vendorId], references: [id])
 
   @@map("vendor_settlements")
 }
 
-// ==================== VENDOR REFERRAL BONUS ====================
-
 model VendorReferralBonus {
-  id              String   @id @default(cuid())
-  memberId        String
+  id               String   @id @default(cuid())
+  memberId         String
   referredVendorId String
-  bonusPaise      Int
-  status          String   @default("PENDING") // PENDING, CONFIRMED
-  createdAt       DateTime @default(now())
-
-  // Relations
-  member          Member   @relation(fields: [memberId], references: [id])
+  bonusPaise       Int
+  status           String   @default("PENDING")
+  createdAt        DateTime @default(now())
+  member           Member   @relation(fields: [memberId], references: [id])
 
   @@map("vendor_referral_bonus")
 }
 
-// ==================== PLATFORM SETTINGS ====================
-
 model PlatformSetting {
-  id              String   @id @default(cuid())
-  key             String   @unique
-  value           String
-  updatedAt       DateTime @updatedAt
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 
   @@map("platform_settings")
 }
 
-// ==================== AUDIT LOG ====================
-
 model AuditLog {
-  id              String   @id @default(cuid())
-  action          String
-  entity          String
-  entityId        String?
-  oldValue        String?
-  newValue        String?
-  performedBy     String?
-  createdAt       DateTime @default(now())
+  id          String   @id @default(cuid())
+  action      String
+  entity      String
+  entityId    String?
+  oldValue    String?
+  newValue    String?
+  performedBy String?
+  createdAt   DateTime @default(now())
 
   @@map("audit_logs")
 }
 
-// ==================== SYSTEM COUNTERS ====================
-
 model SystemCounter {
-  id              String   @id // e.g., "AUTOPOOL_POSITION"
-  currentValue    Int      @default(0)
-  updatedAt       DateTime @updatedAt
+  id           String   @id
+  currentValue Int      @default(0)
+  updatedAt    DateTime @updatedAt
 
   @@map("system_counters")
 }
