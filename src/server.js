@@ -2,44 +2,45 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-const prisma = require("./lib/prisma");
+// Route imports
+const authRoutes = require("./routes/authRoutes");
 const memberRoutes = require("./routes/memberRoutes");
-const idCardRoutes = require("./routes/idCardRoutes"); // <--- ADDED THIS LINE
+const walletRoutes = require("./routes/walletRoutes");
+const withdrawalRoutes = require("./routes/withdrawalRoutes");
+const vendorRoutes = require("./routes/vendorRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const healthRoutes = require("./routes/healthRoutes");
+const idCardRoutes = require("./routes/idCardRoutes"); // Legacy from before, keeping it
+
+// Middleware
+const errorHandler = require("./middleware/errorMiddleware");
 
 const app = express();
 
-// Middleware
+// Global Middleware
 app.use(cors());
 app.use(express.json());
 
-// Health check route
-app.get("/health", async (req, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-
-    res.json({
-      status: "ok",
-      app: "Bharatiya Bazaar Backend",
-      database: "connected",
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: "error",
-      app: "Bharatiya Bazaar Backend",
-      database: "failed",
-      error: error.message
-    });
-  }
-});
-
 // API routes
+app.use("/api/health", healthRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/members", memberRoutes);
-app.use("/api/id-cards", idCardRoutes); // <--- ADDED THIS LINE
+app.use("/api/wallet", walletRoutes);
+app.use("/api/withdrawals", withdrawalRoutes);
+app.use("/api/vendors", vendorRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/id-cards", idCardRoutes);
+
+// Global Error Handler
+app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app; // Export for testing

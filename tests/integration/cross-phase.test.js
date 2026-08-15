@@ -15,7 +15,7 @@ describe("Integration: Cross-Phase Interactions", () => {
       data: {
         email: "superadmin_cross@bb.test",
         name: "Super Admin",
-        password: "hashed",
+        passwordHash: "hashed",
         role: "SUPER_ADMIN"
       }
     });

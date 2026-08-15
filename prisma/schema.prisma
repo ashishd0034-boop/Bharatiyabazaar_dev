@@ -11,6 +11,7 @@ model Member {
   name            String
   mobile          String                @unique
   email           String?
+  passwordHash    String?
   address         String?
   pinCode         String?
   gender          String?
@@ -300,9 +301,9 @@ model AuditLog {
 model AdminUser {
   id        String   @id @default(cuid())
   email     String   @unique
-  name      String
-  password  String
-  role      String   @default("SUPPORT") // SUPER_ADMIN, ADMIN, SUPPORT
+  name         String
+  passwordHash String
+  role         String   @default("SUPPORT") // SUPER_ADMIN, ADMIN, SUPPORT
   status    String   @default("ACTIVE")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

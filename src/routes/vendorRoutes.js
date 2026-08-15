@@ -1,5 +1,5 @@
 const express = require("express");
-const memberController = require("../controllers/memberController");
+const vendorController = require("../controllers/vendorController");
 const authMiddleware = require("../middleware/authMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const schemas = require("../validations/schemas");
@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-router.get("/profile", memberController.getProfile);
-router.put("/kyc", validate(schemas.kycSchema), memberController.updateKyc);
+router.post("/sale", validate(schemas.vendorSaleSchema), vendorController.recordSale);
+router.get("/settlements", vendorController.getSettlements);
 
 module.exports = router;

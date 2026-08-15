@@ -12,7 +12,7 @@ describe("Scenario G: Admin Settings & Audit", () => {
       data: {
         email: "super@bb.test",
         name: "Super Admin",
-        password: "hashed_password",
+        passwordHash: "hashed_password",
         role: "SUPER_ADMIN"
       }
     });
@@ -21,7 +21,7 @@ describe("Scenario G: Admin Settings & Audit", () => {
       data: {
         email: "support@bb.test",
         name: "Support Staff",
-        password: "hashed_password",
+        passwordHash: "hashed_password",
         role: "SUPPORT"
       }
     });
