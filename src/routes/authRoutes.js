@@ -12,6 +12,7 @@ const authLimiter = rateLimit({
   message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many login attempts" } }
 });
 
+router.get("/validate-referral", authController.validateReferral); // Add this line
 router.post("/register", validate(schemas.registerSchema), authController.register);
 router.post("/login", authLimiter, validate(schemas.loginSchema), authController.login);
 router.post("/admin/login", authLimiter, validate(schemas.adminLoginSchema), authController.adminLogin);

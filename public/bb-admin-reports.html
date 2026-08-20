@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bharatiya Bazaar â€” Admin Reports & Export. Generate, schedule and export platform reports.">
+<title>Reports & Export | Bharatiya Bazaar Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B3A6B;
+    --navy-dark:#12294c;
+    --teal:#1A6B5A;
+    --teal-dark:#135241;
+    --amber:#B8860B;
+    --red:#d64545;
+    --red-dark:#b33636;
+    --bg:#F5F7FA;
+    --white:#ffffff;
+    --ink:#1f2a3a;
+    --muted:#5b6b7f;
+    --border:#e4e9f0;
+    --success:#1e8e5a;
+    --shadow:0 10px 30px rgba(27,58,107,.10);
+    --shadow-sm:0 3px 12px rgba(27,58,107,.08);
+    --radius-card:12px;
+    --radius-btn:8px;
+    --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-display:'Poppins',var(--font);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2}
+  a{text-decoration:none;color:inherit}
+  img{max-width:100%;display:block}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--font);font-weight:600;font-size:.88rem;
+    padding:11px 18px;border-radius:var(--radius-btn);
+    border:2px solid transparent;cursor:pointer;transition:.22s ease;line-height:1;
+  }
+  .btn-sm{padding:8px 13px;font-size:.8rem}
+  .btn-navy{background:var(--navy);color:#fff}
+  .btn-navy:hover{background:var(--navy-dark)}
+  .btn-teal{background:var(--teal);color:#fff}
+  .btn-teal:hover{background:var(--teal-dark)}
+  .btn-outline-navy{background:transparent;color:var(--navy);border-color:var(--navy)}
+  .btn-outline-navy:hover{background:var(--navy);color:#fff}
+  .btn-outline-teal{background:transparent;color:var(--teal);border-color:var(--teal)}
+  .btn-outline-teal:hover{background:var(--teal);color:#fff}
+  .btn-outline-amber{background:transparent;color:#8a6508;border-color:var(--amber)}
+  .btn-outline-amber:hover{background:var(--amber);color:#fff}
+  .btn-outline-red{background:transparent;color:var(--red);border-color:var(--red)}
+  .btn-outline-red:hover{background:var(--red);color:#fff}
+  .btn-danger{background:var(--red);color:#fff}
+  .btn-danger:hover{background:var(--red-dark)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;width:280px;z-index:120;
+    background:var(--navy);color:#fff;
+    display:flex;flex-direction:column;
+  }
+  .sb-logo{
+    display:flex;align-items:center;gap:12px;
+    padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .sb-logo .logo-mark{
+    width:42px;height:42px;flex:none;border-radius:12px;
+    background:#fff;border:1px solid rgba(255,255,255,.6);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .sb-logo .logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
+  .sb-logo .lt{display:flex;flex-direction:column;line-height:1.15}
+  .sb-logo .lt-name{font-family:var(--font-display);font-weight:700;font-size:1rem}
+  .sb-logo .lt-sub{font-size:.7rem;color:rgba(255,255,255,.72);letter-spacing:.04em}
+  .admin-info{background:rgba(255,255,255,.07);margin:16px;border-radius:12px;padding:14px}
+  .a-head{display:flex;align-items:center;gap:11px}
+  .avatar{
+    width:44px;height:44px;flex:none;border-radius:50%;
+    background:var(--red);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.95rem;
+  }
+  .a-name{font-weight:700;font-size:.9rem;line-height:1.2}
+  .a-id{font-size:.7rem;color:rgba(255,255,255,.72);margin-top:1px}
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:.68rem;font-weight:800;letter-spacing:.03em;
+    padding:4px 10px;border-radius:999px;margin-top:8px;white-space:nowrap;
+  }
+  .badge-red{background:var(--red);color:#fff}
+  .badge-teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .badge-amber{background:rgba(184,134,11,.14);color:#8a6508}
+  .badge-navy{background:rgba(27,58,107,.1);color:var(--navy)}
+  .badge-gray{background:#eceff4;color:#6b7a8f}
+  .sb-nav{flex:1;overflow-y:auto;padding:10px 12px}
+  .sb-nav a{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:10px;margin-bottom:3px;
+    color:rgba(255,255,255,.84);font-weight:500;font-size:.88rem;
+    transition:.2s;
+  }
+  .sb-nav a .ic{font-size:1rem;width:20px;text-align:center;flex:none}
+  .sb-nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+  .sb-nav a.active{background:var(--navy-dark);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--teal)}
+  .sb-nav a.logout{color:#ff9a9a;margin-top:6px}
+  .sb-nav a.logout:hover{background:rgba(214,69,69,.22);color:#fff}
+  .sb-foot{
+    padding:14px 20px;border-top:1px solid rgba(255,255,255,.12);
+    font-size:.68rem;color:rgba(255,255,255,.5);
+  }
+
+  /* ---------- MAIN LAYOUT ---------- */
+  .main{margin-left:280px;min-height:100vh;background:var(--bg)}
+  .main .container{max-width:1180px;margin:0 auto;padding:26px 26px 70px}
+  .page-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .page-head h1{font-size:1.45rem;font-weight:800;color:var(--navy)}
+  .page-sub{font-size:.84rem;color:var(--muted);margin-top:2px}
+
+  /* ---------- MOBILE TOP HEADER ---------- */
+  .mobile-top{
+    position:sticky;top:0;z-index:150;
+    background:var(--navy);color:#fff;
+    display:none;align-items:center;justify-content:space-between;
+    padding:10px 14px;box-shadow:0 2px 14px rgba(18,41,76,.35);gap:10px;
+  }
+  .mt-logo{width:38px;height:38px;flex:none;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .mt-logo img{width:100%;height:100%;object-fit:cover}
+  .mt-center{flex:1;text-align:center;font-family:var(--font-display);font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mt-right{display:flex;align-items:center;gap:14px;flex:none}
+  .bell-wrap{position:relative}
+  .bell{position:relative;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;line-height:1}
+  .bell-badge{
+    position:absolute;top:-5px;right:-8px;
+    background:var(--red);color:#fff;font-size:.6rem;font-weight:800;
+    min-width:16px;height:16px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;padding:0 3px;
+  }
+  .bell-drop{
+    position:absolute;right:0;top:44px;width:300px;z-index:260;
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow);display:none;overflow:hidden;
+  }
+  .bell-drop.show{display:block;animation:fadeUp .25s ease}
+  .bd-head{padding:12px 16px;font-family:var(--font-display);font-weight:700;font-size:.9rem;color:var(--navy);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .bd-item{display:flex;gap:11px;align-items:flex-start;padding:12px 16px;border-bottom:1px dashed var(--border);font-size:.82rem;cursor:pointer;transition:.2s}
+  .bd-item:last-child{border-bottom:none}
+  .bd-item:hover{background:#F7F9FF}
+  .bd-ico{width:28px;height:28px;flex:none;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+  .bd-ico.red{background:rgba(214,69,69,.12);color:var(--red)}
+  .bd-ico.amber{background:rgba(184,134,11,.14);color:var(--amber)}
+  .bd-ico.teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .bd-ico.blue{background:rgba(27,58,107,.1);color:var(--navy)}
+  .bd-item b{display:block;font-size:.82rem;color:var(--ink)}
+  .bd-item span{font-size:.7rem;color:var(--muted)}
+  .mt-avatar{
+    width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.78rem;
+  }
+
+  /* ---------- SUMMARY CHIPS ---------- */
+  .chip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .chip{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow-sm);padding:16px;display:flex;align-items:center;gap:13px;
+  }
+  .chip-ico{width:44px;height:44px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+  .ci-navy{background:rgba(27,58,107,.1);color:var(--navy)}
+  .ci-teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .ci-amber{background:rgba(184,134,11,.14);color:var(--amber)}
+  .ci-red{background:rgba(214,69,69,.12);color:var(--red)}
+  .chip-val{font-family:var(--font-display);font-weight:800;font-size:1.02rem;color:var(--navy);line-height:1.2}
+  .chip-sub{font-size:.7rem;color:var(--muted);line-height:1.4}
+
+  /* ---------- VIEW TABS ---------- */
+  .view-tabs{
+    display:flex;background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:5px;gap:5px;margin-bottom:20px;
+    box-shadow:var(--shadow-sm);flex-wrap:wrap;
+  }
+  .vt{
+    flex:1;min-width:170px;border:none;cursor:pointer;font-family:var(--font);font-weight:600;font-size:.86rem;
+    padding:11px 12px;border-radius:9px;background:transparent;color:var(--muted);transition:.2s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .vt:hover{color:var(--navy)}
+  .vt.active{background:var(--navy);color:#fff;box-shadow:0 4px 12px rgba(27,58,107,.25)}
+  .vt-badge{
+    background:var(--amber);color:#fff;font-size:.64rem;font-weight:800;
+    padding:2px 8px;border-radius:999px;letter-spacing:.02em;
+  }
+  .vt.active .vt-badge{background:#fff;color:var(--navy)}
+  .view{display:none}
+  .view.active{display:block;animation:fadeUp .35s ease}
+
+  /* ---------- REPORT CARDS (TAB 1) ---------- */
+  .rep-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .rep-card{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow-sm);padding:20px;display:flex;flex-direction:column;
+  }
+  .rep-head{display:flex;align-items:center;gap:13px;margin-bottom:14px}
+  .rep-ico{width:48px;height:48px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+  .ri-navy{background:rgba(27,58,107,.1);color:var(--navy)}
+  .ri-amber{background:rgba(184,134,11,.14);color:var(--amber)}
+  .ri-teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .ri-red{background:rgba(214,69,69,.12);color:var(--red)}
+  .rep-title{font-family:var(--font-display);font-weight:700;font-size:1rem;color:var(--ink)}
+  .rep-desc{font-size:.76rem;color:var(--muted);line-height:1.5}
+  .rep-section{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:13px 0 7px}
+  .opt-list{display:flex;flex-direction:column;gap:6px}
+  .opt{
+    display:flex;align-items:center;gap:9px;font-size:.8rem;color:var(--ink);cursor:pointer;
+  }
+  .opt input{width:16px;height:16px;flex:none;accent-color:var(--teal);cursor:pointer}
+  .opt .o-dim{color:var(--muted)}
+  .filt-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .fb{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px}
+  .fb label{font-size:.62rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .sel,.inp{
+    width:100%;font-family:var(--font);font-size:.8rem;padding:8px 10px;
+    border:1.5px solid var(--border);border-radius:var(--radius-btn);background:var(--white);color:var(--ink);
+    outline:none;transition:.2s;
+  }
+  .sel:focus,.inp:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,90,.12)}
+  .fmt-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .fmt{
+    position:relative;
+  }
+  .fmt input{position:absolute;opacity:0;pointer-events:none}
+  .fmt .fmt-lbl{
+    display:inline-flex;align-items:center;gap:6px;font-family:var(--font);font-weight:600;font-size:.78rem;
+    padding:7px 14px;border:1.5px solid var(--border);border-radius:999px;color:var(--muted);cursor:pointer;transition:.2s;background:var(--white);
+  }
+  .fmt input:checked + .fmt-lbl{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .fmt input:focus-visible + .fmt-lbl{box-shadow:0 0 0 3px rgba(26,107,90,.25)}
+
+  /* ---------- GENERATE FLOW ---------- */
+  .gen-wrap{margin-top:14px}
+  .gen-progress{display:none;align-items:center;gap:12px}
+  .gen-progress.show{display:flex}
+  .gen-track{flex:1;height:10px;background:var(--bg);border:1px solid var(--border);border-radius:999px;overflow:hidden}
+  .gen-fill{
+    height:100%;width:0;border-radius:999px;
+    background:linear-gradient(90deg,var(--teal),var(--teal-dark));
+    transition:width 1.5s ease;
+  }
+  .gen-pct{flex:none;font-family:var(--font-display);font-weight:800;font-size:.82rem;color:var(--navy);width:42px;text-align:right}
+  .gen-result{display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    background:rgba(30,142,90,.07);border:1px solid rgba(30,142,90,.3);border-radius:10px;padding:11px 14px}
+  .gen-result.show{display:flex;animation:fadeUp .3s ease}
+  .gen-msg{font-size:.82rem;font-weight:700;color:var(--success);display:inline-flex;align-items:center;gap:7px}
+  .gen-msg::before{content:"âœ“";width:18px;height:18px;flex:none;border-radius:50%;background:var(--success);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem}
+
+  .rep-note{
+    display:flex;gap:10px;align-items:flex-start;margin-top:14px;
+    background:#fffdf7;border:1px solid #f0dfb6;border-left:5px solid var(--amber);
+    border-radius:10px;padding:11px 13px;font-size:.76rem;color:#7a5c08;line-height:1.55;
+  }
+
+  /* ---------- SCHEDULED REPORTS (TAB 2) ---------- */
+  .sched-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .sched-card{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow-sm);padding:20px;display:flex;flex-direction:column;
+  }
+  .sched-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .sched-name{font-family:var(--font-display);font-weight:800;font-size:.98rem;color:var(--navy)}
+  .sched-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+  .sched-row{display:flex;justify-content:space-between;gap:10px;font-size:.8rem;padding:5px 0;border-bottom:1px dashed var(--border)}
+  .sched-row:last-child{border-bottom:none}
+  .sched-row .k{color:var(--muted)}
+  .sched-row .v{font-weight:600;color:var(--ink);text-align:right}
+  .sched-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+  .sched-actions .btn{flex:1;min-width:90px}
+
+  .add-sched-wrap{margin-top:18px}
+  .add-sched{
+    width:100%;border:2px dashed var(--teal);border-radius:var(--radius-card);
+    background:rgba(26,107,90,.04);color:var(--teal);font-family:var(--font-display);
+    font-weight:700;font-size:.92rem;padding:16px;cursor:pointer;transition:.2s;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+  }
+  .add-sched:hover{background:rgba(26,107,90,.1)}
+
+  /* ---------- EXPORT HISTORY (TAB 3) ---------- */
+  .filter-bar{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    padding:16px;box-shadow:var(--shadow-sm);margin-bottom:16px;
+  }
+  .search-row{position:relative}
+  .search-row .s-ico{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    color:var(--muted);font-size:.9rem;pointer-events:none;
+  }
+  .input{
+    width:100%;font-family:var(--font);font-size:.86rem;
+    padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-btn);
+    background:var(--white);color:var(--ink);outline:none;transition:.2s;
+  }
+  .input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,90,.12)}
+  .input.search{padding-left:38px}
+  .filter-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:13px}
+  .fb-group{display:flex;flex-direction:column;gap:5px}
+  .fb-group label{font-size:.66rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .fb-group .input,.fb-group .sel{width:168px;max-width:100%}
+  .filter-actions{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+
+  .card{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);box-shadow:var(--shadow-sm);padding:20px;
+  }
+  .card-title{
+    font-family:var(--font-display);font-weight:700;font-size:1.03rem;color:var(--navy);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+  }
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;min-width:900px;font-size:.82rem}
+  thead th{
+    text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--muted);font-weight:700;padding:11px 12px;background:var(--bg);
+    border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  tbody td{padding:11px 12px;border-bottom:1px dashed var(--border);white-space:nowrap;vertical-align:middle}
+  tbody tr.pt-row{cursor:pointer}
+  tbody tr.pt-row:hover{background:#F5F7FF}
+  tbody tr:last-child td{border-bottom:none}
+  td.type-cell{font-weight:600;color:var(--ink)}
+  td.date-cell{color:var(--muted)}
+  td.rec-cell{font-weight:700;color:var(--ink)}
+  td.by-cell{color:var(--muted)}
+  .st-badge{display:inline-flex;align-items:center;gap:5px;font-size:.66rem;font-weight:800;letter-spacing:.03em;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .st-ready{background:rgba(26,107,90,.12);color:var(--teal)}
+  .dl-btn{
+    display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;border:none;
+    font-family:var(--font);font-weight:700;font-size:.74rem;padding:6px 12px;border-radius:7px;cursor:pointer;transition:.2s;
+  }
+  .dl-btn:hover{background:var(--teal)}
+  tr.pt-detail{cursor:default}
+  tr.pt-detail:hover{background:#EEF4FF}
+  tr.pt-detail td{background:#EEF4FF;padding:12px 14px;border-bottom:1px solid var(--border)}
+  .tx-detail{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+  .tx-block{display:flex;flex-direction:column;gap:2px;min-width:150px;flex:1}
+  .tx-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .tx-value{font-size:.82rem;font-weight:600;color:var(--ink);word-break:break-all}
+  .empty-state{text-align:center;padding:44px 20px;color:var(--muted)}
+  .empty-state .es-ic{font-size:2.2rem;margin-bottom:8px}
+  .empty-state p{font-size:.88rem;font-weight:600}
+
+  .pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .pg-info{font-size:.8rem;color:var(--muted);font-weight:600}
+  .pg-controls{display:flex;gap:10px;align-items:center}
+
+  /* ---------- MODALS ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(18,41,76,.55);z-index:400;
+    display:none;align-items:center;justify-content:center;padding:18px;
+  }
+  .modal-overlay.show{display:flex}
+  .modal-card{
+    background:var(--white);border-radius:var(--radius-card);width:100%;max-width:520px;
+    box-shadow:0 20px 50px rgba(0,0,0,.3);max-height:92vh;overflow-y:auto;
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+  .modal-head h3{font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--navy)}
+  .modal-x{background:none;border:none;font-size:1.15rem;cursor:pointer;color:var(--muted);line-height:1}
+  .modal-x:hover{color:var(--red)}
+  .modal-body{padding:18px 20px;font-size:.86rem}
+  .modal-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border)}
+  .modal-foot .btn{flex:1}
+  .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .form-group label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .confirm-ico{width:54px;height:54px;border-radius:15px;background:rgba(214,69,69,.1);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 12px}
+  .confirm-title{font-family:var(--font-display);font-weight:800;font-size:1.05rem;color:var(--navy);text-align:center;margin-bottom:5px}
+  .confirm-sub{font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:8px}
+
+  /* ---------- BOTTOM TABS (MOBILE) ---------- */
+  .bottom-tabs{
+    position:fixed;bottom:0;left:0;right:0;z-index:200;
+    background:var(--white);border-top:1px solid var(--border);
+    display:none;justify-content:space-around;align-items:stretch;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    box-shadow:0 -4px 16px rgba(27,58,107,.08);
+  }
+  .tab{
+    flex:1;background:none;border:none;cursor:pointer;font-family:var(--font);
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:.64rem;font-weight:600;color:var(--muted);padding:4px 2px;border-radius:10px;
+  }
+  .tab .ti{font-size:1.15rem;line-height:1}
+  .tab.active{color:var(--teal)}
+  .tab.active .ti{transform:translateY(-1px)}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(80px);
+    background:var(--navy);color:#fff;font-size:.84rem;font-weight:600;
+    padding:12px 22px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+    opacity:0;transition:.3s ease;z-index:500;pointer-events:none;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:1100px){
+    .rep-grid{grid-template-columns:1fr}
+  }
+  @media(max-width:900px){
+    .sidebar{display:none}
+    .main{margin-left:0}
+    .mobile-top{display:flex}
+    .bottom-tabs{display:flex}
+    .main .container{padding:18px 14px 96px}
+    .chip-grid{grid-template-columns:repeat(2,1fr)}
+    .toast{bottom:86px}
+  }
+  @media(max-width:520px){
+    .chip-grid{grid-template-columns:1fr}
+    .form-row{grid-template-columns:1fr}
+    .view-tabs{flex-direction:column}
+    .vt{min-width:100%}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR (DESKTOP) ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="logo-mark"><img src="BB-8.png" alt="Bharatiya Bazaar logo"></div>
+      <div class="lt">
+        <span class="lt-name">Bharatiya Bazaar</span>
+        <span class="lt-sub">à¤­à¤¾à¤°à¤¤à¥€à¤¯ à¤¬à¤¾à¤œà¤¼à¤¾à¤° Â· Admin</span>
+      </div>
+    </div>
+
+    <div class="admin-info">
+      <div class="a-head">
+        <div class="avatar">SA</div>
+        <div>
+          <div class="a-name">Super Admin</div>
+          <div class="a-id">Platform Administrator</div>
+        </div>
+      </div>
+      <span class="badge badge-red">SUPER ADMIN</span>
+    </div>
+
+    <nav class="sb-nav">
+      <a href="bb-admin.html"><span class="ic">ðŸ </span>Dashboard</a>
+      <a href="bb-admin-members.html"><span class="ic">ðŸ‘¥</span>Member Management</a>
+      <a href="#"><span class="ic">ðŸª</span>Vendor Management</a>
+      <a href="bb-admin-kyc.html"><span class="ic">ðŸ“„</span>KYC Verification</a>
+      <a href="bb-admin-payouts.html"><span class="ic">ðŸ’¸</span>Payout Management</a>
+      <a href="bb-admin-disputes.html"><span class="ic">âš–ï¸ </span>Dispute Resolution</a>
+      <a href="#"><span class="ic">âš™ï¸ </span>Commission Engine</a>
+      <a href="bb-admin-reports.html" class="active"><span class="ic">ðŸ“Š</span>Reports &amp; Export</a>
+      <a href="bb-admin-settings.html"><span class="ic">ðŸ” </span>System Settings</a>
+      <a href="bb-bharatiya-bazaar-v2.html" class="logout"><span class="ic">🚪</span>Logout</a>
+    </nav>
+
+    <div class="sb-foot">Â© 2026 Bharatiya Bazaar<br>Admin Portal v1.0</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+
+    <!-- MOBILE TOP HEADER -->
+    <header class="mobile-top">
+      <div class="mt-logo"><img src="BB-8.png" alt="Bharatiya Bazaar"></div>
+      <div class="mt-center">Admin Panel</div>
+      <div class="mt-right">
+        <div class="bell-wrap">
+          <button class="bell" id="bell" aria-label="Notifications">ðŸ””</button>
+          <span class="bell-badge">5</span>
+          <div class="bell-drop" id="bellDrop">
+            <div class="bd-head">Notifications</div>
+            <div class="bd-item">
+              <div class="bd-ico blue">ðŸ“Š</div>
+              <div><b>Daily payout summary ready</b><span>Generated 08 Aug 11:00 PM</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico teal">ðŸ—“ï¸</div>
+              <div><b>Weekly commission summary sent</b><span>Delivered 04 Aug 08:00 AM</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico amber">ðŸ“„</div>
+              <div><b>3 scheduled reports due this week</b><span>Next: Daily payout 09 Aug</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-avatar">SA</div>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <!-- PAGE HEAD -->
+      <div class="page-head">
+        <div>
+          <h1>Reports &amp; Export</h1>
+          <p class="page-sub">Generate, schedule and export platform reports Â· Super Admin Â· 08 Aug 2026</p>
+        </div>
+      </div>
+
+      <!-- SUMMARY CHIPS -->
+      <div class="chip-grid">
+        <div class="chip">
+          <div class="chip-ico ci-navy">ðŸ“Š</div>
+          <div><div class="chip-val">142</div><div class="chip-sub">Reports Generated</div></div>
+        </div>
+        <div class="chip">
+          <div class="chip-ico ci-teal">â±ï¸</div>
+          <div><div class="chip-val">Today 09:45 AM</div><div class="chip-sub">Last Export</div></div>
+        </div>
+        <div class="chip">
+          <div class="chip-ico ci-amber">ðŸ—“ï¸</div>
+          <div><div class="chip-val">3</div><div class="chip-sub">Scheduled Reports</div></div>
+        </div>
+        <div class="chip">
+          <div class="chip-ico ci-red">ðŸ“†</div>
+          <div><div class="chip-val">Jan 2026 â€“ Aug 2026</div><div class="chip-sub">Data Range</div></div>
+        </div>
+      </div>
+
+      <!-- VIEW TABS -->
+      <div class="view-tabs" id="viewTabs">
+        <button class="vt active" data-view="generate" type="button">Generate Reports</button>
+        <button class="vt" data-view="scheduled" type="button">Scheduled Reports <span class="vt-badge">3</span></button>
+        <button class="vt" data-view="history" type="button">Export History</button>
+      </div>
+
+      <!-- ============ TAB 1 : GENERATE REPORTS ============ -->
+      <div class="view active" id="view-generate">
+
+        <div class="rep-grid">
+
+          <!-- CARD 1 : MEMBER REPORT -->
+          <div class="rep-card">
+            <div class="rep-head">
+              <div class="rep-ico ri-navy">ðŸ‘¥</div>
+              <div>
+                <div class="rep-title">Member Report</div>
+                <div class="rep-desc">Complete member list with status, KYC, earnings, and network data</div>
+              </div>
+            </div>
+            <div class="rep-section">Options</div>
+            <div class="opt-list">
+              <label class="opt"><input type="checkbox" checked> Include CB/ACB status</label>
+              <label class="opt"><input type="checkbox" checked> Include KYC status</label>
+              <label class="opt"><input type="checkbox" checked> Include wallet balances</label>
+              <label class="opt"><input type="checkbox"> Include binary tree data</label>
+              <label class="opt"><input type="checkbox"> Include transaction history</label>
+            </div>
+            <div class="rep-section">Filters</div>
+            <div class="filt-row">
+              <div class="fb">
+                <label>Status</label>
+                <select class="sel">
+                  <option>All</option><option>ACB</option><option>CB</option><option>Frozen</option><option>Suspended</option>
+                </select>
+              </div>
+              <div class="fb">
+                <label>From</label>
+                <input type="date" class="inp" value="2026-01-01">
+              </div>
+              <div class="fb">
+                <label>To</label>
+                <input type="date" class="inp" value="2026-08-08">
+              </div>
+            </div>
+            <div class="rep-section">Format</div>
+            <div class="fmt-row" role="radiogroup">
+              <label class="fmt"><input type="radio" name="fmt-1" value="CSV" checked><span class="fmt-lbl">CSV</span></label>
+              <label class="fmt"><input type="radio" name="fmt-1" value="Excel"><span class="fmt-lbl">Excel</span></label>
+              <label class="fmt"><input type="radio" name="fmt-1" value="PDF"><span class="fmt-lbl">PDF</span></label>
+            </div>
+            <div class="gen-wrap">
+              <button class="btn btn-navy gen-report" type="button" data-name="Member Report" data-records="10,482">Generate Report</button>
+              <div class="gen-progress">
+                <div class="gen-track"><div class="gen-fill"></div></div>
+                <div class="gen-pct">0%</div>
+              </div>
+              <div class="gen-result">
+                <span class="gen-msg">Report ready â€” 10,482 records</span>
+                <button class="btn btn-teal btn-sm gen-download" type="button" data-name="Member Report">Download</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 2 : COMMISSION REPORT -->
+          <div class="rep-card">
+            <div class="rep-head">
+              <div class="rep-ico ri-amber">ðŸª™</div>
+              <div>
+                <div class="rep-title">Commission Report</div>
+                <div class="rep-desc">All commission payouts across 3 earning streams</div>
+              </div>
+            </div>
+            <div class="rep-section">Options</div>
+            <div class="opt-list">
+              <label class="opt"><input type="checkbox" checked> Stream 1 â€” AutoPool</label>
+              <label class="opt"><input type="checkbox" checked> Stream 2 â€” MY SYSTEM</label>
+              <label class="opt"><input type="checkbox" checked> Stream 3 â€” Setu Kosh</label>
+              <label class="opt"><input type="checkbox" checked> Include pending amounts</label>
+              <label class="opt"><input type="checkbox"> Include events (non-cash)</label>
+            </div>
+            <div class="rep-section">Filters</div>
+            <div class="filt-row">
+              <div class="fb">
+                <label>Stream</label>
+                <select class="sel">
+                  <option>All</option><option>Stream 1</option><option>Stream 2</option><option>Stream 3</option>
+                </select>
+              </div>
+              <div class="fb">
+                <label>Status</label>
+                <select class="sel">
+                  <option>All</option><option>Confirmed</option><option>Pending</option>
+                </select>
+              </div>
+              <div class="fb">
+                <label>From</label>
+                <input type="date" class="inp" value="2026-01-01">
+              </div>
+              <div class="fb">
+                <label>To</label>
+                <input type="date" class="inp" value="2026-08-08">
+              </div>
+            </div>
+            <div class="rep-section">Format</div>
+            <div class="fmt-row" role="radiogroup">
+              <label class="fmt"><input type="radio" name="fmt-2" value="CSV" checked><span class="fmt-lbl">CSV</span></label>
+              <label class="fmt"><input type="radio" name="fmt-2" value="Excel"><span class="fmt-lbl">Excel</span></label>
+              <label class="fmt"><input type="radio" name="fmt-2" value="PDF"><span class="fmt-lbl">PDF</span></label>
+            </div>
+            <div class="gen-wrap">
+              <button class="btn btn-navy gen-report" type="button" data-name="Commission Report" data-records="41,928">Generate Report</button>
+              <div class="gen-progress">
+                <div class="gen-track"><div class="gen-fill"></div></div>
+                <div class="gen-pct">0%</div>
+              </div>
+              <div class="gen-result">
+                <span class="gen-msg">Report ready â€” 41,928 commission records</span>
+                <button class="btn btn-teal btn-sm gen-download" type="button" data-name="Commission Report">Download</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 3 : VENDOR REPORT -->
+          <div class="rep-card">
+            <div class="rep-head">
+              <div class="rep-ico ri-teal">ðŸª</div>
+              <div>
+                <div class="rep-title">Vendor Report</div>
+                <div class="rep-desc">Vendor list, sales, margins and settlement history</div>
+              </div>
+            </div>
+            <div class="rep-section">Options</div>
+            <div class="opt-list">
+              <label class="opt"><input type="checkbox" checked> Include sales volume</label>
+              <label class="opt"><input type="checkbox" checked> Include margin collected</label>
+              <label class="opt"><input type="checkbox" checked> Include settlement status</label>
+              <label class="opt"><input type="checkbox"> Include QR scan data</label>
+              <label class="opt"><input type="checkbox"> Include dispute history</label>
+            </div>
+            <div class="rep-section">Filters</div>
+            <div class="filt-row">
+              <div class="fb">
+                <label>Status</label>
+                <select class="sel">
+                  <option>All</option><option>Verified</option><option>Provisional</option><option>Suspended</option>
+                </select>
+              </div>
+              <div class="fb" style="flex:2;min-width:170px">
+                <label>Category</label>
+                <select class="sel">
+                  <option>All</option><option>Kirana / Grocery</option><option>Electronics</option><option>Mobile &amp; Accessories</option><option>Clothing &amp; Apparel</option><option>Beauty &amp; Personal Care</option><option>Pharmacy</option><option>Home &amp; Kitchen</option><option>Furniture</option><option>Stationery</option><option>Footwear</option><option>Jewellery</option><option>Sports &amp; Fitness</option><option>Books &amp; Gifts</option><option>Bakery &amp; Snacks</option><option>Dairy &amp; Frozen</option><option>Hardware</option><option>Automotive</option><option>Pet Supplies</option><option>Salon &amp; Services</option><option>Liquor &amp; Beverages</option>
+                </select>
+              </div>
+              <div class="fb">
+                <label>From</label>
+                <input type="date" class="inp" value="2026-01-01">
+              </div>
+              <div class="fb">
+                <label>To</label>
+                <input type="date" class="inp" value="2026-08-08">
+              </div>
+            </div>
+            <div class="rep-section">Format</div>
+            <div class="fmt-row" role="radiogroup">
+              <label class="fmt"><input type="radio" name="fmt-3" value="CSV" checked><span class="fmt-lbl">CSV</span></label>
+              <label class="fmt"><input type="radio" name="fmt-3" value="Excel"><span class="fmt-lbl">Excel</span></label>
+              <label class="fmt"><input type="radio" name="fmt-3" value="PDF"><span class="fmt-lbl">PDF</span></label>
+            </div>
+            <div class="gen-wrap">
+              <button class="btn btn-navy gen-report" type="button" data-name="Vendor Report" data-records="523">Generate Report</button>
+              <div class="gen-progress">
+                <div class="gen-track"><div class="gen-fill"></div></div>
+                <div class="gen-pct">0%</div>
+              </div>
+              <div class="gen-result">
+                <span class="gen-msg">Report ready â€” 523 vendor records</span>
+                <button class="btn btn-teal btn-sm gen-download" type="button" data-name="Vendor Report">Download</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 4 : TDS REPORT -->
+          <div class="rep-card">
+            <div class="rep-head">
+              <div class="rep-ico ri-red">ðŸ“„</div>
+              <div>
+                <div class="rep-title">TDS Report</div>
+                <div class="rep-desc">Tax deductions under Section 194H and 194R</div>
+              </div>
+            </div>
+            <div class="rep-section">Options</div>
+            <div class="opt-list">
+              <label class="opt"><input type="checkbox" checked> Section 194H (cash commissions)</label>
+              <label class="opt"><input type="checkbox" checked> Section 194R (product vouchers)</label>
+              <label class="opt"><input type="checkbox" checked> Include member PAN details</label>
+              <label class="opt"><input type="checkbox" checked> Include Form 16A data</label>
+              <label class="opt"><input type="checkbox"> Include zero-TDS members</label>
+            </div>
+            <div class="rep-section">Filters</div>
+            <div class="filt-row">
+              <div class="fb">
+                <label>Financial Year</label>
+                <select class="sel">
+                  <option>2026-27</option><option>2025-26</option>
+                </select>
+              </div>
+              <div class="fb">
+                <label>Section</label>
+                <select class="sel">
+                  <option>Both</option><option>194H only</option><option>194R only</option>
+                </select>
+              </div>
+            </div>
+            <div class="rep-section">Format</div>
+            <div class="fmt-row" role="radiogroup">
+              <label class="fmt"><input type="radio" name="fmt-4" value="CSV" checked><span class="fmt-lbl">CSV</span></label>
+              <label class="fmt"><input type="radio" name="fmt-4" value="Excel"><span class="fmt-lbl">Excel</span></label>
+              <label class="fmt"><input type="radio" name="fmt-4" value="PDF"><span class="fmt-lbl">PDF</span></label>
+            </div>
+            <div class="gen-wrap">
+              <button class="btn btn-navy gen-report" type="button" data-name="TDS Report" data-records="721">Generate Report</button>
+              <div class="gen-progress">
+                <div class="gen-track"><div class="gen-fill"></div></div>
+                <div class="gen-pct">0%</div>
+              </div>
+              <div class="gen-result">
+                <span class="gen-msg">Report ready â€” 721 members with TDS deductions</span>
+                <button class="btn btn-teal btn-sm gen-download" type="button" data-name="TDS Report">Download</button>
+              </div>
+            </div>
+            <div class="rep-note">âš ï¸ TDS reports contain sensitive PAN data. Access restricted to Super-Admin only.</div>
+          </div>
+
+          <!-- CARD 5 : AUTOPOOL REPORT -->
+          <div class="rep-card">
+            <div class="rep-head">
+              <div class="rep-ico ri-amber">ðŸŒ³</div>
+              <div>
+                <div class="rep-title">AutoPool Health Report</div>
+                <div class="rep-desc">Pool progress, rebirth IDs, vouchers, and earning distribution</div>
+              </div>
+            </div>
+            <div class="rep-section">Options</div>
+            <div class="opt-list">
+              <label class="opt"><input type="checkbox" checked> Pool 1 through 7 status</label>
+              <label class="opt"><input type="checkbox" checked> Rebirth ID generation log</label>
+              <label class="opt"><input type="checkbox" checked> Voucher issuance log</label>
+              <label class="opt"><input type="checkbox" checked> Pay-Once Rule event log</label>
+              <label class="opt"><input type="checkbox"> Individual member pool positions</label>
+            </div>
+            <div class="rep-section">Filters</div>
+            <div class="filt-row">
+              <div class="fb">
+                <label>Pool Cycle</label>
+                <select class="sel">
+                  <option>All</option><option>Pool 1</option><option>Pool 2</option><option>Pool 3</option><option>Pool 4</option><option>Pool 5+</option>
+                </select>
+              </div>
+              <div class="fb">
+                <label>From</label>
+                <input type="date" class="inp" value="2026-01-01">
+              </div>
+              <div class="fb">
+                <label>To</label>
+                <input type="date" class="inp" value="2026-08-08">
+              </div>
+            </div>
+            <div class="rep-section">Format</div>
+            <div class="fmt-row" role="radiogroup">
+              <label class="fmt"><input type="radio" name="fmt-5" value="CSV" checked><span class="fmt-lbl">CSV</span></label>
+              <label class="fmt"><input type="radio" name="fmt-5" value="Excel"><span class="fmt-lbl">Excel</span></label>
+              <label class="fmt"><input type="radio" name="fmt-5" value="PDF"><span class="fmt-lbl">PDF</span></label>
+            </div>
+            <div class="gen-wrap">
+              <button class="btn btn-navy gen-report" type="button" data-name="AutoPool Report" data-records="10,482">Generate Report</button>
+              <div class="gen-progress">
+                <div class="gen-track"><div class="gen-fill"></div></div>
+                <div class="gen-pct">0%</div>
+              </div>
+              <div class="gen-result">
+                <span class="gen-msg">Report ready â€” 10,482 pool entries</span>
+                <button class="btn btn-teal btn-sm gen-download" type="button" data-name="AutoPool Report">Download</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 6 : FINANCIAL SUMMARY -->
+          <div class="rep-card">
+            <div class="rep-head">
+              <div class="rep-ico ri-teal">ðŸ“ˆ</div>
+              <div>
+                <div class="rep-title">Financial Summary Report</div>
+                <div class="rep-desc">Revenue, payouts, admin charges, TDS and company surplus</div>
+              </div>
+            </div>
+            <div class="rep-section">Options</div>
+            <div class="opt-list">
+              <label class="opt"><input type="checkbox" checked> Kit revenue</label>
+              <label class="opt"><input type="checkbox" checked> Vendor margin collected</label>
+              <label class="opt"><input type="checkbox" checked> Commission payouts</label>
+              <label class="opt"><input type="checkbox" checked> Admin charges collected</label>
+              <label class="opt"><input type="checkbox" checked> TDS collected</label>
+              <label class="opt"><input type="checkbox" checked> Company surplus</label>
+            </div>
+            <div class="rep-section">Filters</div>
+            <div class="filt-row">
+              <div class="fb">
+                <label>Period</label>
+                <select class="sel">
+                  <option>Monthly</option><option>Quarterly</option><option>Annual</option>
+                </select>
+              </div>
+              <div class="fb">
+                <label>Financial Year</label>
+                <select class="sel">
+                  <option>2026-27</option><option>2025-26</option>
+                </select>
+              </div>
+            </div>
+            <div class="rep-section">Format</div>
+            <div class="fmt-row" role="radiogroup">
+              <label class="fmt"><input type="radio" name="fmt-6" value="CSV" checked><span class="fmt-lbl">CSV</span></label>
+              <label class="fmt"><input type="radio" name="fmt-6" value="Excel"><span class="fmt-lbl">Excel</span></label>
+              <label class="fmt"><input type="radio" name="fmt-6" value="PDF"><span class="fmt-lbl">PDF</span></label>
+            </div>
+            <div class="gen-wrap">
+              <button class="btn btn-navy gen-report" type="button" data-name="Financial Summary" data-records="FY 2026-27">Generate Report</button>
+              <div class="gen-progress">
+                <div class="gen-track"><div class="gen-fill"></div></div>
+                <div class="gen-pct">0%</div>
+              </div>
+              <div class="gen-result">
+                <span class="gen-msg">Report ready â€” Summary for FY 2026-27</span>
+                <button class="btn btn-teal btn-sm gen-download" type="button" data-name="Financial Summary">Download</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ============ TAB 2 : SCHEDULED REPORTS ============ -->
+      <div class="view" id="view-scheduled">
+
+        <div class="sched-grid" id="schedGrid">
+
+          <!-- SCHEDULE 1 -->
+          <div class="sched-card" data-sched="1">
+            <div class="sched-top">
+              <div class="sched-name">Weekly Commission Summary</div>
+              <span class="badge badge-teal sched-status">ACTIVE</span>
+            </div>
+            <div class="sched-rows">
+              <div class="sched-row"><span class="k">Frequency</span><span class="v">Every Monday, 08:00 AM</span></div>
+              <div class="sched-row"><span class="k">Recipients</span><span class="v">superadmin@bharatiyabazaar.com</span></div>
+              <div class="sched-row"><span class="k">Format</span><span class="v">Excel</span></div>
+              <div class="sched-row"><span class="k">Last sent</span><span class="v">04 Aug 2026</span></div>
+              <div class="sched-row"><span class="k">Next due</span><span class="v">11 Aug 2026</span></div>
+            </div>
+            <div class="sched-actions">
+              <button class="btn btn-outline-navy btn-sm sched-edit" type="button">Edit</button>
+              <button class="btn btn-outline-amber btn-sm sched-toggle" type="button">Pause</button>
+              <button class="btn btn-outline-red btn-sm sched-del" type="button">Delete</button>
+            </div>
+          </div>
+
+          <!-- SCHEDULE 2 -->
+          <div class="sched-card" data-sched="2">
+            <div class="sched-top">
+              <div class="sched-name">Monthly Member Report</div>
+              <span class="badge badge-teal sched-status">ACTIVE</span>
+            </div>
+            <div class="sched-rows">
+              <div class="sched-row"><span class="k">Frequency</span><span class="v">1st of every month, 09:00 AM</span></div>
+              <div class="sched-row"><span class="k">Recipients</span><span class="v">admin@bharatiyabazaar.com</span></div>
+              <div class="sched-row"><span class="k">Format</span><span class="v">PDF</span></div>
+              <div class="sched-row"><span class="k">Last sent</span><span class="v">01 Aug 2026</span></div>
+              <div class="sched-row"><span class="k">Next due</span><span class="v">01 Sep 2026</span></div>
+            </div>
+            <div class="sched-actions">
+              <button class="btn btn-outline-navy btn-sm sched-edit" type="button">Edit</button>
+              <button class="btn btn-outline-amber btn-sm sched-toggle" type="button">Pause</button>
+              <button class="btn btn-outline-red btn-sm sched-del" type="button">Delete</button>
+            </div>
+          </div>
+
+          <!-- SCHEDULE 3 -->
+          <div class="sched-card" data-sched="3">
+            <div class="sched-top">
+              <div class="sched-name">Daily Payout Summary</div>
+              <span class="badge badge-amber sched-status">PAUSED</span>
+            </div>
+            <div class="sched-rows">
+              <div class="sched-row"><span class="k">Frequency</span><span class="v">Every day, 11:00 PM</span></div>
+              <div class="sched-row"><span class="k">Recipients</span><span class="v">finance@bharatiyabazaar.com</span></div>
+              <div class="sched-row"><span class="k">Format</span><span class="v">CSV</span></div>
+              <div class="sched-row"><span class="k">Last sent</span><span class="v">08 Aug 2026</span></div>
+              <div class="sched-row"><span class="k">Next due</span><span class="v">09 Aug 2026</span></div>
+            </div>
+            <div class="sched-actions">
+              <button class="btn btn-outline-navy btn-sm sched-edit" type="button">Edit</button>
+              <button class="btn btn-teal btn-sm sched-toggle" type="button">Resume</button>
+              <button class="btn btn-outline-red btn-sm sched-del" type="button">Delete</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="add-sched-wrap">
+          <button class="add-sched" id="addSched" type="button">ï¼‹ Add New Schedule</button>
+        </div>
+      </div>
+
+      <!-- ============ TAB 3 : EXPORT HISTORY ============ -->
+      <div class="view" id="view-history">
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+          <div class="search-row">
+            <span class="s-ico">ðŸ”</span>
+            <input class="input search" id="histSearch" placeholder="Search exports by type, generated by, or date...">
+          </div>
+          <div class="filter-row">
+            <div class="fb-group">
+              <label>Report Type</label>
+              <select class="sel" id="histType">
+                <option value="All">All types</option>
+                <option>Financial Summary</option>
+                <option>Commission Report</option>
+                <option>Member Report</option>
+                <option>Vendor Report</option>
+                <option>TDS Report</option>
+                <option>AutoPool Report</option>
+              </select>
+            </div>
+            <div class="fb-group">
+              <label>From</label>
+              <input type="date" class="input" id="histFrom" value="2026-07-01">
+            </div>
+            <div class="fb-group">
+              <label>To</label>
+              <input type="date" class="input" id="histTo" value="2026-08-08">
+            </div>
+            <div class="fb-group">
+              <label>Format</label>
+              <select class="sel" id="histFormat">
+                <option value="All">All formats</option>
+                <option>CSV</option>
+                <option>Excel</option>
+                <option>PDF</option>
+              </select>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-outline-navy btn-sm" id="histReset" type="button">Reset</button>
+              <button class="btn btn-teal btn-sm" id="histExport" type="button">Export</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="card">
+          <div class="card-title">Export History</div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th><th>Report Type</th><th>Records</th><th>Format</th><th>Generated By</th><th>Status</th><th>Download</th>
+                </tr>
+              </thead>
+              <tbody id="histBody"></tbody>
+            </table>
+            <div class="empty-state" id="histEmpty" style="display:none">
+              <div class="es-ic">ðŸ“­</div>
+              <p>No exports match your filters</p>
+            </div>
+          </div>
+          <div class="pagination">
+            <span class="pg-info" id="pgInfo">Showing 1â€“10 of 12</span>
+            <div class="pg-controls">
+              <button class="btn btn-outline-navy btn-sm" id="pgPrev" type="button">â† Prev</button>
+              <span class="pg-info" id="pgCur">Page 1 of 2</span>
+              <button class="btn btn-outline-navy btn-sm" id="pgNext" type="button">Next â†’</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== MOBILE BOTTOM TABS ===== -->
+  <nav class="bottom-tabs" id="bottomTabs">
+    <button class="tab" data-name="Dashboard"><span class="ti">ðŸ </span>Dashboard</button>
+    <button class="tab" data-name="Members"><span class="ti">ðŸ‘¥</span>Members</button>
+    <button class="tab" data-name="Vendors"><span class="ti">ðŸª</span>Vendors</button>
+    <button class="tab" data-name="KYC"><span class="ti">ðŸ“„</span>KYC</button>
+    <button class="tab active" data-name="Reports"><span class="ti">ðŸ“Š</span>Reports</button>
+  </nav>
+
+  <!-- ===== ADD SCHEDULE MODAL ===== -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Add New Schedule</h3>
+        <button class="modal-x" type="button" data-close="addModal">âœ•</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Report Type</label>
+          <select class="sel" id="nsType">
+            <option>Member Report</option>
+            <option>Commission Report</option>
+            <option>Vendor Report</option>
+            <option>TDS Report</option>
+            <option>AutoPool Report</option>
+            <option>Financial Summary</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Frequency</label>
+            <select class="sel" id="nsFreq">
+              <option>Daily</option><option>Weekly</option><option>Monthly</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Time</label>
+            <input type="time" class="inp" id="nsTime" value="08:00">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Recipients (comma-separated emails)</label>
+          <input type="text" class="inp" id="nsRecipients" placeholder="finance@bharatiyabazaar.com">
+        </div>
+        <div class="form-group">
+          <label>Format</label>
+          <div class="fmt-row">
+            <label class="fmt"><input type="radio" name="ns-format" value="CSV" checked><span class="fmt-lbl">CSV</span></label>
+            <label class="fmt"><input type="radio" name="ns-format" value="Excel"><span class="fmt-lbl">Excel</span></label>
+            <label class="fmt"><input type="radio" name="ns-format" value="PDF"><span class="fmt-lbl">PDF</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline-navy" type="button" data-close="addModal">Cancel</button>
+        <button class="btn btn-teal" id="nsSave" type="button">Save Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DELETE CONFIRM MODAL ===== -->
+  <div class="modal-overlay" id="delModal">
+    <div class="modal-card" style="max-width:420px">
+      <div class="modal-body" style="text-align:center">
+        <div class="confirm-ico">ðŸ—‘ï¸</div>
+        <div class="confirm-title">Delete this schedule?</div>
+        <div class="confirm-sub" id="delName">Weekly Commission Summary</div>
+        <div class="confirm-sub">This scheduled report will be permanently removed. This action cannot be undone.</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline-navy" type="button" id="delCancel">Cancel</button>
+        <button class="btn btn-danger" type="button" id="delConfirm">Delete Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function(){
+    'use strict';
+    function $(s){ return document.querySelector(s); }
+    function $$(s){ return Array.from(document.querySelectorAll(s)); }
+
+    var toastTimer = null;
+    function showToast(msg){
+      var t = $('#toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
+    }
+
+    /* ---------- SIDEBAR NAV ---------- */
+    $$('.sb-nav a').forEach(function(a){
+      a.addEventListener('click', function(e){
+        if(a.classList.contains('active')) return;
+        if(a.getAttribute('href') && a.getAttribute('href') !== '#') return;
+        e.preventDefault();
+        if(a.classList.contains('logout')){ showToast('Logging out (demo)'); return; }
+        showToast('Coming soon: ' + a.textContent.trim());
+      });
+    });
+
+    /* ---------- MOBILE BOTTOM TABS ---------- */
+    var ADMIN_TABS = { 'Dashboard':'bb-admin.html', 'Members':'bb-admin-members.html', 'KYC':'bb-admin-kyc.html' };
+    $$('.tab').forEach(function(t){
+      t.addEventListener('click', function(){
+        if(t.classList.contains('active')) return;
+        var name = t.getAttribute('data-name');
+        if(ADMIN_TABS[name]) location.href = ADMIN_TABS[name]; else showToast('Coming soon: ' + name);
+      });
+    });
+
+    /* ---------- BELL DROPDOWN ---------- */
+    var bell = $('#bell');
+    var drop = $('#bellDrop');
+    bell.addEventListener('click', function(e){
+      e.stopPropagation();
+      drop.classList.toggle('show');
+    });
+    $$('.bd-item').forEach(function(item){
+      item.addEventListener('click', function(e){
+        e.stopPropagation();
+        drop.classList.remove('show');
+        showToast('Opening notification...');
+      });
+    });
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('.bell-wrap')) drop.classList.remove('show');
+    });
+
+    /* ---------- VIEW TABS ---------- */
+    $$('#viewTabs .vt').forEach(function(t){
+      t.addEventListener('click', function(){
+        $$('#viewTabs .vt').forEach(function(x){ x.classList.toggle('active', x === t); });
+        ['generate','scheduled','history'].forEach(function(v){
+          $('#view-' + v).classList.toggle('active', v === t.dataset.view);
+        });
+      });
+    });
+
+    /* ---------- GENERATE REPORTS ---------- */
+    $$('.gen-report').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var card = btn.closest('.rep-card');
+        var name = btn.dataset.name;
+        var records = btn.dataset.records;
+        btn.style.display = 'none';
+        var prog = card.querySelector('.gen-progress');
+        var fill = card.querySelector('.gen-fill');
+        var pct = card.querySelector('.gen-pct');
+        var result = card.querySelector('.gen-result');
+        var msg = card.querySelector('.gen-msg');
+        msg.textContent = 'Report ready â€” ' + records + ' records';
+        prog.classList.add('show');
+        pct.textContent = '0%';
+        fill.style.width = '0%';
+        var start = Date.now();
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){ fill.style.width = '100%'; });
+        });
+        var pctTimer = setInterval(function(){
+          var el = Date.now() - start;
+          var p = Math.min(100, Math.round(el / 1500 * 100));
+          pct.textContent = p + '%';
+          if(p >= 100){ clearInterval(pctTimer); }
+        }, 40);
+        setTimeout(function(){
+          prog.classList.remove('show');
+          result.classList.add('show');
+          showToast(name + ' generated successfully');
+        }, 1550);
+      });
+    });
+
+    $$('.gen-download').forEach(function(b){
+      b.addEventListener('click', function(){
+        var name = b.dataset.name;
+        showToast('Downloading ' + name + '... (simulated â€” actual download requires backend integration)');
+      });
+    });
+
+    /* ---------- SCHEDULED REPORTS ---------- */
+    $$('.sched-toggle').forEach(function(b){
+      b.addEventListener('click', function(){
+        var card = b.closest('.sched-card');
+        var badge = card.querySelector('.sched-status');
+        var isActive = badge.classList.contains('badge-teal');
+        if(isActive){
+          badge.className = 'badge badge-amber sched-status';
+          badge.textContent = 'PAUSED';
+          b.className = 'btn btn-teal btn-sm sched-toggle';
+          b.textContent = 'Resume';
+          showToast(card.querySelector('.sched-name').textContent + ' paused');
+        } else {
+          badge.className = 'badge badge-teal sched-status';
+          badge.textContent = 'ACTIVE';
+          b.className = 'btn btn-outline-amber btn-sm sched-toggle';
+          b.textContent = 'Pause';
+          showToast(card.querySelector('.sched-name').textContent + ' resumed');
+        }
+      });
+    });
+
+    $$('.sched-edit').forEach(function(b){
+      b.addEventListener('click', function(){
+        showToast('Editing ' + b.closest('.sched-card').querySelector('.sched-name').textContent + ' (demo)');
+      });
+    });
+
+    var delTarget = null;
+    $$('.sched-del').forEach(function(b){
+      b.addEventListener('click', function(){
+        delTarget = b.closest('.sched-card');
+        $('#delName').textContent = delTarget.querySelector('.sched-name').textContent;
+        $('#delModal').classList.add('show');
+      });
+    });
+    $('#delCancel').addEventListener('click', function(){ $('#delModal').classList.remove('show'); });
+    $('#delConfirm').addEventListener('click', function(){
+      var name = delTarget ? delTarget.querySelector('.sched-name').textContent : 'Schedule';
+      if(delTarget){ delTarget.parentNode.removeChild(delTarget); }
+      $('#delModal').classList.remove('show');
+      showToast(name + ' deleted');
+      delTarget = null;
+    });
+
+    /* ---------- ADD SCHEDULE MODAL ---------- */
+    function openAdd(){ $('#addModal').classList.add('show'); }
+    function closeAdd(){ $('#addModal').classList.remove('show'); }
+    $('#addSched').addEventListener('click', openAdd);
+    $$('[data-close="addModal"]').forEach(function(b){ b.addEventListener('click', closeAdd); });
+    $('#nsSave').addEventListener('click', function(){
+      var type = $('#nsType').value;
+      var freq = $('#nsFreq').value;
+      var time = $('#nsTime').value || '08:00';
+      var recipients = $('#nsRecipients').value.trim() || 'admin@bharatiyabazaar.com';
+      var format = document.querySelector('input[name="ns-format"]:checked');
+      var fmt = format ? format.value : 'CSV';
+      var freqLabel = freq === 'Daily' ? 'Every day' : freq === 'Weekly' ? 'Every week' : 'Every month';
+      var card = document.createElement('div');
+      card.className = 'sched-card';
+      card.innerHTML =
+        '<div class="sched-top"><div class="sched-name">' + type + '</div><span class="badge badge-teal sched-status">ACTIVE</span></div>' +
+        '<div class="sched-rows">' +
+          '<div class="sched-row"><span class="k">Frequency</span><span class="v">' + freqLabel + ', ' + time + '</span></div>' +
+          '<div class="sched-row"><span class="k">Recipients</span><span class="v">' + recipients + '</span></div>' +
+          '<div class="sched-row"><span class="k">Format</span><span class="v">' + fmt + '</span></div>' +
+          '<div class="sched-row"><span class="k">Last sent</span><span class="v">Never</span></div>' +
+          '<div class="sched-row"><span class="k">Next due</span><span class="v">Schedule pending</span></div>' +
+        '</div>' +
+        '<div class="sched-actions">' +
+          '<button class="btn btn-outline-navy btn-sm sched-edit" type="button">Edit</button>' +
+          '<button class="btn btn-outline-amber btn-sm sched-toggle" type="button">Pause</button>' +
+          '<button class="btn btn-outline-red btn-sm sched-del" type="button">Delete</button>' +
+        '</div>';
+      $('#schedGrid').appendChild(card);
+      wireSchedCard(card);
+      closeAdd();
+      showToast('Schedule saved');
+      var badge = $('#viewTabs .vt[data-view="scheduled"] .vt-badge');
+      badge.textContent = parseInt(badge.textContent, 10) + 1;
+    });
+
+    function wireSchedCard(card){
+      var toggle = card.querySelector('.sched-toggle');
+      var edit = card.querySelector('.sched-edit');
+      var del = card.querySelector('.sched-del');
+      toggle.addEventListener('click', function(){
+        var badge = card.querySelector('.sched-status');
+        var isActive = badge.classList.contains('badge-teal');
+        if(isActive){
+          badge.className = 'badge badge-amber sched-status';
+          badge.textContent = 'PAUSED';
+          toggle.className = 'btn btn-teal btn-sm sched-toggle';
+          toggle.textContent = 'Resume';
+          showToast(card.querySelector('.sched-name').textContent + ' paused');
+        } else {
+          badge.className = 'badge badge-teal sched-status';
+          badge.textContent = 'ACTIVE';
+          toggle.className = 'btn btn-outline-amber btn-sm sched-toggle';
+          toggle.textContent = 'Pause';
+          showToast(card.querySelector('.sched-name').textContent + ' resumed');
+        }
+      });
+      edit.addEventListener('click', function(){
+        showToast('Editing ' + card.querySelector('.sched-name').textContent + ' (demo)');
+      });
+      del.addEventListener('click', function(){
+        delTarget = card;
+        $('#delName').textContent = card.querySelector('.sched-name').textContent;
+        $('#delModal').classList.add('show');
+      });
+    }
+
+    /* ---------- EXPORT HISTORY ---------- */
+    var EXPORTS = [
+      {date:'2026-08-08', time:'09:45', type:'Financial Summary', recs:'â€”',    fmt:'PDF',   by:'Admin-01', sum:'SHA256:a81f0c9e4d2b3f7c6e5d', size:'0.8 MB',  gen:'2.1s',   expiry:'22 Aug 2026'},
+      {date:'2026-08-07', time:'14:30', type:'Commission Report', recs:'41,928', fmt:'CSV',   by:'Admin-01', sum:'SHA256:7c2e4d9a1b8f6d3e0a5c', size:'4.6 MB',  gen:'3.4s',   expiry:'21 Aug 2026'},
+      {date:'2026-08-07', time:'11:15', type:'Member Report',     recs:'10,482', fmt:'Excel', by:'Admin-02', sum:'SHA256:b3f8a7c2e1d90645a8b2', size:'2.9 MB',  gen:'2.8s',   expiry:'21 Aug 2026'},
+      {date:'2026-08-06', time:'16:00', type:'Vendor Report',     recs:'523',    fmt:'PDF',   by:'Admin-01', sum:'SHA256:5d1e8f3a9c2b7046e7d8', size:'1.1 MB',  gen:'1.9s',   expiry:'20 Aug 2026'},
+      {date:'2026-08-06', time:'09:30', type:'TDS Report',        recs:'721',    fmt:'Excel', by:'Admin-01', sum:'SHA256:9c4a2b7e6d1f8053f9a1', size:'3.3 MB',  gen:'4.1s',   expiry:'20 Aug 2026'},
+      {date:'2026-08-05', time:'08:00', type:'Commission Report', recs:'41,210', fmt:'CSV',   by:'System',   sum:'SHA256:1e8b3d6c9a2f0475e6b3', size:'4.5 MB',  gen:'3.1s',   expiry:'19 Aug 2026'},
+      {date:'2026-08-04', time:'08:00', type:'Commission Report', recs:'40,891', fmt:'CSV',   by:'System',   sum:'SHA256:6f2a9c4e8b1d3075d9f2', size:'4.5 MB',  gen:'3.0s',   expiry:'18 Aug 2026'},
+      {date:'2026-08-03', time:'08:00', type:'Commission Report', recs:'40,320', fmt:'CSV',   by:'System',   sum:'SHA256:a4d8b1e6f3c9072a8b1c', size:'4.4 MB',  gen:'2.9s',   expiry:'17 Aug 2026'},
+      {date:'2026-08-01', time:'09:00', type:'Member Report',     recs:'10,358', fmt:'PDF',   by:'System',   sum:'SHA256:2b6e9d1c8a4f3057b9d4', size:'1.9 MB',  gen:'2.4s',   expiry:'15 Aug 2026'},
+      {date:'2026-07-31', time:'14:00', type:'AutoPool Report',   recs:'10,200', fmt:'Excel', by:'Admin-02', sum:'SHA256:8d3c7a2f1e6b9048c2a5', size:'2.4 MB',  gen:'2.6s',   expiry:'14 Aug 2026'},
+      {date:'2026-07-28', time:'11:30', type:'Financial Summary', recs:'â€”',    fmt:'PDF',   by:'Admin-01', sum:'SHA256:3f1a8d5b9c2e6074e8a3', size:'0.9 MB',  gen:'2.2s',   expiry:'11 Aug 2026'},
+      {date:'2026-07-25', time:'09:00', type:'Member Report',     recs:'10,100', fmt:'CSV',   by:'System',   sum:'SHA256:5c9e2a7d4b8f1036a9c2', size:'3.0 MB',  gen:'2.7s',   expiry:'08 Aug 2026'}
+    ];
+
+    var page = 1;
+    var perPage = 10;
+
+    function monthName(d){ return d.toLocaleString('en-GB', { month:'short' }); }
+
+    function fmtDate(iso, time){
+      var d = new Date(iso + 'T00:00:00');
+      return monthName(d) + ' ' + d.getDate() + ' ' + time;
+    }
+
+    function fmtShortDate(iso){
+      var d = new Date(iso + 'T00:00:00');
+      return monthName(d) + ' ' + d.getDate();
+    }
+
+    function filtered(){
+      var q = ($('#histSearch').value || '').toLowerCase();
+      var type = $('#histType').value;
+      var fmt = $('#histFormat').value;
+      var from = $('#histFrom').value || '0000-00-00';
+      var to = $('#histTo').value || '9999-99-99';
+      return EXPORTS.filter(function(r){
+        if(type !== 'All' && r.type !== type) return false;
+        if(fmt !== 'All' && r.fmt !== fmt) return false;
+        if(r.date < from || r.date > to) return false;
+        if(q && (r.type + ' ' + r.by + ' ' + r.date).toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      });
+    }
+
+    function renderHistory(){
+      var list = filtered();
+      var tbody = $('#histBody');
+      tbody.innerHTML = '';
+      var total = list.length;
+      var pages = Math.max(1, Math.ceil(total / perPage));
+      if(page > pages) page = pages;
+      var start = (page - 1) * perPage;
+      var rows = list.slice(start, start + perPage);
+      rows.forEach(function(r){
+        var tr = document.createElement('tr');
+        tr.className = 'pt-row';
+        tr.innerHTML =
+          '<td class="date-cell">' + fmtDate(r.date, r.time) + '</td>' +
+          '<td class="type-cell">' + r.type + '</td>' +
+          '<td class="rec-cell">' + r.recs + '</td>' +
+          '<td>' + r.fmt + '</td>' +
+          '<td class="by-cell">' + r.by + '</td>' +
+          '<td><span class="st-badge st-ready">â— READY</span></td>' +
+          '<td><button class="dl-btn" type="button" data-name="' + r.type + '" data-fmt="' + r.fmt + '">â†“ Download</button></td>';
+        tbody.appendChild(tr);
+        var detail = document.createElement('tr');
+        detail.className = 'pt-detail';
+        detail.style.display = 'none';
+        detail.innerHTML =
+          '<td colspan="7"><div class="tx-detail">' +
+            '<div class="tx-block"><span class="tx-label">Checksum</span><span class="tx-value">' + r.sum + '</span></div>' +
+            '<div class="tx-block"><span class="tx-label">File Size</span><span class="tx-value">' + r.size + '</span></div>' +
+            '<div class="tx-block"><span class="tx-label">Generation Time</span><span class="tx-value">' + r.gen + '</span></div>' +
+            '<div class="tx-block"><span class="tx-label">Expiry</span><span class="tx-value">' + r.expiry + '</span></div>' +
+          '</div></td>';
+        tbody.appendChild(detail);
+        tr.addEventListener('click', function(){
+          detail.style.display = detail.style.display === 'none' ? '' : 'none';
+        });
+        var dl = tr.querySelector('.dl-btn');
+        dl.addEventListener('click', function(e){
+          e.stopPropagation();
+          showToast('Downloading ' + dl.dataset.name + '_' + fmtShortDate(r.date) + '.' + (dl.dataset.fmt === 'Excel' ? 'xlsx' : dl.dataset.fmt.toLowerCase()) + ' (simulated)');
+        });
+      });
+      $('#histEmpty').style.display = total ? 'none' : 'block';
+      $('#pgInfo').textContent = total ? 'Showing ' + (start + 1) + 'â€“' + Math.min(start + perPage, total) + ' of ' + total : 'No exports';
+      $('#pgCur').textContent = 'Page ' + page + ' of ' + pages;
+      $('#pgPrev').disabled = page <= 1;
+      $('#pgNext').disabled = page >= pages;
+    }
+
+    $('#histSearch').addEventListener('input', function(){ page = 1; renderHistory(); });
+    $('#histType').addEventListener('change', function(){ page = 1; renderHistory(); });
+    $('#histFormat').addEventListener('change', function(){ page = 1; renderHistory(); });
+    $('#histFrom').addEventListener('change', function(){ page = 1; renderHistory(); });
+    $('#histTo').addEventListener('change', function(){ page = 1; renderHistory(); });
+    $('#histReset').addEventListener('click', function(){
+      $('#histSearch').value = '';
+      $('#histType').value = 'All';
+      $('#histFormat').value = 'All';
+      $('#histFrom').value = '2026-07-01';
+      $('#histTo').value = '2026-08-08';
+      page = 1;
+      renderHistory();
+    });
+    $('#histExport').addEventListener('click', function(){
+      showToast('Exporting filtered results... (simulated â€” actual export requires backend integration)');
+    });
+    $('#pgPrev').addEventListener('click', function(){ if(page > 1){ page--; renderHistory(); } });
+    $('#pgNext').addEventListener('click', function(){
+      var pages = Math.max(1, Math.ceil(filtered().length / perPage));
+      if(page < pages){ page++; renderHistory(); }
+    });
+
+    /* ---------- MODAL OVERLAY CLICK + ESC ---------- */
+    $$('.modal-overlay').forEach(function(ov){
+      ov.addEventListener('click', function(e){
+        if(e.target === ov) ov.classList.remove('show');
+      });
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){
+        $$('.modal-overlay.show').forEach(function(m){ m.classList.remove('show'); });
+      }
+    });
+
+    /* ---------- INIT ---------- */
+    renderHistory();
+  })();
+  </script>
+</body>
+</html>

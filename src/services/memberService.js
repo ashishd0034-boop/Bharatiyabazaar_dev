@@ -1,6 +1,33 @@
 const prisma = require("../lib/prisma");
 
+// Generates sequential, human-readable member codes: BB10001, BB10002, ...
+async function generateMemberCode() {
+  try {
+    const counter = await prisma.systemCounter.upsert({
+      where: { id: "MEMBER_CODE" },
+      update: { currentValue: { increment: 1 } },
+      create: { id: "MEMBER_CODE", currentValue: 10001 },
+    });
+    return `BB${counter.currentValue}`;
+  } catch (err) {
+    // Race-safety: if two registrations hit at the same millisecond
+    if (err.code === "P2002") {
+      const target = err.meta?.target;
+      let field = "a unique field";
+      if (Array.isArray(target)) field = target.join(", ");
+      else if (typeof target === "string") field = target;
+      
+      throw new Error(`This ${field} is already registered`);
+    }
+    throw err; // Re-throw other errors
+  }
+}
+
+// Creates a new member with a temporary placeholder memberCode.
+// The permanent memberCode is assigned in idCardService.purchaseIds matching the MAIN card number (BBxxxxx).
 async function createMember(args) {
+  const tempCode = `TEMP_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
   // Create member
   const member = await prisma.member.create({
     data: {
@@ -9,6 +36,7 @@ async function createMember(args) {
       email: args.email,
       address: args.address,
       pinCode: args.pinCode,
+      memberCode: tempCode,
       kycTier: 1,
       kycStatus: args.kycStatus || "PENDING",
       status: "ACTIVE"
@@ -46,8 +74,20 @@ async function getMemberByMobile(mobile) {
   });
 }
 
+// For sponsor/referral lookups (BB10001 → member)
+async function getMemberByCode(memberCode) {
+  return prisma.member.findUnique({
+    where: { memberCode },
+    include: {
+      idCards: true,
+      mainWallet: true
+    }
+  });
+}
+
 module.exports = {
   createMember,
   getMemberById,
-  getMemberByMobile
+  getMemberByMobile,
+  getMemberByCode
 };

@@ -18,7 +18,6 @@ async function checkAutoPoolLevelCompletion(tx, newGlobalPosition) {
       const ancestorPos = numerator / denominator;
       
       if (ancestorPos >= 1) {
-        // Ancestor completed Level L
         const ancestorNode = await tx.autoPoolNode.findUnique({
           where: { globalPosition: ancestorPos }
         });
@@ -87,17 +86,21 @@ async function calculateAndCreateCommissions(tx, idCardId, level, stream, amount
   // 1. Check Pay-Once Ledger
   const alreadyPaid = await payOnceService.hasAlreadyPaid(tx, idCardId, level);
   
-  // Check if the idCard belongs to a MAIN ID or SUB ID for ACB locking
   const idCard = await tx.memberIdCard.findUnique({ where: { id: idCardId } });
   
   if (alreadyPaid) {
-    // Create a PAY_ONCE_BLOCKED commission
+    // Prevent duplicate blocked rows when checks run more than once
+    const existingBlocked = await tx.commissionEntry.findFirst({
+      where: { idCardId, stream, level, status: "PAY_ONCE_BLOCKED" }
+    });
+    if (existingBlocked) return;
+
     await tx.commissionEntry.create({
       data: {
         idCardId,
         stream,
         level,
-        amountPaise: 0, // Blocked, so 0 earned
+        amountPaise: 0,
         status: "PAY_ONCE_BLOCKED"
       }
     });
@@ -109,11 +112,10 @@ async function calculateAndCreateCommissions(tx, idCardId, level, stream, amount
     let initialStatus = "CONFIRMED";
     
     if (stream === "MY_SYSTEM") {
-      // MY SYSTEM commissions are pending for 7 days
+      // MY SYSTEM commissions are pending for 7 days (fraud prevention)
       initialStatus = "PENDING_7_DAY";
     } else if (stream === "AUTOPOOL") {
       // AutoPool commissions require ACB to be unlocked
-      // To check ACB, we must look up the owner's MAIN ID (Rule 4)
       const ownerMainCard = await tx.memberIdCard.findFirst({
         where: { memberId: idCard.memberId, type: "MAIN" }
       });

@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bharatiya Bazaar — QR Code Management. Sharma Kirana Store, Vendor ID BBV10089.">
+<title>QR Code Management | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B3A6B;
+    --navy-dark:#12294c;
+    --teal:#1A6B5A;
+    --teal-dark:#135241;
+    --amber:#B8860B;
+    --bg:#F8F9FA;
+    --white:#ffffff;
+    --ink:#1f2a3a;
+    --muted:#5b6b7f;
+    --border:#e4e9f0;
+    --danger:#d64545;
+    --success:#1e8e5a;
+    --shadow:0 10px 30px rgba(27,58,107,.10);
+    --shadow-sm:0 3px 12px rgba(27,58,107,.08);
+    --radius-card:12px;
+    --radius-btn:8px;
+    --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-display:'Poppins',var(--font);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2}
+  a{text-decoration:none;color:inherit}
+  img{max-width:100%;display:block}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--font);font-weight:600;font-size:.88rem;
+    padding:11px 18px;border-radius:var(--radius-btn);
+    border:2px solid transparent;cursor:pointer;transition:.22s ease;line-height:1;
+  }
+  .btn-sm{padding:9px 14px;font-size:.8rem}
+  .btn-lg{padding:15px 30px;font-size:1rem}
+  .btn-block{width:100%}
+  .btn-navy{background:var(--navy);color:#fff}
+  .btn-navy:hover{background:var(--navy-dark)}
+  .btn-teal{background:var(--teal);color:#fff}
+  .btn-teal:hover{background:var(--teal-dark)}
+  .btn-outline-navy{background:transparent;color:var(--navy);border-color:var(--navy)}
+  .btn-outline-navy:hover{background:var(--navy);color:#fff}
+  .btn-outline-teal{background:transparent;color:var(--teal);border-color:var(--teal)}
+  .btn-outline-teal:hover{background:var(--teal);color:#fff}
+  .btn-outline-amber{background:transparent;color:var(--amber);border-color:var(--amber)}
+  .btn-outline-amber:hover{background:var(--amber);color:#fff}
+  .btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+  .spinner{
+    width:18px;height:18px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;width:260px;z-index:120;
+    background:var(--navy);color:#fff;
+    display:flex;flex-direction:column;
+  }
+  .sb-logo{
+    display:flex;align-items:center;gap:12px;
+    padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .sb-logo .logo-mark{
+    width:42px;height:42px;flex:none;border-radius:12px;
+    background:#fff;border:1px solid rgba(255,255,255,.6);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .sb-logo .logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
+  .sb-logo .lt{display:flex;flex-direction:column;line-height:1.15}
+  .sb-logo .lt-name{font-family:var(--font-display);font-weight:700;font-size:1rem}
+  .sb-logo .lt-sub{font-size:.7rem;color:rgba(255,255,255,.72);letter-spacing:.04em}
+  .vendor-info{background:rgba(255,255,255,.07);margin:16px;border-radius:12px;padding:14px}
+  .v-head{display:flex;align-items:center;gap:11px}
+  .avatar{
+    width:44px;height:44px;flex:none;border-radius:50%;
+    background:var(--amber);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.95rem;
+  }
+  .v-name{font-weight:700;font-size:.9rem;line-height:1.2}
+  .v-id{font-size:.7rem;color:rgba(255,255,255,.72);margin-top:1px}
+  .v-biz{font-size:.76rem;color:rgba(255,255,255,.82);margin-top:8px}
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:.68rem;font-weight:800;letter-spacing:.03em;
+    padding:4px 10px;border-radius:999px;margin-top:8px;
+  }
+  .badge-verified{background:var(--teal);color:#fff}
+  .badge-teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .badge-amber{background:rgba(184,134,11,.14);color:#8a6508}
+  .sb-nav{flex:1;overflow-y:auto;padding:10px 12px}
+  .sb-nav a{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:10px;margin-bottom:3px;
+    color:rgba(255,255,255,.84);font-weight:500;font-size:.88rem;
+    transition:.2s;
+  }
+  .sb-nav a .ic{font-size:1rem;width:20px;text-align:center;flex:none}
+  .sb-nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+  .sb-nav a.active{background:var(--teal);color:#fff;font-weight:600}
+  .sb-nav a.logout{color:#ff9a9a;margin-top:6px}
+  .sb-nav a.logout:hover{background:rgba(214,69,69,.22);color:#fff}
+  .sb-foot{
+    padding:14px 20px;border-top:1px solid rgba(255,255,255,.12);
+    font-size:.68rem;color:rgba(255,255,255,.5);
+  }
+
+  /* ---------- MAIN LAYOUT ---------- */
+  .main{margin-left:260px;min-height:100vh;background:var(--bg)}
+  .main .container{max-width:1100px;margin:0 auto;padding:26px 26px 70px}
+  .page-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .page-head h1{font-size:1.45rem;font-weight:800;color:var(--navy)}
+  .page-sub{font-size:.84rem;color:var(--muted);margin-top:2px}
+
+  /* ---------- MOBILE TOP HEADER ---------- */
+  .mobile-top{
+    position:sticky;top:0;z-index:150;
+    background:var(--navy);color:#fff;
+    display:none;align-items:center;justify-content:space-between;
+    padding:10px 14px;box-shadow:0 2px 14px rgba(18,41,76,.35);gap:10px;
+  }
+  .mt-logo{width:38px;height:38px;flex:none;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .mt-logo img{width:100%;height:100%;object-fit:cover}
+  .mt-center{flex:1;text-align:center;font-family:var(--font-display);font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mt-right{display:flex;align-items:center;gap:14px;flex:none}
+  .bell-wrap{position:relative}
+  .bell{position:relative;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;line-height:1}
+  .bell-badge{
+    position:absolute;top:-5px;right:-8px;
+    background:var(--danger);color:#fff;font-size:.6rem;font-weight:800;
+    min-width:16px;height:16px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;padding:0 3px;
+  }
+  .bell-drop{
+    position:absolute;right:0;top:44px;width:300px;z-index:260;
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow);display:none;overflow:hidden;
+  }
+  .bell-drop.show{display:block;animation:fadeUp .25s ease}
+  .bd-head{padding:12px 16px;font-family:var(--font-display);font-weight:700;font-size:.9rem;color:var(--navy);border-bottom:1px solid var(--border)}
+  .bd-item{display:flex;gap:11px;align-items:flex-start;padding:12px 16px;border-bottom:1px dashed var(--border);font-size:.82rem}
+  .bd-item:last-child{border-bottom:none}
+  .bd-ico{width:28px;height:28px;flex:none;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+  .bd-ico.teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .bd-ico.amber{background:rgba(184,134,11,.14);color:var(--amber)}
+  .bd-item b{display:block;font-size:.82rem;color:var(--ink)}
+  .bd-item span{font-size:.7rem;color:var(--muted)}
+  .mt-avatar{
+    width:34px;height:34px;border-radius:50%;background:var(--amber);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.78rem;
+  }
+
+  /* ---------- VIEW TABS ---------- */
+  .view-tabs{
+    display:flex;background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:5px;gap:5px;margin-bottom:20px;
+    box-shadow:var(--shadow-sm);max-width:520px;
+  }
+  .vt{
+    flex:1;border:none;cursor:pointer;font-family:var(--font);font-weight:600;font-size:.88rem;
+    padding:11px 12px;border-radius:9px;background:transparent;color:var(--muted);transition:.2s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .vt:hover{color:var(--navy)}
+  .vt.active{background:var(--navy);color:#fff;box-shadow:0 4px 12px rgba(27,58,107,.25)}
+  .view{display:none}
+  .view.active{display:block;animation:fadeUp .35s ease}
+
+  /* ---------- STAT CHIPS ---------- */
+  .stat-chips{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .chip{
+    flex:1;min-width:150px;background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:13px 16px;box-shadow:var(--shadow-sm);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .chip-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .chip-val{
+    font-family:var(--font-display);font-weight:800;font-size:1.15rem;color:var(--navy);
+    display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  }
+  .chip-val.act{color:var(--teal);font-size:.9rem}
+  .live-dot{width:9px;height:9px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse 1.6s ease infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
+
+  /* ---------- QR DISPLAY CARD ---------- */
+  .qr-display-card{
+    background:var(--white);border:2px solid var(--navy);border-radius:var(--radius-card);
+    box-shadow:var(--shadow);padding:22px;max-width:520px;margin:0 auto;
+    text-align:center;
+  }
+  .qr-top-label{font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+  .qr-code-wrap{
+    background:#fff;border:1px solid var(--border);border-radius:14px;
+    padding:16px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+  }
+  .qr-code-wrap svg{width:240px;height:240px;max-width:100%;height:auto;display:block}
+  .qr-vendor-id{font-family:var(--font-display);font-weight:800;font-size:1.25rem;color:var(--navy);letter-spacing:.03em}
+  .qr-store{font-weight:700;color:var(--teal);font-size:.95rem;margin-top:2px}
+  .qr-loc{font-size:.78rem;color:var(--muted);margin-top:2px}
+  .qr-brand{
+    display:inline-flex;align-items:center;gap:8px;margin-top:12px;
+    background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:6px 16px;
+  }
+  .qr-brand img{width:24px;height:24px;border-radius:7px;object-fit:cover}
+  .qr-brand span{font-family:var(--font-display);font-weight:700;font-size:.78rem;color:var(--navy)}
+  .qr-actions{display:grid;gap:10px;margin-top:18px}
+  .qr-actions .btn{width:100%}
+
+  /* ---------- SECURITY NOTE ---------- */
+  .sec-note{
+    background:#fffdf7;border:1px solid #f0dfb6;border-left:5px solid var(--amber);
+    border-radius:var(--radius-card);padding:15px 18px;font-size:.84rem;color:#7a5c08;
+    margin:18px auto 0;max-width:520px;line-height:1.65;
+  }
+
+  /* ---------- FLOW GUIDE ---------- */
+  .card{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);box-shadow:var(--shadow-sm);padding:20px;margin-top:16px;
+  }
+  .card-title{
+    font-family:var(--font-display);font-weight:700;font-size:1.03rem;color:var(--navy);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+  }
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .f-step{
+    background:var(--bg);border:1px solid var(--border);border-radius:10px;
+    padding:14px;display:flex;gap:11px;align-items:flex-start;font-size:.82rem;color:var(--ink);line-height:1.45;
+  }
+  .f-num{
+    width:26px;height:26px;flex:none;border-radius:50%;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.74rem;margin-top:1px;
+  }
+  .f-step b{display:block;font-size:.8rem;color:var(--navy);margin-bottom:1px}
+
+  /* ---------- MEMBER VIEW : VENDOR FOUND ---------- */
+  .vfound-card{
+    background:var(--white);border:2px solid var(--success);border-radius:var(--radius-card);
+    box-shadow:var(--shadow-sm);padding:20px;max-width:520px;margin:0 auto 16px;
+  }
+  .vf-title{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-display);font-weight:800;font-size:1.05rem;color:var(--success);margin-bottom:14px;
+  }
+  .vf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+  .vf-row{display:flex;justify-content:space-between;gap:10px;font-size:.85rem;border-bottom:1px dashed var(--border);padding-bottom:8px}
+  .vf-row .k{color:var(--muted)}
+  .vf-row .v{font-weight:700;color:var(--ink);text-align:right}
+
+  /* ---------- MEMBER VIEW : AMOUNT ---------- */
+  .amount-card{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow-sm);padding:20px;max-width:520px;margin:0 auto;
+  }
+  .amount-card label{display:block;font-size:.86rem;font-weight:700;color:var(--ink);margin-bottom:7px}
+  .amount-input{
+    width:100%;font-family:var(--font-display);font-weight:700;font-size:1.6rem;color:var(--navy);
+    padding:13px 16px;border:1.5px solid var(--border);border-radius:10px;outline:none;transition:.2s;background:var(--bg);
+  }
+  .amount-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,90,.12);background:#fff}
+  .amount-input::placeholder{color:#a9b4c2;font-weight:500}
+  .counter-preview{margin-top:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .cp-line{font-size:.84rem;color:var(--ink)}
+  .cp-line b{color:var(--navy)}
+  .cp-line + .cp-line{margin-top:4px}
+  .mem-bar{height:11px;background:var(--border);border-radius:999px;overflow:hidden;margin:12px 0 6px}
+  .mem-fill{height:100%;width:65%;background:linear-gradient(90deg,var(--teal),#2e9b80);border-radius:999px;transition:width .25s ease}
+  .mem-bar-meta{display:flex;justify-content:space-between;gap:10px;font-size:.72rem;color:var(--muted);flex-wrap:wrap}
+  .mem-bar-meta b{color:var(--navy)}
+  .milestone{
+    display:none;align-items:flex-start;gap:9px;margin-top:14px;
+    background:linear-gradient(90deg,var(--teal),var(--teal-dark));color:#fff;
+    border-radius:10px;padding:13px 15px;font-size:.84rem;line-height:1.5;
+  }
+  .milestone.show{display:flex;animation:fadeUp .3s ease}
+  .milestone b{font-weight:800}
+  .milestone .ms-sub{font-size:.76rem;opacity:.9;margin-top:2px}
+  .confirm-btn{margin-top:16px}
+
+  /* ---------- LOADER / SUCCESS SCREENS ---------- */
+  .screen{display:none;max-width:520px;margin:0 auto;text-align:center;padding:30px 10px}
+  .loader-box{
+    display:flex;flex-direction:column;align-items:center;gap:16px;
+    color:var(--navy);font-weight:600;font-size:.9rem;
+  }
+  .loader-ring{
+    width:64px;height:64px;border-radius:50%;position:relative;
+    border:4px solid var(--border);border-top-color:var(--teal);
+    animation:spin .8s linear infinite;
+  }
+  .sc-circle{
+    width:88px;height:88px;border-radius:50%;margin:0 auto 16px;
+    background:var(--success);display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 28px rgba(30,142,90,.35);animation:popIn .5s ease backwards;
+  }
+  @keyframes popIn{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  .sc-circle svg{width:44px;height:44px}
+  .sc-path{stroke:#fff;stroke-width:3.5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:60;animation:draw .45s ease .3s forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .screen h3{font-size:1.3rem;color:var(--navy);font-weight:800}
+  .sc-meta{font-size:.88rem;color:var(--muted);margin-top:8px;line-height:1.9}
+  .sc-meta b{color:var(--ink)}
+  .sc-bar-wrap{margin:16px 0 4px}
+  .sc-bar{height:11px;background:var(--border);border-radius:999px;overflow:hidden}
+  .sc-fill{height:100%;width:65%;background:linear-gradient(90deg,var(--teal),#2e9b80);border-radius:999px}
+  .sc-bar-label{font-size:.74rem;color:var(--muted);margin-top:6px}
+  .sc-milestone{
+    display:none;margin-top:16px;background:linear-gradient(90deg,var(--teal),var(--teal-dark));
+    color:#fff;border-radius:10px;padding:13px 15px;font-size:.84rem;line-height:1.5;
+  }
+  .sc-milestone.show{display:block;animation:fadeUp .35s ease}
+  .sc-milestone b{font-weight:800}
+  .done-btn{margin-top:20px}
+
+  /* ---------- OUTLETS ---------- */
+  .outlet-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .outlet-card{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow-sm);padding:18px;
+  }
+  .oc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .oc-name{font-family:var(--font-display);font-weight:700;font-size:.95rem;color:var(--navy)}
+  .oc-addr{font-size:.8rem;color:var(--muted)}
+  .oc-scans{font-size:.8rem;color:var(--ink);margin-top:6px}
+  .oc-actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+
+  /* ---------- BOTTOM TABS (MOBILE) ---------- */
+  .bottom-tabs{
+    position:fixed;bottom:0;left:0;right:0;z-index:200;
+    background:var(--white);border-top:1px solid var(--border);
+    display:none;justify-content:space-around;align-items:stretch;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    box-shadow:0 -4px 16px rgba(27,58,107,.08);
+  }
+  .tab{
+    flex:1;background:none;border:none;cursor:pointer;font-family:var(--font);
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:.64rem;font-weight:600;color:var(--muted);padding:4px 2px;border-radius:10px;
+  }
+  .tab .ti{font-size:1.15rem;line-height:1}
+  .tab.active{color:var(--teal)}
+  .tab.active .ti{transform:translateY(-1px)}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(80px);
+    background:var(--navy);color:#fff;font-size:.84rem;font-weight:600;
+    padding:12px 22px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+    opacity:0;transition:.3s ease;z-index:400;pointer-events:none;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:900px){
+    .sidebar{display:none}
+    .main{margin-left:0}
+    .mobile-top{display:flex}
+    .bottom-tabs{display:flex}
+    .main .container{padding:18px 14px 96px}
+    .flow{grid-template-columns:1fr}
+    .outlet-grid{grid-template-columns:1fr}
+    .toast{bottom:86px}
+  }
+  @media(max-width:640px){
+    .vf-grid{grid-template-columns:1fr}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR (DESKTOP) ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="logo-mark"><img src="BB-8.png" alt="Bharatiya Bazaar logo"></div>
+      <div class="lt">
+        <span class="lt-name">Bharatiya Bazaar</span>
+        <span class="lt-sub">भारतीय बाज़ार · Vendor</span>
+      </div>
+    </div>
+
+    <div class="vendor-info">
+      <div class="v-head">
+        <div class="avatar">RK</div>
+        <div>
+          <div class="v-name">Ramesh Kumar Sharma</div>
+          <div class="v-id">Vendor ID: BBV10089</div>
+        </div>
+      </div>
+      <div class="v-biz">🏪 Sharma Kirana Store</div>
+      <span class="badge badge-verified">✔ VERIFIED</span>
+    </div>
+
+    <nav class="sb-nav">
+      <a href="bb-vendor-dashboard.html"><span class="ic">🏠</span>Dashboard</a>
+      <a href="bb-settlement.html"><span class="ic">💸</span>Transactions</a>
+      <a href="bb-qr.html" class="active"><span class="ic">📱</span>QR Code</a>
+      <a href="bb-settlement.html"><span class="ic">🏦</span>Settlements</a>
+      <a href="bb-tree.html"><span class="ic">🤝</span>My Network</a>
+      <a href="#"><span class="ic">📄</span>KYC &amp; Documents</a>
+      <a href="#"><span class="ic">🎧</span>Support</a>
+      <a href="bb-bharatiya-bazaar-v2.html" class="logout"><span class="ic">🚪</span>Logout</a>
+    </nav>
+
+    <div class="sb-foot">© 2026 Bharatiya Bazaar<br>Vendor Portal v1.0</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+
+    <!-- MOBILE TOP HEADER -->
+    <header class="mobile-top">
+      <div class="mt-logo"><img src="BB-8.png" alt="Bharatiya Bazaar"></div>
+      <div class="mt-center">Sharma Kirana Store</div>
+      <div class="mt-right">
+        <div class="bell-wrap">
+          <button class="bell" id="bell" aria-label="Notifications">🔔</button>
+          <span class="bell-badge">2</span>
+          <div class="bell-drop" id="bellDrop">
+            <div class="bd-head">Notifications</div>
+            <div class="bd-item">
+              <div class="bd-ico teal">💸</div>
+              <div><b>Settlement of Rs.12,672 processed</b><span>Just now · Bank transfer</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico amber">⚠️</div>
+              <div><b>Security deposit low — Rs.4,650 remaining</b><span>Replenish to stay protected</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-avatar">RK</div>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <div class="page-head">
+        <div>
+          <h1>QR Code Management</h1>
+          <p class="page-sub">Main Store · Vendor ID: BBV10089</p>
+        </div>
+      </div>
+
+      <!-- VIEW TABS -->
+      <div class="view-tabs" role="tablist">
+        <button class="vt active" data-view="vendor" type="button">📱 My QR Code</button>
+        <button class="vt" data-view="member" type="button">🧾 Record a Purchase</button>
+      </div>
+
+      <!-- ===== VIEW 1 : VENDOR SIDE ===== -->
+      <div class="view active" id="vendorView">
+
+        <div class="stat-chips">
+          <div class="chip">
+            <span class="chip-label">Today's Scans</span>
+            <span class="chip-val">12</span>
+          </div>
+          <div class="chip">
+            <span class="chip-label">This Week</span>
+            <span class="chip-val">87</span>
+          </div>
+          <div class="chip">
+            <span class="chip-label">QR Status</span>
+            <span class="chip-val act"><span class="live-dot"></span>ACTIVE</span>
+          </div>
+        </div>
+
+        <div class="qr-display-card">
+          <div class="qr-top-label">Show this QR to your customer</div>
+          <div class="qr-code-wrap" id="qrWrap"></div>
+          <div class="qr-vendor-id">BBV10089</div>
+          <div class="qr-store">Sharma Kirana Store</div>
+          <div class="qr-loc">Virar West, Maharashtra</div>
+          <div class="qr-brand">
+            <img src="BB-8.png" alt="Bharatiya Bazaar">
+            <span>Bharatiya Bazaar</span>
+          </div>
+          <div class="qr-actions">
+            <button class="btn btn-navy" id="dlQr" type="button">⬇ Download QR (PNG)</button>
+            <button class="btn btn-outline-teal" id="printQr" type="button">🖨 Print QR</button>
+            <button class="btn btn-outline-amber" id="shareQr" type="button">🔗 Share QR Link</button>
+          </div>
+        </div>
+
+        <div class="sec-note">
+          <strong>⚠️ Important:</strong> Members must scan this QR using the Bharatiya Bazaar app only. Third-party scanning apps will not record the transaction. Refusing to show this QR attracts a penalty of Rs.1,000 per incident.
+        </div>
+
+        <div class="card">
+          <div class="card-title">How the QR transaction works</div>
+          <div class="flow">
+            <div class="f-step"><span class="f-num">1</span><span><b>Open BB app</b>Member opens the Bharatiya Bazaar app and taps "Scan QR".</span></div>
+            <div class="f-step"><span class="f-num">2</span><span><b>Scan your QR</b>Member scans your store QR code.</span></div>
+            <div class="f-step"><span class="f-num">3</span><span><b>Enter amount</b>Member enters the purchase amount.</span></div>
+            <div class="f-step"><span class="f-num">4</span><span><b>You confirm</b>You confirm the transaction on your device.</span></div>
+            <div class="f-step"><span class="f-num">5</span><span><b>Counter updates</b>Transaction recorded — member counter updates instantly.</span></div>
+            <div class="f-step"><span class="f-num">6</span><span><b>Setu Kosh commission</b>Member earns a Setu Kosh commission on the purchase.</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== VIEW 2 : MEMBER TRANSACTION SCREEN ===== -->
+      <div class="view" id="memberView">
+
+        <!-- STEP B (vendor info + amount) -->
+        <div id="stepB">
+          <div class="vfound-card">
+            <div class="vf-title">Vendor Found ✓</div>
+            <div class="vf-grid">
+              <div class="vf-row"><span class="k">Store</span><span class="v">Sharma Kirana Store</span></div>
+              <div class="vf-row"><span class="k">Vendor ID</span><span class="v">BBV10089</span></div>
+              <div class="vf-row"><span class="k">Category</span><span class="v">Groceries/Kirana</span></div>
+              <div class="vf-row"><span class="k">Margin</span><span class="v">7% (platform rate)</span></div>
+              <div class="vf-row"><span class="k">Status</span><span class="v"><span class="badge badge-verified">✔ VERIFIED</span></span></div>
+            </div>
+          </div>
+
+          <div class="amount-card">
+            <label for="memAmount">Enter purchase amount (Rs.)</label>
+            <input class="amount-input" type="tel" id="memAmount" placeholder="e.g. 500" inputmode="numeric" maxlength="7">
+            <div class="counter-preview">
+              <div class="cp-line">Your current Setu Kosh counter: <b id="counterNow">Rs.650</b></div>
+              <div class="cp-line">After this purchase: <b id="counterAfter">Rs.650</b></div>
+              <div class="mem-bar"><div class="mem-fill" id="memFill"></div></div>
+              <div class="mem-bar-meta">
+                <span><b id="memBarLabel">Rs.650</b> of Rs.1,000</span>
+                <span id="memBarPct">65% toward next Setu Kosh ID</span>
+              </div>
+            </div>
+            <div class="milestone" id="milestone">
+              <span>🎉 <b>A new Setu Kosh ID will be created with this purchase!</b>
+              <div class="ms-sub" id="msOverflow">Rs.0 carried to next Rs.1,000 cycle</div></span>
+            </div>
+            <button class="btn btn-teal btn-lg btn-block confirm-btn" id="confirmBtn" type="button" disabled>Confirm Purchase — Rs.0</button>
+          </div>
+        </div>
+
+        <!-- LOADING -->
+        <div class="screen" id="loadingScreen">
+          <div class="loader-box">
+            <div class="loader-ring"></div>
+            <span>Recording transaction…</span>
+          </div>
+        </div>
+
+        <!-- SUCCESS -->
+        <div class="screen" id="successScreen">
+          <div class="sc-circle"><svg viewBox="0 0 24 24"><path class="sc-path" d="M4 12.5l5 5L20 7"/></svg></div>
+          <h3>Purchase Recorded!</h3>
+          <div class="sc-meta">
+            Amount: <b id="scAmount">Rs.0</b><br>
+            Vendor: <b>Sharma Kirana Store</b><br>
+            New counter: <b id="scCounter">Rs.650</b> / Rs.1,000
+          </div>
+          <div class="sc-bar-wrap">
+            <div class="sc-bar"><div class="sc-fill" id="scFill"></div></div>
+            <div class="sc-bar-label" id="scBarLabel">Rs.650 of Rs.1,000</div>
+          </div>
+          <div class="sc-milestone" id="scMilestone">
+            🎉 <b>New Setu Kosh ID created!</b><br>ID placed in your global tree.
+          </div>
+          <button class="btn btn-navy btn-lg done-btn" id="doneBtn" type="button">Done</button>
+        </div>
+
+      </div>
+
+      <!-- ===== MULTI-OUTLET ===== -->
+      <div class="card">
+        <div class="card-title">My Outlets <button class="btn btn-outline-navy btn-sm" id="addOutlet" type="button">+ Add New Outlet</button></div>
+        <div class="outlet-grid">
+          <div class="outlet-card">
+            <div class="oc-head">
+              <span class="oc-name">Outlet 1 — Main Store</span>
+              <span class="badge badge-teal">● ACTIVE</span>
+            </div>
+            <div class="oc-addr">Shop 4, Market Road, Virar West</div>
+            <div class="oc-scans">Today's scans: <b>12</b></div>
+            <div class="oc-actions">
+              <button class="btn btn-navy btn-sm" id="viewQr1" type="button">View QR</button>
+            </div>
+          </div>
+          <div class="outlet-card">
+            <div class="oc-head">
+              <span class="oc-name">Outlet 2 — Branch Store</span>
+              <span class="badge badge-teal">● ACTIVE</span>
+            </div>
+            <div class="oc-addr">12B Station Road, Virar East</div>
+            <div class="oc-scans">Today's scans: <b>5</b></div>
+            <div class="oc-actions">
+              <button class="btn btn-outline-navy btn-sm" id="viewQr2" type="button">View QR</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== MOBILE BOTTOM TABS ===== -->
+  <nav class="bottom-tabs" id="bottomTabs">
+    <button class="tab" data-name="Dashboard"><span class="ti">🏠</span>Dashboard</button>
+    <button class="tab" data-name="Transactions"><span class="ti">💸</span>Transactions</button>
+    <button class="tab active" data-name="QR"><span class="ti">📱</span>QR</button>
+    <button class="tab" data-name="Settlements"><span class="ti">🏦</span>Settlements</button>
+    <button class="tab" data-name="Profile"><span class="ti">👤</span>Profile</button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  function $(s){ return document.querySelector(s); }
+  function $$(s){ return Array.from(document.querySelectorAll(s)); }
+
+  var toastTimer = null;
+  function showToast(msg){
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+  }
+
+  /* ---------- QR SVG GENERATOR ---------- */
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function buildQrSvg(n){
+    var rand = mulberry32(20260808);
+    var cells = [];
+    var i, r, c;
+    for(i = 0; i < n; i++){
+      cells.push([]);
+      for(var j = 0; j < n; j++){ cells[i].push(false); }
+    }
+    function inFinder(r, c){
+      var tl = r < 8 && c < 8;
+      var tr = r < 8 && c >= n - 8;
+      var bl = r >= n - 8 && c < 8;
+      return tl || tr || bl;
+    }
+    for(r = 0; r < n; r++){
+      for(c = 0; c < n; c++){
+        if(inFinder(r, c)) continue;
+        cells[r][c] = rand() < 0.46;
+      }
+    }
+    for(i = 0; i < n; i++){
+      if(!inFinder(6, i)) cells[6][i] = (i % 2 === 0);
+      if(!inFinder(i, 6)) cells[i][6] = (i % 2 === 0);
+    }
+    function drawFinder(r, c){
+      for(var rr = 0; rr < 7; rr++){
+        for(var cc = 0; cc < 7; cc++){
+          var on = (rr === 0 || rr === 6 || cc === 0 || cc === 6) || (rr >= 2 && rr <= 4 && cc >= 2 && cc <= 4);
+          cells[r + rr][c + cc] = on;
+        }
+      }
+    }
+    drawFinder(0, 0);
+    drawFinder(0, n - 7);
+    drawFinder(n - 7, 0);
+
+    var off = 2;
+    var total = n + off * 2;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + total + ' ' + total +
+      '" width="240" height="240" shape-rendering="crispEdges" role="img" aria-label="QR code">';
+    svg += '<rect x="0" y="0" width="' + total + '" height="' + total + '" fill="#ffffff"/>';
+    for(r = 0; r < n; r++){
+      for(c = 0; c < n; c++){
+        if(cells[r][c]){
+          svg += '<rect x="' + (c + off) + '" y="' + (r + off) + '" width="1" height="1" fill="#1B3A6B"/>';
+        }
+      }
+    }
+    svg += '</svg>';
+    return svg;
+  }
+
+  $('#qrWrap').innerHTML = buildQrSvg(29);
+
+  /* ---------- VIEW TABS ---------- */
+  $$('.vt').forEach(function(t){
+    t.addEventListener('click', function(){
+      $$('.vt').forEach(function(x){ x.classList.toggle('active', x === t); });
+      var v = t.dataset.view;
+      $('#vendorView').classList.toggle('active', v === 'vendor');
+      $('#memberView').classList.toggle('active', v === 'member');
+    });
+  });
+
+  /* ---------- QR ACTIONS ---------- */
+  $('#dlQr').addEventListener('click', function(){
+    showToast('QR code downloaded as PNG (demo)');
+  });
+  $('#printQr').addEventListener('click', function(){
+    showToast('Opening print dialog…');
+  });
+  $('#shareQr').addEventListener('click', function(){
+    showToast('QR link copied! Share with your customers');
+  });
+
+  /* ---------- MEMBER SIMULATION ---------- */
+  var memberCounter = 650;
+
+  function fmt(n){ return 'Rs.' + n.toLocaleString('en-IN'); }
+
+  function updatePreview(){
+    var amt = parseInt(($('#memAmount').value || '').replace(/\D/g, ''), 10) || 0;
+    var total = memberCounter + amt;
+    $('#counterNow').textContent = fmt(memberCounter);
+    $('#counterAfter').textContent = fmt(total);
+    var pct = Math.min(100, Math.round((total / 1000) * 100));
+    $('#memFill').style.width = pct + '%';
+    $('#memBarLabel').textContent = fmt(total);
+    $('#memBarPct').textContent = pct + '% toward next Setu Kosh ID';
+    $('#confirmBtn').disabled = amt <= 0;
+    $('#confirmBtn').textContent = amt > 0 ? 'Confirm Purchase — ' + fmt(amt) : 'Confirm Purchase — Rs.0';
+    var ms = $('#milestone');
+    if(total >= 1000){
+      ms.classList.add('show');
+      $('#msOverflow').textContent = fmt(total - 1000) + ' carried to next Rs.1,000 cycle';
+    } else {
+      ms.classList.remove('show');
+    }
+  }
+
+  $('#memAmount').addEventListener('input', function(){
+    this.value = this.value.replace(/\D/g, '');
+    updatePreview();
+  });
+
+  $('#confirmBtn').addEventListener('click', function(){
+    var amt = parseInt(($('#memAmount').value || '').replace(/\D/g, ''), 10) || 0;
+    if(amt <= 0){ showToast('Enter a purchase amount first'); return; }
+    $('#stepB').style.display = 'none';
+    $('#loadingScreen').style.display = 'block';
+    setTimeout(function(){
+      $('#loadingScreen').style.display = 'none';
+      var total = memberCounter + amt;
+      var milestone = total >= 1000;
+      memberCounter = milestone ? (total - 1000) : total;
+
+      $('#scAmount').textContent = fmt(amt);
+      $('#scCounter').textContent = fmt(total);
+      var pct = Math.min(100, Math.round((total / 1000) * 100));
+      $('#scFill').style.width = pct + '%';
+      $('#scBarLabel').textContent = fmt(total) + ' of Rs.1,000';
+      $('#scMilestone').classList.toggle('show', milestone);
+      $('#successScreen').style.display = 'block';
+    }, 1500);
+  });
+
+  $('#doneBtn').addEventListener('click', function(){
+    $('#successScreen').style.display = 'none';
+    $('#stepB').style.display = 'block';
+    $('#memAmount').value = '';
+    updatePreview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ---------- OUTLETS ---------- */
+  $('#addOutlet').addEventListener('click', function(){
+    showToast('Contact support to add a new outlet.');
+  });
+  $('#viewQr1').addEventListener('click', function(){
+    showToast('Opening Main Store QR…');
+  });
+  $('#viewQr2').addEventListener('click', function(){
+    showToast('Loading branch QR…');
+  });
+
+  /* ---------- SIDEBAR / TABS / BELL ---------- */
+  $$('.sb-nav a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      if(a.classList.contains('active')) return;
+      if(a.getAttribute('href') && a.getAttribute('href') !== '#'){
+        return; /* allow navigation to existing pages */
+      }
+      e.preventDefault();
+      showToast('Coming soon');
+    });
+  });
+
+  var TABS = { 'Dashboard':'bb-vendor-dashboard.html', 'QR':'bb-qr.html', 'Settlements':'bb-settlement.html' };
+  $$('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      if(t.classList.contains('active')) return;
+      var name = t.getAttribute('data-name');
+      if(TABS[name]) location.href = TABS[name]; else showToast('Coming soon');
+    });
+  });
+
+  var bell = $('#bell');
+  var drop = $('#bellDrop');
+  bell.addEventListener('click', function(e){
+    e.stopPropagation();
+    drop.classList.toggle('show');
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.bell-wrap')) drop.classList.remove('show');
+  });
+
+  updatePreview();
+})();
+</script>
+</body>
+</html>

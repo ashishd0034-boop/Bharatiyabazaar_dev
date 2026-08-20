@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --navy-3: #1b3250;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --teal-light: #e0f5f5;
+      --amber: #f5a623;
+      --white: #ffffff;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+      --sidebar-width: 260px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+      box-shadow: 4px 0 20px rgba(13, 27, 42, 0.15);
+    }
+
+    .sidebar-brand {
+      padding: 22px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, #fff 55% 100%);
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-text .title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .brand-text .subtitle {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 2px;
+    }
+
+    /* Profile Card */
+    .sidebar-profile {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: #fff;
+      font-size: 16px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(15, 157, 157, 0.3);
+    }
+
+    .profile-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .profile-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-code {
+      font-size: 11.5px;
+      color: var(--amber);
+      font-weight: 600;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .profile-code::before {
+      content: "●";
+      color: var(--success);
+      font-size: 8px;
+    }
+
+    /* Nav Section */
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+
+    .nav-section-title {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.4);
+      padding: 8px 12px 6px;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+    .nav-section-title:first-child { margin-top: 0; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 3px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-item .icon {
+      font-size: 17px;
+      width: 22px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, var(--teal) 0%, var(--teal-dark) 100%);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(15, 157, 157, 0.25);
+    }
+
+    .nav-item .badge-dot {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--amber);
+      color: var(--navy);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+
+    /* Footer */
+    .sidebar-footer {
+      padding: 14px 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .nav-item.logout:hover {
+      background: rgba(220, 38, 38, 0.15);
+      color: #fca5a5;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: #fff;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .topbar h2 {
+      color: var(--navy);
+      font-size: 18px;
+    }
+    .topbar p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: var(--navy);
+    }
+    .icon-btn:hover { background: var(--teal-light); border-color: var(--teal); }
+
+    .container {
+      padding: 28px 32px;
+      max-width: 1400px;
+    }
+
+    .page-head { margin-bottom: 20px; }
+    .page-head h1 {
+      font-size: clamp(24px, 3vw, 32px);
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .page-head p { color: var(--muted); font-size: 14.5px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow);
+    }
+
+    .banner {
+      border-left: 4px solid var(--success);
+      background: #e8f8ee;
+      color: #14532d;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card { padding: 18px; }
+    .stat-card .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-card .label .ico { font-size: 15px; }
+    .stat-card .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--navy);
+      font-family: "Poppins", sans-serif;
+    }
+    .stat-card .sub {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .stat-card.highlight {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+      border-color: transparent;
+    }
+    .stat-card.highlight .label, .stat-card.highlight .value, .stat-card.highlight .sub {
+      color: #fff;
+    }
+    .stat-card.highlight .value { color: var(--amber); }
+
+    .streams {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stream-card {
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stream-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--teal), var(--amber));
+    }
+    .stream-card h3 {
+      color: var(--navy);
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .stream-card .stream-sub {
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-bottom: 14px;
+    }
+
+    .stream-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .metric {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfdff;
+    }
+    .metric .m-label { font-size: 11px; color: var(--muted); }
+    .metric .m-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-top: 2px;
+    }
+
+    .stream-link {
+      display: inline-block;
+      margin-top: 14px;
+      color: var(--teal-dark);
+      font-weight: 700;
+      font-size: 13.5px;
+      text-decoration: none;
+    }
+    .stream-link:hover { color: var(--teal); }
+
+    .badge {
+      display: inline-flex;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.info { background: #e8f6ff; color: var(--info); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel { padding: 20px; }
+    .panel h2 {
+      font-size: 18px;
+      color: var(--navy);
+      margin-bottom: 14px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13.5px;
+      vertical-align: top;
+    }
+    th { background: #f8fafc; color: var(--navy); font-weight: 600; }
+
+    .wallet-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      margin-top: 8px;
+      background: #fbfdff;
+    }
+    .wallet-row .name { font-weight: 700; color: var(--navy); font-size: 14px; }
+    .wallet-row .desc { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .wallet-row .amt { font-weight: 700; color: var(--navy); white-space: nowrap; }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .qa-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .qa-btn:hover { border-color: var(--teal); background: var(--teal-light); }
+    .qa-btn strong { display: block; color: var(--navy); font-size: 14px; margin-bottom: 3px; }
+    .qa-btn span { color: var(--muted); font-size: 12.5px; }
+
+    .note {
+      border-left: 4px solid var(--teal);
+      background: #f3fbfb;
+      color: #155e5e;
+      padding: 11px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .hidden { display: none; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1080px) {
+      .streams { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 980px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-width: 0px; }
+      .sidebar {
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 70px;
+        flex-direction: row;
+        background: #fff;
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -4px 20px rgba(13, 27, 42, 0.08);
+      }
+      .sidebar-brand,
+      .sidebar-profile,
+      .sidebar-footer,
+      .nav-section-title { display: none; }
+      .sidebar-nav {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        overflow: visible;
+      }
+      .nav-item {
+        flex-direction: column;
+        gap: 2px;
+        padding: 6px 8px;
+        font-size: 10.5px;
+        margin: 0;
+        color: var(--muted);
+      }
+      .nav-item .icon { font-size: 19px; }
+      .nav-item.active {
+        background: transparent;
+        color: var(--teal-dark);
+        box-shadow: none;
+      }
+      .main { margin-left: 0; margin-bottom: 70px; }
+      .topbar { padding: 14px 20px; }
+      .container { padding: 20px; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      .quick-actions { grid-template-columns: 1fr; }
+      .sidebar-nav .nav-item[data-mobile-hide] { display: none; }
+    }
+
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(13,27,42,0.55); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 60; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(560px, 100%); background: #fff; border-radius: 14px; padding: 20px; max-height: 90vh; overflow: auto; }
+    .modal h3 { color: var(--navy); margin-bottom: 12px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .btn-ghost { flex: 1; border: 1px solid var(--border); background: #fff; color: var(--navy); padding: 12px; border-radius: var(--radius-btn); font-weight: 700; cursor: pointer; }
+    .btn-confirm { flex: 1; border: none; background: var(--teal); color: #fff; padding: 12px; border-radius: var(--radius-btn); font-weight: 700; cursor: pointer; }
+    .method-list { display: grid; gap: 10px; margin-top: 8px; }
+    .method-item { border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; gap: 10px; align-items: flex-start; cursor: pointer; background: #fff; }
+    .method-item input { margin-top: 3px; accent-color: var(--teal); width: auto; }
+    .method-item.selected { border-color: var(--teal); background: #f3fbfb; }
+    .method-title { font-weight: 700; color: var(--navy); }
+    .method-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; display: block; }
+
+    /* 🆕 Placement Card Styles */
+    .placement-card {
+      grid-column: span 2;
+      position: relative;
+      overflow: hidden;
+    }
+    .placement-card .decorative-circle {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(15,157,157,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .placement-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .placement-box {
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .placement-box.sponsor {
+      background: linear-gradient(135deg, #f8fafc 0%, #fff 100%);
+    }
+    .placement-box.placement {
+      background: linear-gradient(135deg, #fff8e9 0%, #fff 100%);
+    }
+    .placement-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .placement-code {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      font-family: 'Poppins', sans-serif;
+    }
+    .placement-name {
+      font-size: 12px;
+      color: var(--teal-dark);
+      margin-top: 2px;
+    }
+    .placement-footer {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-badge"></span>
+      <div class="brand-text">
+        <div class="title">Bharatiya Bazaar</div>
+        <div class="subtitle">भारतीय बाज़ार</div>
+      </div>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="avatar" id="memberAvatar">?</div>
+      <div class="profile-info">
+        <div class="profile-name" id="memberName">Loading...</div>
+        <div class="profile-code" id="memberCode">BB-----</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="/bb-dashboard.html" class="nav-item active">
+        <span class="icon">🏠</span><span>Dashboard</span>
+      </a>
+      <a href="/bb-tree.html" class="nav-item">
+        <span class="icon">🤝</span><span>My Network</span>
+      </a>
+      <a href="/bb-wallet.html" class="nav-item">
+        <span class="icon">👛</span><span>Wallet</span>
+      </a>
+      <a href="/bb-commissions.html" class="nav-item">
+        <span class="icon">💰</span><span>Commissions</span>
+        <span class="badge-dot" id="commissionBadge" style="display:none;">NEW</span>
+      </a>
+
+      <div class="nav-section-title">Earnings</div>
+      <a href="/bb-autopool.html" class="nav-item">
+        <span class="icon">🔄</span><span>AutoPool</span>
+      </a>
+      <a href="/bb-setu-kosh.html" class="nav-item">
+        <span class="icon">🛒</span><span>Setu Kosh</span>
+      </a>
+      <a href="/bb-rebirth.html" class="nav-item">
+        <span class="icon">🎭</span><span>Rebirth IDs</span>
+      </a>
+
+      <div class="nav-section-title">Account</div>
+      <a href="/bb-notifications.html" class="nav-item">
+        <span class="icon">🔔</span><span>Notifications</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="icon">👤</span><span>Profile</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="#" class="nav-item logout" onclick="handleLogout(); return false;">
+        <span class="icon">🚪</span><span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="greeting">Good morning</h2>
+        <p id="memberSince">Member since...</p>
+      </div>
+      <div class="topbar-actions">
+        <a href="/bb-notifications.html" class="icon-btn" title="Notifications">🔔</a>
+        <a href="/bb-hindi.html" class="icon-btn" title="हिंदी">हि</a>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="loadingIndicator" class="loading">Loading dashboard...</div>
+
+      <div id="dashboardContent" style="display:none;">
+        <div class="banner">
+          ✓ <strong>Welcome back!</strong> Your membership is active. Start referring friends to earn commissions.
+        </div>
+
+        <section class="stat-grid">
+          <div class="card stat-card highlight">
+            <div class="label"><span class="ico">👛</span> Wallet Balance</div>
+            <div class="value" id="walletBalance">Rs.0.00</div>
+            <div class="sub">Available for withdrawal</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label"><span class="ico">💰</span> Total Earnings</div>
+            <div class="value" id="totalEarnings">Rs.0.00</div>
+            <div class="sub">All time commissions</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label"><span class="ico">🆔</span> ID Cards</div>
+            <div class="value" id="idCardCount">0</div>
+            <div class="sub">MAIN + SUB + REBIRTH</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label"><span class="ico">🛡️</span> KYC Status</div>
+            <div class="value" id="kycStatus">Pending</div>
+            <div class="sub" id="kycTier">Tier 1 (Basic)</div>
+          </div>
+
+          <!-- 🆕 Your Network Position Card -->
+          <div class="card stat-card placement-card">
+            <div class="decorative-circle"></div>
+            <div class="label" style="display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 12px;">
+              <span style="font-size: 18px;">🔗</span>
+              <span style="font-weight: 700; color: var(--navy);">Your Network Position</span>
+            </div>
+            <div class="placement-grid">
+              <div class="placement-box sponsor">
+                <div class="placement-label">👤 Sponsored By</div>
+                <div class="placement-code" id="sponsorCode">Loading...</div>
+                <div class="placement-name" id="sponsorName">—</div>
+              </div>
+              <div class="placement-box placement">
+                <div class="placement-label">🌳 Placed Under</div>
+                <div class="placement-code" id="placedCode">Loading...</div>
+                <div class="placement-name" id="placedName">—</div>
+              </div>
+            </div>
+            <div class="placement-footer">
+              <span>Side: <strong id="placedSide">—</strong></span>
+              <span>Placement Type: <strong id="placedType">—</strong></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="streams">
+          <div class="card stream-card">
+            <h3>Anant Samriddhi Chakra</h3>
+            <div class="stream-sub">AutoPool · Global binary pool</div>
+            <div class="stream-metrics">
+              <div class="metric"><div class="m-label">Current Level</div><div class="m-value" id="apLevel">Level —</div></div>
+              <div class="metric"><div class="m-label">Cash Earned</div><div class="m-value" id="apCash">Rs.0</div></div>
+              <div class="metric"><div class="m-label">Rebirth IDs</div><div class="m-value" id="apRebirth">0</div></div>
+              <div class="metric"><div class="m-label">Status</div><div class="m-value" id="apStatus"><span class="badge pending">LOADING</span></div></div>
+            </div>
+            <a class="stream-link" href="bb-autopool.html">View Pool Tree →</a>
+          </div>
+
+          <div class="card stream-card">
+            <h3>MY SYSTEM</h3>
+            <div class="stream-sub">Referral network · Binary tree</div>
+            <div class="stream-metrics">
+              <div class="metric"><div class="m-label">Direct Referrals</div><div class="m-value" id="msDirect">0</div></div>
+              <div class="metric"><div class="m-label">Network Size</div><div class="m-value" id="msNetwork">0</div></div>
+              <div class="metric"><div class="m-label">Cash Earned</div><div class="m-value" id="msCash">Rs.0</div></div>
+              <div class="metric"><div class="m-label">ACB Status</div><div class="m-value" id="msAcb"><span class="badge pending">PENDING</span></div></div>
+            </div>
+            <a class="stream-link" href="bb-tree.html">View My Network →</a>
+          </div>
+
+          <div class="card stream-card">
+            <h3>Setu Kosh</h3>
+            <div class="stream-sub">Shopping rewards · Binary tree</div>
+            <div class="stream-metrics">
+              <div class="metric"><div class="m-label">Shopping Counter</div><div class="m-value">Rs.0</div></div>
+              <div class="metric"><div class="m-label">Commission</div><div class="m-value">Rs.0</div></div>
+              <div class="metric"><div class="m-label">Status</div><div class="m-value"><span class="badge success">ACTIVE</span></div></div>
+              <div class="metric"><div class="m-label">Position</div><div class="m-value">Queue</div></div>
+            </div>
+            <a class="stream-link" href="bb-setu-kosh.html">View Shopping History →</a>
+          </div>
+        </section>
+
+        <section class="grid-2">
+          <div class="card panel">
+            <h2>Recent Commissions</h2>
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Stream</th><th>Amount</th><th>Status</th></tr>
+              </thead>
+              <tbody id="commissionsTable">
+                <tr><td colspan="4" style="text-align:center; color:var(--muted);">No commissions yet. Start referring friends!</td></tr>
+              </tbody>
+            </table>
+
+            <div class="quick-actions">
+              <button class="qa-btn" type="button" id="openReferralBtn">
+                <strong>🔗 Refer a Friend</strong><span>Choose LEFT / RIGHT placement</span>
+              </button>
+              <button class="qa-btn" type="button" onclick="window.location.href='/bb-setu-kosh.html'">
+                <strong>🛒 Shop & Earn</strong><span>Find partner vendors</span>
+              </button>
+              <button class="qa-btn" type="button" id="openWithdrawBtn">
+                <strong>💸 Withdraw</strong><span>Transfer to bank / wallet</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card panel">
+            <h2>Wallet Summary</h2>
+            <div class="wallet-row">
+              <div>
+                <div class="name">Cash Wallet</div>
+                <div class="desc">Available balance</div>
+              </div>
+              <div class="amt" id="walletBalanceSide">Rs.0.00</div>
+            </div>
+
+            <h2 style="margin-top:20px;">Your ID Cards</h2>
+            <div id="idCardsList">
+              <div class="wallet-row">
+                <div>
+                  <div class="name">No ID Cards</div>
+                  <div class="desc">Purchase ID cards to participate</div>
+                </div>
+                <div class="amt">-</div>
+              </div>
+            </div>
+
+            <div class="note">
+              Withdrawals are processed from your cash wallet. Complete KYC Tier 2 to unlock withdrawals.
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <!-- Referral Placement Modal -->
+  <div class="modal-backdrop" id="referralModal">
+    <div class="modal">
+      <h3>🔗 Refer a Friend</h3>
+      <p style="color:var(--muted); font-size:13.5px;">
+        Choose which leg of your MY SYSTEM tree the new member will join.
+        This placement is <strong>locked</strong> once they register.
+      </p>
+
+      <div class="method-list">
+        <label class="method-item selected" id="refLeft">
+          <input type="radio" name="refside" value="LEFT" checked />
+          <span>
+            <span class="method-title">⬅ LEFT Leg</span>
+            <span class="method-sub">Place the new member on your LEFT side</span>
+          </span>
+        </label>
+        <label class="method-item" id="refRight">
+          <input type="radio" name="refside" value="RIGHT" />
+          <span>
+            <span class="method-title">➡ RIGHT Leg</span>
+            <span class="method-sub">Place the new member on your RIGHT side</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="note" style="margin-top:12px;">
+        💡 <strong>ACB Tip:</strong> You need 1 LEFT + 1 RIGHT direct referral to unlock ACB status!
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" id="refCancelBtn" type="button">Cancel</button>
+        <button class="btn-confirm" id="refCopyBtn" type="button">Copy Invite Link</button>
+      </div>
+    </div>
+  </div>
+    <script>
+    const API_BASE = 'http://localhost:4000/api';
+
+    function getToken() { return localStorage.getItem('jwt_token'); }
+    function logout() {
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('member');
+      window.location.href = '/bb-register.html';
+    }
+    function handleLogout() {
+      if (confirm('Are you sure you want to logout?')) logout();
+    }
+
+    function formatINR(paise) {
+      return 'Rs.' + (Number(paise) / 100).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    async function apiCall(endpoint) {
+      const token = getToken();
+      if (!token) { logout(); return null; }
+      try {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.status === 401) { logout(); return null; }
+        const data = await response.json();
+        return data.success ? data.data : null;
+      } catch (error) {
+        console.error('API Error:', error);
+        return null;
+      }
+    }
+
+    async function loadDashboard() {
+      const token = getToken();
+      if (!token) { logout(); return; }
+
+      const [profile, wallet, commissions] = await Promise.all([
+        apiCall('/members/profile'),
+        apiCall('/wallet/balance'),
+        apiCall('/wallet/commissions')
+      ]);
+
+      if (!profile) {
+        document.getElementById('loadingIndicator').textContent = 'Failed to load. Redirecting...';
+        setTimeout(logout, 2000);
+        return;
+      }
+
+      document.getElementById('loadingIndicator').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
+
+      const name = profile.name || 'Member';
+      const memberCode = profile.memberCode || profile.id;
+      
+      // Update sidebar profile
+      document.getElementById('memberName').textContent = name;
+      document.getElementById('memberCode').textContent = memberCode;
+      document.getElementById('memberAvatar').textContent = name.charAt(0).toUpperCase();
+      
+      // Update topbar greeting
+      document.getElementById('greeting').textContent = `Good morning, ${name} 🙏`;
+      const memberSince = new Date(profile.createdAt);
+      document.getElementById('memberSince').textContent = 
+        `Member since ${memberSince.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })} · ${memberCode}`;
+
+      // Update stats
+      const balance = wallet?.balancePaise || 0;
+      document.getElementById('walletBalance').textContent = formatINR(balance);
+      document.getElementById('walletBalanceSide').textContent = formatINR(balance);
+
+      const totalEarnings = commissions?.reduce((sum, c) => sum + c.amountPaise, 0) || 0;
+      document.getElementById('totalEarnings').textContent = formatINR(totalEarnings);
+
+      const idCards = profile.idCards || [];
+      document.getElementById('idCardCount').textContent = idCards.length;
+      document.getElementById('kycStatus').textContent = profile.kycStatus || 'Pending';
+      document.getElementById('kycTier').textContent = `Tier ${profile.kycTier || 1}`;
+
+      // Update commissions table
+      const commissionsTable = document.getElementById('commissionsTable');
+      if (commissions && commissions.length > 0) {
+        commissionsTable.innerHTML = commissions.slice(0, 10).map(c => `
+          <tr>
+            <td>${formatDate(c.createdAt)}</td>
+            <td>${c.stream}</td>
+            <td>+${formatINR(c.amountPaise)}</td>
+            <td><span class="badge ${c.status === 'CONFIRMED' ? 'success' : 'pending'}">${c.status}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      // Update ID cards
+      const idCardsList = document.getElementById('idCardsList');
+      if (idCards.length > 0) {
+        idCardsList.innerHTML = idCards.map(card => `
+          <div class="wallet-row">
+            <div>
+              <div class="name">${card.cardNumber}</div>
+              <div class="desc">${card.type} · ${card.status}</div>
+            </div>
+            <div class="amt">
+              <span class="badge ${card.acbStatus ? 'success' : 'pending'}">
+                ${card.acbStatus ? 'ACB' : 'Pending'}
+              </span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // 🆕 Load placement details (Sponsor vs Placement)
+    async function loadPlacement() {
+      try {
+        const placement = await apiCall('/members/my-placement');
+        if (!placement) return;
+        
+        document.getElementById('sponsorCode').textContent = placement.sponsoredBy || 'ROOT';
+        document.getElementById('sponsorName').textContent = placement.sponsorName || 'You are the founder';
+        document.getElementById('placedCode').textContent = placement.placedUnder || 'ROOT';
+        document.getElementById('placedName').textContent = placement.placedUnderName || 'Top of the tree';
+        document.getElementById('placedSide').textContent = placement.side || '—';
+        document.getElementById('placedType').textContent = placement.placementType || '—';
+      } catch (e) {
+        console.error('Placement load failed:', e);
+      }
+    }
+
+    // 🆕 Load LIVE stream stats for AutoPool + MY SYSTEM cards
+    async function loadStreamStats() {
+      const [ap, ms, commissions, refs] = await Promise.all([
+        apiCall('/members/autopool-tree'),
+        apiCall('/members/my-system-tree'),
+        apiCall('/wallet/commissions'),
+        apiCall('/members/my-referrals')
+      ]);
+
+      // ---- Anant Samriddhi Chakra (AutoPool) card ----
+      if (ap && ap.myStats) {
+        document.getElementById('apLevel').textContent = 'Level ' + ap.myStats.level;
+        document.getElementById('apCash').textContent = formatINR(ap.myStats.cashEarnedPaise);
+        document.getElementById('apRebirth').textContent = ap.myStats.rebirthIds;
+        document.getElementById('apStatus').innerHTML = '<span class="badge success">ACTIVE</span>';
+      } else {
+        document.getElementById('apStatus').innerHTML = '<span class="badge pending">NO POOL ID</span>';
+      }
+
+      // ---- MY SYSTEM card ----
+      if (ms && ms.stats) {
+        const direct = refs ? refs.directReferrals : 0;
+        document.getElementById('msDirect').textContent = direct;
+        document.getElementById('msNetwork').textContent = ms.stats.totalNetwork;
+        document.getElementById('msAcb').innerHTML = ms.stats.acbStatus
+          ? '<span class="badge success">UNLOCKED</span>'
+          : '<span class="badge pending">PENDING</span>';
+      }
+
+      // MY SYSTEM cash = sum of commissions whose stream belongs to MY SYSTEM
+      if (commissions && commissions.length > 0) {
+        const msCash = commissions
+          .filter(c => (c.stream || '').toUpperCase().includes('SYSTEM'))
+          .reduce((sum, c) => sum + c.amountPaise, 0);
+        document.getElementById('msCash').textContent = formatINR(msCash);
+      }
+    }
+
+    function copyReferralLink(side) {
+      const member = localStorage.getItem('member') ? JSON.parse(localStorage.getItem('member')) : null;
+      const memberCode = member?.memberCode || '';
+      if (memberCode) {
+        const link = `http://localhost:4000/bb-register.html?ref=${memberCode}&side=${side}`;
+        navigator.clipboard.writeText(link).then(() => {
+          alert(`✅ ${side} LEG referral link copied!\n\n` + link);
+        }).catch(() => {
+          prompt('Copy your referral link:', link);
+        });
+      } else {
+        alert('Member code not available. Please refresh the page.');
+      }
+    }
+
+    // Referral modal wiring
+    document.getElementById('openReferralBtn').addEventListener('click', () => {
+      document.getElementById('referralModal').classList.add('open');
+    });
+    document.getElementById('refCancelBtn').addEventListener('click', () => {
+      document.getElementById('referralModal').classList.remove('open');
+    });
+    document.getElementById('refCopyBtn').addEventListener('click', () => {
+      const side = document.querySelector('input[name="refside"]:checked').value;
+      copyReferralLink(side);
+      document.getElementById('referralModal').classList.remove('open');
+    });
+    document.querySelectorAll('input[name="refside"]').forEach(i => i.addEventListener('change', () => {
+      const val = document.querySelector('input[name="refside"]:checked').value;
+      document.getElementById('refLeft').classList.toggle('selected', val === 'LEFT');
+      document.getElementById('refRight').classList.toggle('selected', val === 'RIGHT');
+    }));
+
+    // ==========================================
+    // LOAD EVERYTHING
+    // ==========================================
+    loadDashboard();
+    loadPlacement();    // 🆕 Sponsor + Placement card
+    loadStreamStats();  // 🆕 Live AutoPool + MY SYSTEM numbers
+  </script>
+</body>
+</html>

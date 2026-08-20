@@ -9,5 +9,5 @@ router.use(authMiddleware);
 router.get("/balance", walletController.getBalance);
 router.get("/ledger", walletController.getLedger);
 router.get("/commissions", walletController.getCommissions);
-
+router.post("/withdraw", walletController.requestWithdrawal);
 module.exports = router;

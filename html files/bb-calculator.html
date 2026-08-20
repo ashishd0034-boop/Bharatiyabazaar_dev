@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Withdrawal Calculator & TDS Guide | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --white: #ffffff;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: "Poppins", "Noto Sans Devanagari", sans-serif;
+    }
+
+    .topbar {
+      background: var(--navy);
+      color: var(--white);
+      padding: 14px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+
+    .brand-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
+      flex: 0 0 auto;
+    }
+
+    .member-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.92);
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--teal);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: white;
+    }
+
+    .container {
+      width: min(1200px, calc(100% - 32px));
+      margin: 24px auto 40px;
+    }
+
+    .page-head {
+      margin-bottom: 18px;
+    }
+
+    .page-head h1 {
+      font-size: clamp(24px, 3vw, 34px);
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .page-head p {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow);
+    }
+
+    .summary-card {
+      padding: 16px;
+    }
+
+    .summary-card .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .summary-card .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .summary-card .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .badge.success {
+      background: #e8f8ee;
+      color: var(--success);
+    }
+
+    .badge.info {
+      background: #e8f6ff;
+      color: #0369a1;
+    }
+
+    .badge.warning {
+      background: #fff4e0;
+      color: var(--warning);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin: 18px 0;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--navy);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .panel h2 {
+      font-size: 20px;
+      color: var(--navy);
+      margin-bottom: 12px;
+    }
+
+    .panel h3 {
+      font-size: 15px;
+      color: var(--navy);
+      margin: 16px 0 8px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 12px 0 6px;
+    }
+
+    .amount-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px;
+      background: #fff;
+    }
+
+    .amount-input-wrap span {
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    input[type="number"] {
+      width: 100%;
+      border: none;
+      outline: none;
+      padding: 13px 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      background: transparent;
+    }
+
+    .quick-amounts {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .quick-btn {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 700;
+      color: var(--navy);
+      cursor: pointer;
+    }
+
+    .quick-btn:hover,
+    .tab-btn:hover {
+      border-color: var(--teal);
+      color: var(--teal-dark);
+    }
+
+    .method-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .method-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      transition: 0.16s ease;
+      background: #fff;
+    }
+
+    .method-item input {
+      margin-top: 3px;
+      accent-color: var(--teal);
+    }
+
+    .method-item.selected {
+      border-color: var(--teal);
+      background: #f3fbfb;
+      box-shadow: inset 0 0 0 1px rgba(15, 157, 157, 0.08);
+    }
+
+    .method-title {
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .method-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .note {
+      border-left: 4px solid var(--teal);
+      background: #f3fbfb;
+      color: #155e5e;
+      padding: 11px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    .note.warning {
+      border-left-color: var(--warning);
+      background: #fff8e9;
+      color: #7c4a03;
+    }
+
+    .breakdown {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .breakdown-row {
+      border: 1px solid var(--border);
+      background: #fbfdff;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .breakdown-row .row-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .breakdown-row .row-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .breakdown-row.net {
+      background: linear-gradient(135deg, var(--navy), var(--navy-2));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .breakdown-row.net .row-top,
+    .breakdown-row.net .row-sub {
+      color: #fff;
+    }
+
+    .breakdown-row.danger .row-top {
+      color: var(--danger);
+    }
+
+    .breakdown-row.success .row-top {
+      color: var(--success);
+    }
+
+    .arrow {
+      text-align: center;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .compare-table th {
+      background: #f8fafc;
+      color: var(--navy);
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .guide-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .guide-card h4 {
+      color: var(--navy);
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .guide-card p,
+    .guide-card li {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .guide-card ul {
+      padding-left: 18px;
+      margin-top: 8px;
+    }
+
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+      background: #fff;
+    }
+
+    .faq-item strong {
+      display: block;
+      color: var(--navy);
+      margin-bottom: 5px;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .progress-wrap {
+      margin-top: 12px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #e5edf6;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--teal), var(--amber));
+      transition: width 0.2s ease;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    @media (max-width: 980px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-2,
+      .guide-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-badge"></span>
+      <span>Bharatiya Bazaar · भारतीय बाज़ार</span>
+    </div>
+
+    <div class="member-chip">
+      <span>Rajesh Kumar · Member ID: BB10042 · ACB Member</span>
+      <span class="avatar">RK</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <h1>Withdrawal Calculator & TDS Guide</h1>
+      <p>Rajesh Kumar · BB10042 · TDS Section 194H · Corrected as per validated platform rules</p>
+    </section>
+
+    <section class="summary-grid">
+      <div class="card summary-card">
+        <div class="label">Member Status</div>
+        <div class="value">ACB Member</div>
+        <div class="badge success">✓ Withdrawals enabled for eligible earnings</div>
+      </div>
+
+      <div class="card summary-card">
+        <div class="label">KYC Status</div>
+        <div class="value">Tier 2 Verified</div>
+        <div class="sub">PAN + bank details verified</div>
+      </div>
+
+      <div class="card summary-card">
+        <div class="label">Annual commissions so far</div>
+        <div class="value" id="annualCommissionDisplay">Rs.1,175.00</div>
+        <div class="sub">FY 2026-27 · Section 194H</div>
+      </div>
+
+      <div class="card summary-card">
+        <div class="label">TDS threshold</div>
+        <div class="value">Rs.20,000</div>
+        <div class="badge info" id="tdsStatusChip">Below threshold — no TDS unless withdrawal crosses threshold</div>
+      </div>
+    </section>
+
+    <section class="tabs">
+      <button class="tab-btn active" id="tabCalculatorBtn" type="button">Withdrawal Calculator</button>
+      <button class="tab-btn" id="tabGuideBtn" type="button">TDS Guide</button>
+    </section>
+
+    <section id="calculatorTab">
+      <div class="grid-2">
+        <div class="card panel">
+          <h2>Calculate Your Withdrawal</h2>
+
+          <h3>Section A — Amount</h3>
+          <div class="muted" style="font-size:14px;">
+            Maximum withdrawable: <strong>Rs.575.00</strong>
+            <span class="muted">(confirmed and source-eligible balance only)</span>
+          </div>
+
+          <label class="field-label" for="withdrawalAmount">Enter withdrawal amount</label>
+          <div class="amount-input-wrap">
+            <span>Rs.</span>
+            <input id="withdrawalAmount" type="number" min="50" max="575" step="1" value="575" />
+          </div>
+
+          <div class="quick-amounts">
+            <button class="quick-btn" type="button" data-amount="100">Rs.100</button>
+            <button class="quick-btn" type="button" data-amount="250">Rs.250</button>
+            <button class="quick-btn" type="button" data-amount="500">Rs.500</button>
+            <button class="quick-btn" type="button" data-amount="575">Max Rs.575</button>
+          </div>
+
+          <h3>Section B — Transfer Method</h3>
+
+          <div class="method-list">
+            <label class="method-item selected" id="bankMethodCard">
+              <input type="radio" name="transferMethod" value="bank" checked />
+              <span>
+                <span class="method-title">Bank Transfer</span>
+                <span class="method-sub">HDFC Bank ****1234 · 1-2 working days · Admin charge: 10% on post-TDS amount</span>
+              </span>
+            </label>
+
+            <label class="method-item" id="walletMethodCard">
+              <input type="radio" name="transferMethod" value="wallet" />
+              <span>
+                <span class="method-title">Member Wallet Transfer</span>
+                <span class="method-sub">Transfer to another BB member wallet · Instant · Admin charge: 5% on post-TDS amount</span>
+              </span>
+            </label>
+          </div>
+
+          <div class="note">
+            Voucher wallet conversion is available inside the Wallet screen. This calculator is for cash withdrawal
+            and member wallet transfer.
+          </div>
+
+          <h3>Section C — TDS Declaration</h3>
+
+          <div class="breakdown">
+            <div class="breakdown-row">
+              <div class="row-top"><span>TDS Section</span><span>194H — Commission income</span></div>
+            </div>
+
+            <div class="breakdown-row">
+              <div class="row-top"><span>Your PAN</span><span>ABCDE****</span></div>
+            </div>
+
+            <div class="breakdown-row">
+              <div class="row-top"><span>TDS Rate</span><span id="tdsRateDisplay">3% — PAN verified</span></div>
+            </div>
+
+            <div class="breakdown-row">
+              <div class="row-top"><span>Annual commissions</span><span>Rs.1,175.00</span></div>
+            </div>
+
+            <div class="breakdown-row">
+              <div class="row-top"><span>Threshold</span><span>Rs.20,000.00</span></div>
+            </div>
+
+            <div class="breakdown-row">
+              <div class="row-top"><span>Remaining before threshold</span><span id="remainingThresholdDisplay">Rs.18,825.00</span></div>
+              <div class="row-sub">
+                TDS is deducted only when annual taxable commission crosses the threshold.
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="muted" style="font-size:14px;">FY 2026-27 threshold progress</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="thresholdProgressFill"></div>
+            </div>
+            <div class="muted" style="font-size:13px; margin-top:6px;" id="thresholdProgressText"></div>
+          </div>
+        </div>
+
+        <div class="card panel">
+          <h2>Live Deduction Breakdown</h2>
+
+          <div class="breakdown">
+            <div class="breakdown-row">
+              <div class="row-top"><span>Gross Withdrawal Amount</span><span id="grossDisplay">Rs.575.00</span></div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="breakdown-row" id="liabilityRow">
+              <div class="row-top"><span>Step 0 — 194R Liability Recovery</span><span id="liabilityDisplay">Rs.0.00</span></div>
+              <div class="row-sub">Recovered separately before payout, if pending voucher TDS liability exists.</div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="breakdown-row" id="tdsRow">
+              <div class="row-top"><span>Step 1 — TDS under Section 194H</span><span id="tdsDisplay">Rs.0.00</span></div>
+              <div class="row-sub" id="tdsCalculationDisplay">No TDS because annual aggregate remains below Rs.20,000.</div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="breakdown-row">
+              <div class="row-top"><span>Post-TDS Amount</span><span id="postTdsDisplay">Rs.575.00</span></div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="breakdown-row" id="adminRow">
+              <div class="row-top"><span>Step 2 — Admin Charge</span><span id="adminDisplay">Rs.57.50</span></div>
+              <div class="row-sub" id="adminCalculationDisplay">10% applied on post-TDS amount.</div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="breakdown-row net">
+              <div class="row-top"><span>Net Amount To Receive</span><span id="netDisplay">Rs.517.50</span></div>
+              <div class="row-sub" id="methodDisplay">Bank Transfer</div>
+            </div>
+          </div>
+
+          <div class="note warning" style="margin-top:14px;">
+            <strong>Mandatory order:</strong>
+            194H TDS is calculated first. Admin charge is applied second on the post-TDS amount.
+            This order cannot be reversed.
+          </div>
+
+          <div class="note">
+            TDS is held at withdrawal request. It is deposited with the Income Tax Department only when the
+            withdrawal becomes COMPLETED. If the withdrawal is rejected, deducted TDS is reversed to the wallet.
+          </div>
+        </div>
+      </div>
+
+      <div class="card panel" style="margin-top:16px;">
+        <h2>Compare: Bank vs Member Wallet Transfer</h2>
+        <p class="muted" style="font-size:14px;">For the currently entered withdrawal amount.</p>
+
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Bank Transfer</th>
+              <th>Member Wallet Transfer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Gross Amount</td>
+              <td id="compareGrossBank">Rs.575.00</td>
+              <td id="compareGrossWallet">Rs.575.00</td>
+            </tr>
+            <tr>
+              <td>194R Liability Recovery</td>
+              <td id="compareLiabilityBank">Rs.0.00</td>
+              <td id="compareLiabilityWallet">Rs.0.00</td>
+            </tr>
+            <tr>
+              <td>TDS under 194H — Step 1</td>
+              <td id="compareTdsBank">Rs.0.00</td>
+              <td id="compareTdsWallet">Rs.0.00</td>
+            </tr>
+            <tr>
+              <td>Post-TDS Amount</td>
+              <td id="comparePostTdsBank">Rs.575.00</td>
+              <td id="comparePostTdsWallet">Rs.575.00</td>
+            </tr>
+            <tr>
+              <td>Admin Charge — Step 2</td>
+              <td id="compareAdminBank">Rs.57.50</td>
+              <td id="compareAdminWallet">Rs.28.75</td>
+            </tr>
+            <tr>
+              <td><strong>Net Received</strong></td>
+              <td><strong id="compareNetBank">Rs.517.50</strong></td>
+              <td><strong id="compareNetWallet">Rs.546.25</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note" style="margin-top:12px;" id="savingsNote">
+          You save Rs.28.75 by using Member Wallet Transfer.
+        </div>
+      </div>
+    </section>
+
+    <section id="guideTab" class="hidden">
+      <div class="card panel">
+        <h2>Understanding TDS on Bharatiya Bazaar Earnings</h2>
+        <p class="muted" style="font-size:14px;">
+          Tax Deducted at Source (TDS) is a mandatory deduction under the Indian Income Tax Act.
+          Bharatiya Bazaar deducts TDS on eligible earnings before payout and deposits it with the
+          Income Tax Department on your behalf.
+        </p>
+
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h4>Section 194H — Cash Commissions</h4>
+            <ul>
+              <li>Applicable to AutoPool cash, MY SYSTEM cash, and Setu Kosh cash commissions</li>
+              <li>Threshold: Rs.20,000 aggregate per financial year</li>
+              <li>Rate with PAN: 3%</li>
+              <li>Rate without PAN: 20%</li>
+              <li>Deduction timing: withdrawal request, finalised on COMPLETED withdrawal</li>
+              <li>Certificate: Form 16A, quarterly</li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <h4>Section 194R — Product Vouchers</h4>
+            <ul>
+              <li>Applicable to Rs.200 vouchers issued at AutoPool Levels 5, 6 and 7</li>
+              <li>Threshold: Rs.20,000 aggregate voucher face value per financial year</li>
+              <li>Rate: 10%</li>
+              <li>Once threshold crosses, liability = 10% of full aggregate voucher value</li>
+              <li>Recovered from next withdrawal automatically</li>
+              <li>Not reversed if voucher expires unused</li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <h4>Admin Charge — Not TDS</h4>
+            <ul>
+              <li>Bank transfer: 10% of post-TDS amount</li>
+              <li>Member wallet transfer: 5% of post-TDS amount</li>
+              <li>This is a platform fee, not a tax</li>
+              <li>Not deposited with the Income Tax Department</li>
+              <li>Shown separately in wallet statement</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="guide-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="guide-card">
+            <h4>194H Calculation Examples</h4>
+
+            <p style="margin-top:8px;"><strong>Example 1 — Below threshold</strong></p>
+            <p>
+              Annual commissions: Rs.1,175<br />
+              Withdrawal: Rs.575<br />
+              New aggregate: Rs.1,750<br />
+              TDS: Rs.0<br />
+              Bank admin charge: Rs.57.50<br />
+              Net: Rs.517.50
+            </p>
+
+            <p style="margin-top:10px;"><strong>Example 2 — Withdrawal crosses threshold</strong></p>
+            <p>
+              Annual commissions before withdrawal: Rs.19,500<br />
+              Withdrawal: Rs.1,000<br />
+              New aggregate: Rs.20,500<br />
+              Taxable portion: Rs.500<br />
+              TDS @ 3%: Rs.15<br />
+              Post-TDS: Rs.985<br />
+              Bank admin charge: Rs.98.50<br />
+              Net: Rs.886.50
+            </p>
+
+            <p style="margin-top:10px;"><strong>Example 3 — Already above threshold</strong></p>
+            <p>
+              Annual commissions before withdrawal: Rs.25,000<br />
+              Withdrawal: Rs.575<br />
+              TDS @ 3%: Rs.17.25<br />
+              Post-TDS: Rs.557.75<br />
+              Bank admin charge: Rs.55.78<br />
+              Net: Rs.501.97
+            </p>
+          </div>
+
+          <div class="guide-card">
+            <h4>194R Calculation Examples</h4>
+
+            <p style="margin-top:8px;"><strong>Example 1 — Threshold crossed</strong></p>
+            <p>
+              Vouchers issued: 120 × Rs.200 = Rs.24,000<br />
+              Threshold: Rs.20,000<br />
+              194R liability = 10% of full aggregate value<br />
+              Liability = 24,000 × 10% = Rs.2,400
+            </p>
+
+            <p style="margin-top:10px;"><strong>Example 2 — Later voucher after threshold already crossed</strong></p>
+            <p>
+              Existing aggregate: Rs.24,000<br />
+              Existing liability: Rs.2,400<br />
+              New voucher: Rs.200<br />
+              New aggregate: Rs.24,200<br />
+              New total liability: Rs.2,420<br />
+              Additional liability: Rs.20
+            </p>
+
+            <div class="note warning" style="margin-top:12px;">
+              194R liability is recovered from the member’s next withdrawal automatically.
+              If the voucher expires unused, the liability is still not reversed.
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:18px;">Frequently Asked Questions</h3>
+
+        <div class="faq-item">
+          <strong>Do I need to file ITR for Bharatiya Bazaar earnings?</strong>
+          Yes, if your total income exceeds the basic exemption limit. TDS deducted by Bharatiya Bazaar
+          is reflected in Form 26AS and can be claimed as credit when filing your ITR.
+        </div>
+
+        <div class="faq-item">
+          <strong>What if I do not have a PAN card?</strong>
+          Without PAN, TDS is deducted at 20% instead of 3%. Submit your PAN through KYC Tier 2 to use
+          the lower rate.
+        </div>
+
+        <div class="faq-item">
+          <strong>When will I get my TDS certificate?</strong>
+          Form 16A is generated quarterly and made available under KYC & Documents for members who had
+          TDS deducted during that quarter.
+        </div>
+
+        <div class="faq-item">
+          <strong>Are vouchers taxable?</strong>
+          Yes. Vouchers are covered under Section 194R. Once aggregate voucher face value crosses
+          Rs.20,000 in a financial year, liability is calculated as 10% of the full aggregate voucher value.
+        </div>
+
+        <div class="faq-item">
+          <strong>What is the difference between TDS and admin charge?</strong>
+          TDS is a government tax deposited with the Income Tax Department. Admin charge is a platform fee
+          retained by Bharatiya Bazaar. Both appear separately in the payout breakdown.
+        </div>
+
+        <div class="footer-note">
+          This screen has been corrected to match the validated business rules:
+          threshold-based 194H calculation, full aggregate 194R liability, no Sunday charge waiver,
+          and quarterly Form 16A issuance.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      maxWithdrawablePaise: 57500,
+      annualCommissionBeforeWithdrawalPaise: 117500,
+      thresholdPaise: 2000000,
+      panVerified: true,
+      pending194RLiabilityPaise: 0,
+      bankAdminChargePct: 10,
+      walletAdminChargePct: 5
+    };
+
+    const els = {
+      amount: document.getElementById("withdrawalAmount"),
+      annualCommissionDisplay: document.getElementById("annualCommissionDisplay"),
+      tdsStatusChip: document.getElementById("tdsStatusChip"),
+      tdsRateDisplay: document.getElementById("tdsRateDisplay"),
+      remainingThresholdDisplay: document.getElementById("remainingThresholdDisplay"),
+      thresholdProgressFill: document.getElementById("thresholdProgressFill"),
+      thresholdProgressText: document.getElementById("thresholdProgressText"),
+
+      grossDisplay: document.getElementById("grossDisplay"),
+      liabilityDisplay: document.getElementById("liabilityDisplay"),
+      tdsDisplay: document.getElementById("tdsDisplay"),
+      tdsCalculationDisplay: document.getElementById("tdsCalculationDisplay"),
+      postTdsDisplay: document.getElementById("postTdsDisplay"),
+      adminDisplay: document.getElementById("adminDisplay"),
+      adminCalculationDisplay: document.getElementById("adminCalculationDisplay"),
+      netDisplay: document.getElementById("netDisplay"),
+      methodDisplay: document.getElementById("methodDisplay"),
+
+      compareGrossBank: document.getElementById("compareGrossBank"),
+      compareGrossWallet: document.getElementById("compareGrossWallet"),
+      compareLiabilityBank: document.getElementById("compareLiabilityBank"),
+      compareLiabilityWallet: document.getElementById("compareLiabilityWallet"),
+      compareTdsBank: document.getElementById("compareTdsBank"),
+      compareTdsWallet: document.getElementById("compareTdsWallet"),
+      comparePostTdsBank: document.getElementById("comparePostTdsBank"),
+      comparePostTdsWallet: document.getElementById("comparePostTdsWallet"),
+      compareAdminBank: document.getElementById("compareAdminBank"),
+      compareAdminWallet: document.getElementById("compareAdminWallet"),
+      compareNetBank: document.getElementById("compareNetBank"),
+      compareNetWallet: document.getElementById("compareNetWallet"),
+      savingsNote: document.getElementById("savingsNote"),
+
+      bankMethodCard: document.getElementById("bankMethodCard"),
+      walletMethodCard: document.getElementById("walletMethodCard"),
+
+      tabCalculatorBtn: document.getElementById("tabCalculatorBtn"),
+      tabGuideBtn: document.getElementById("tabGuideBtn"),
+      calculatorTab: document.getElementById("calculatorTab"),
+      guideTab: document.getElementById("guideTab")
+    };
+
+    function formatINR(paise) {
+      const rupees = Number(paise) / 100;
+      return "Rs." + rupees.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function getTdsRatePct() {
+      return state.panVerified ? 3 : 20;
+    }
+
+    function calculateMemberTDS(cumulativePaise, grossPaise, thresholdPaise, ratePct) {
+      const newAggregatePaise = cumulativePaise + grossPaise;
+      let taxablePaise = 0;
+      let explanation = "";
+
+      if (newAggregatePaise <= thresholdPaise) {
+        taxablePaise = 0;
+        explanation = "No TDS because annual aggregate remains below Rs.20,000.";
+      } else if (cumulativePaise >= thresholdPaise) {
+        taxablePaise = grossPaise;
+        explanation = `Already above threshold. Full withdrawal taxable: ${formatINR(grossPaise)} × ${ratePct}%.`;
+      } else {
+        taxablePaise = newAggregatePaise - thresholdPaise;
+        explanation = `Withdrawal crosses threshold. Taxable portion above Rs.20,000: ${formatINR(taxablePaise)} × ${ratePct}%.`;
+      }
+
+      const tdsPaise = Math.round(taxablePaise * ratePct / 100);
+
+      return {
+        newAggregatePaise,
+        taxablePaise,
+        tdsPaise,
+        postTdsPaise: grossPaise - tdsPaise,
+        explanation
+      };
+    }
+
+    function calculateScenario(grossPaise, method) {
+      const ratePct = getTdsRatePct();
+
+      const tdsResult = calculateMemberTDS(
+        state.annualCommissionBeforeWithdrawalPaise,
+        grossPaise,
+        state.thresholdPaise,
+        ratePct
+      );
+
+      const adminRatePct = method === "bank" ? state.bankAdminChargePct : state.walletAdminChargePct;
+      const adminPaise = Math.round(tdsResult.postTdsPaise * adminRatePct / 100);
+
+      const maxRecoverablePaise = Math.max(
+        0,
+        grossPaise - tdsResult.tdsPaise - adminPaise
+      );
+
+      const liabilityRecoveredPaise = Math.min(
+        state.pending194RLiabilityPaise,
+        maxRecoverablePaise
+      );
+
+      const netPaise = grossPaise - liabilityRecoveredPaise - tdsResult.tdsPaise - adminPaise;
+
+      return {
+        grossPaise,
+        liabilityRecoveredPaise,
+        tdsResult,
+        adminRatePct,
+        adminPaise,
+        netPaise
+      };
+    }
+
+    function getSelectedMethod() {
+      return document.querySelector('input[name="transferMethod"]:checked').value;
+    }
+
+    function update() {
+      let amountPaise = Math.round(Number(els.amount.value || 0) * 100);
+
+      if (amountPaise < 0) amountPaise = 0;
+      if (amountPaise > state.maxWithdrawablePaise) {
+        amountPaise = state.maxWithdrawablePaise;
+        els.amount.value = state.maxWithdrawablePaise / 100;
+      }
+
+      const method = getSelectedMethod();
+      const scenario = calculateScenario(amountPaise, method);
+      const bankScenario = calculateScenario(amountPaise, "bank");
+      const walletScenario = calculateScenario(amountPaise, "wallet");
+      const remainingThresholdPaise = Math.max(
+        0,
+        state.thresholdPaise - state.annualCommissionBeforeWithdrawalPaise
+      );
+
+      const progressPct = Math.min(
+        100,
+        (state.annualCommissionBeforeWithdrawalPaise / state.thresholdPaise) * 100
+      );
+
+      els.annualCommissionDisplay.textContent = formatINR(state.annualCommissionBeforeWithdrawalPaise);
+      els.tdsRateDisplay.textContent = `${getTdsRatePct()}% — ${state.panVerified ? "PAN verified" : "No PAN"}`;
+      els.remainingThresholdDisplay.textContent = formatINR(remainingThresholdPaise);
+      els.thresholdProgressFill.style.width = `${progressPct}%`;
+      els.thresholdProgressText.textContent =
+        `${formatINR(state.annualCommissionBeforeWithdrawalPaise)} of ${formatINR(state.thresholdPaise)} threshold used.`;
+
+      if (scenario.tdsResult.newAggregatePaise <= state.thresholdPaise) {
+        els.tdsStatusChip.textContent = "Below threshold — no TDS unless withdrawal crosses threshold";
+      } else if (state.annualCommissionBeforeWithdrawalPaise >= state.thresholdPaise) {
+        els.tdsStatusChip.textContent = "Already above threshold — TDS applies on full withdrawal";
+      } else {
+        els.tdsStatusChip.textContent = "This withdrawal crosses threshold — TDS applies only on excess";
+      }
+
+      els.grossDisplay.textContent = formatINR(scenario.grossPaise);
+      els.liabilityDisplay.textContent = `-${formatINR(scenario.liabilityRecoveredPaise)}`;
+      els.tdsDisplay.textContent = `-${formatINR(scenario.tdsResult.tdsPaise)}`;
+      els.tdsCalculationDisplay.textContent = scenario.tdsResult.explanation;
+      els.postTdsDisplay.textContent = formatINR(scenario.tdsResult.postTdsPaise);
+      els.adminDisplay.textContent = `-${formatINR(scenario.adminPaise)}`;
+      els.adminCalculationDisplay.textContent =
+        `${scenario.adminRatePct}% applied on post-TDS amount ${formatINR(scenario.tdsResult.postTdsPaise)}.`;
+      els.netDisplay.textContent = formatINR(scenario.netPaise);
+      els.methodDisplay.textContent = method === "bank" ? "Bank Transfer" : "Member Wallet Transfer";
+
+      els.compareGrossBank.textContent = formatINR(bankScenario.grossPaise);
+      els.compareGrossWallet.textContent = formatINR(walletScenario.grossPaise);
+      els.compareLiabilityBank.textContent = `-${formatINR(bankScenario.liabilityRecoveredPaise)}`;
+      els.compareLiabilityWallet.textContent = `-${formatINR(walletScenario.liabilityRecoveredPaise)}`;
+      els.compareTdsBank.textContent = `-${formatINR(bankScenario.tdsResult.tdsPaise)}`;
+      els.compareTdsWallet.textContent = `-${formatINR(walletScenario.tdsResult.tdsPaise)}`;
+      els.comparePostTdsBank.textContent = formatINR(bankScenario.tdsResult.postTdsPaise);
+      els.comparePostTdsWallet.textContent = formatINR(walletScenario.tdsResult.postTdsPaise);
+      els.compareAdminBank.textContent = `-${formatINR(bankScenario.adminPaise)}`;
+      els.compareAdminWallet.textContent = `-${formatINR(walletScenario.adminPaise)}`;
+      els.compareNetBank.textContent = formatINR(bankScenario.netPaise);
+      els.compareNetWallet.textContent = formatINR(walletScenario.netPaise);
+
+      const savingsPaise = walletScenario.netPaise - bankScenario.netPaise;
+
+      if (savingsPaise > 0) {
+        els.savingsNote.textContent = `You save ${formatINR(savingsPaise)} by using Member Wallet Transfer.`;
+      } else if (savingsPaise < 0) {
+        els.savingsNote.textContent = `Bank Transfer gives ${formatINR(Math.abs(savingsPaise))} less than Member Wallet Transfer.`;
+      } else {
+        els.savingsNote.textContent = `Both methods produce the same net amount for this withdrawal.`;
+      }
+
+      els.bankMethodCard.classList.toggle("selected", method === "bank");
+      els.walletMethodCard.classList.toggle("selected", method === "wallet");
+    }
+
+    document.querySelectorAll(".quick-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        els.amount.value = btn.dataset.amount;
+        update();
+      });
+    });
+
+    els.amount.addEventListener("input", update);
+
+    document.querySelectorAll('input[name="transferMethod"]').forEach((input) => {
+      input.addEventListener("change", update);
+    });
+
+    els.tabCalculatorBtn.addEventListener("click", () => {
+      els.tabCalculatorBtn.classList.add("active");
+      els.tabGuideBtn.classList.remove("active");
+      els.calculatorTab.classList.remove("hidden");
+      els.guideTab.classList.add("hidden");
+    });
+
+    els.tabGuideBtn.addEventListener("click", () => {
+      els.tabGuideBtn.classList.add("active");
+      els.tabCalculatorBtn.classList.remove("active");
+      els.guideTab.classList.remove("hidden");
+      els.calculatorTab.classList.add("hidden");
+    });
+
+    update();
+  </script>
+</body>
+</html>

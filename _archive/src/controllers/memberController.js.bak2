@@ -1,0 +1,321 @@
+const prisma = require("../lib/prisma");
+
+async function getProfile(req, res, next) {
+  try {
+    const member = await prisma.member.findUnique({
+      where: { id: req.member.id },
+      include: {
+        mainWallet: true,
+        idCards: true
+      }
+    });
+
+    res.json({
+      success: true,
+      data: member
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateKyc(req, res, next) {
+  try {
+    const { panNumber, panCardUrl, aadhaarFrontUrl, aadhaarBackUrl } = req.body;
+
+    const updated = await prisma.member.update({
+      where: { id: req.member.id },
+      data: {
+        panNumber,
+        kycStatus: "PENDING"
+      }
+    });
+
+    res.json({
+      success: true,
+      data: updated
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ===== NEW: MY SYSTEM Binary Tree =====
+async function getMySystemTree(req, res, next) {
+  try {
+    const memberId = req.member.id;
+    const mainCard = await prisma.memberIdCard.findFirst({
+      where: { memberId, type: "MAIN" }
+    });
+
+    if (!mainCard) {
+      return res.json({ success: true, data: null });
+    }
+
+    const rootNode = await prisma.mySystemNode.findUnique({
+      where: { idCardId: mainCard.id }
+    });
+
+    if (!rootNode) {
+      return res.json({ success: true, data: null });
+    }
+
+    // sponsorCard sits NEXT TO idCard (it belongs to MySystemNode)
+    const allNodes = await prisma.mySystemNode.findMany({
+      include: {
+        idCard: {
+          include: {
+            member: { select: { id: true, name: true, memberCode: true } }
+          }
+        },
+        sponsorCard: {
+          include: {
+            member: { select: { name: true, memberCode: true } }
+          }
+        }
+      }
+    });
+
+    function buildTree(nodeId, depth) {
+      const node = allNodes.find(n => n.id === nodeId);
+      if (!node || depth > 6) return null;
+
+      const children = allNodes.filter(n => n.parentNodeId === nodeId);
+      const left = children.find(c => c.side === "LEFT");
+      const right = children.find(c => c.side === "RIGHT");
+
+      return {
+        id: node.id,
+        memberName: node.idCard.member.name,
+        memberCode: node.idCard.member.memberCode,
+        cardNumber: node.idCard.cardNumber,
+        cardType: node.idCard.type,
+        acbStatus: node.idCard.acbStatus,
+        joinedAt: node.idCard.createdAt,
+        acbUnlockedAt: node.idCard.acbUnlockedAt || null,
+        side: node.side,
+        placementType: node.placementType,
+        sponsorName: node.sponsorCard?.member?.name || null,
+        sponsorCode: node.sponsorCard?.member?.memberCode || null,
+        parentId: node.parentNodeId,
+        children: {
+          LEFT: left ? buildTree(left.id, depth + 1) : null,
+          RIGHT: right ? buildTree(right.id, depth + 1) : null
+        }
+      };
+    }
+
+    const tree = buildTree(rootNode.id, 0);
+
+    function countLeg(node, side) {
+      if (!node) return 0;
+      let count = 0;
+      if (node.side === side) count++;
+      count += countLeg(node.children?.LEFT, side);
+      count += countLeg(node.children?.RIGHT, side);
+      return count;
+    }
+
+    const stats = {
+      leftLegSize: countLeg(tree, "LEFT"),
+      rightLegSize: countLeg(tree, "RIGHT"),
+      totalNetwork: countLeg(tree, "LEFT") + countLeg(tree, "RIGHT"),
+      hasDirectLeft: !!tree.children?.LEFT,
+      hasDirectRight: !!tree.children?.RIGHT,
+      acbStatus: mainCard.acbStatus
+    };
+
+    res.json({ success: true, data: { tree, stats } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getAutoPoolTree(req, res, next) {
+  try {
+    const memberId = req.member.id;
+
+    const myMainCard = await prisma.memberIdCard.findFirst({
+      where: { memberId, type: "MAIN" }
+    });
+
+    const myPoolNode = myMainCard
+      ? await prisma.autoPoolNode.findUnique({ where: { idCardId: myMainCard.id } })
+      : null;
+
+    // 🆕 Added mySystemNode → sponsorCard chain for sponsor tracking
+    const allNodes = await prisma.autoPoolNode.findMany({
+      include: {
+        idCard: {
+          include: {
+            member: { select: { id: true, name: true, memberCode: true } },
+            mySystemNode: {
+              include: {
+                sponsorCard: {
+                  include: {
+                    member: { select: { name: true, memberCode: true } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const positionMap = {};
+    for (const n of allNodes) {
+      positionMap[n.globalPosition] = {
+        id: n.id,
+        position: n.globalPosition,
+        level: n.depthLevel,
+        side: n.side,
+        memberId: n.idCard.member.id,
+        memberName: n.idCard.member.name,
+        memberCode: n.idCard.member.memberCode || n.idCard.cardNumber,
+        cardNumber: n.idCard.cardNumber,
+        cardType: n.idCard.type,                                  // 🆕
+        acbStatus: n.idCard.acbStatus,
+        acbUnlockedAt: n.idCard.acbUnlockedAt || null,            // 🆕
+        joinedAt: n.idCard.createdAt,                             // 🆕
+        sponsorCode: n.idCard.mySystemNode?.sponsorCard?.member?.memberCode || null,  // 🆕
+        sponsorName: n.idCard.mySystemNode?.sponsorCard?.member?.name || null         // 🆕
+      };
+    }
+
+    function buildTree(pos, levelsLeft, currentDepth) {
+      const node = positionMap[pos];
+      const result = node
+        ? { ...node, filled: true }
+        : { position: pos, level: currentDepth, filled: false, side: pos % 2 === 0 ? "LEFT" : "RIGHT" };
+      if (levelsLeft > 0) {
+        result.children = {
+          LEFT: buildTree(pos * 2, levelsLeft - 1, currentDepth + 1),
+          RIGHT: buildTree(pos * 2 + 1, levelsLeft - 1, currentDepth + 1)
+        };
+      }
+      return result;
+    }
+
+    const globalTree = buildTree(1, 4, 0);
+
+    let myStats = null;
+    let myTree = null;
+    const levelStatus = [];
+
+    if (myPoolNode) {
+      const p = myPoolNode.globalPosition;
+      myTree = buildTree(p, 3, myPoolNode.depthLevel);
+
+      // Live level completion for MY pool cycle (business rules)
+      let cashEarnedPaise = 0, rebirthIds = 0, vouchersPaise = 0;
+      const CASH = { 1: 30000, 2: 30000, 3: 20000 };
+
+      for (let lvl = 1; lvl <= 7; lvl++) {
+        const size = Math.pow(2, lvl);
+        const start = p * size;
+        let filled = 0;
+        for (let i = start; i < start + size; i++) if (positionMap[i]) filled++;
+        const complete = filled === size;
+        if (complete) {
+          if (CASH[lvl]) cashEarnedPaise += CASH[lvl];
+          if (lvl >= 4) rebirthIds += 1;
+          if (lvl >= 5) vouchersPaise += 20000;
+        }
+        levelStatus.push({ level: lvl, size, filled, complete });
+      }
+
+      myStats = {
+        position: p,
+        level: myPoolNode.depthLevel,
+        totalInPool: allNodes.length,
+        highestLevel: Math.max(...allNodes.map(n => n.depthLevel)),
+        cashEarnedPaise,
+        rebirthIds,
+        vouchersPaise
+      };
+    }
+
+    res.json({ success: true, data: { globalTree, myTree, myStats, levelStatus } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function checkAvailability(req, res, next) {
+  try {
+    const { mobile, email } = req.query;
+    
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: "Mobile is required" });
+    }
+
+    const existingMobile = await prisma.member.findUnique({ where: { mobile } });
+    if (existingMobile) {
+      return res.json({ 
+        success: true, 
+        available: false, 
+        reason: "mobile",
+        message: "This mobile number is already registered"
+      });
+    }
+
+    if (email) {
+      const existingEmail = await prisma.member.findFirst({ where: { email } });
+      if (existingEmail) {
+        return res.json({
+          success: true,
+          available: false,
+          reason: "email",
+          message: "This email is already registered"
+        });
+      }
+    }
+
+    res.json({ success: true, available: true });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Add to module.exports:
+module.exports = {
+  getProfile,
+  updateKyc,
+  getMySystemTree,
+  getAutoPoolTree,
+  checkAvailability  // 🆕
+};
+
+// 🆕 "Who sponsored me & where am I placed?"
+async function getMyPlacement(req, res, next) {
+  try {
+    const node = await prisma.mySystemNode.findFirst({
+      where: { idCard: { memberId: req.member.id, type: "MAIN" } },
+      include: {
+        idCard: { include: { member: { select: { memberCode: true, name: true } } } },
+        sponsorCard: { include: { member: { select: { memberCode: true, name: true } } } },
+        parent: { include: { idCard: { include: { member: { select: { memberCode: true, name: true } } } } } }
+      }
+    });
+
+    if (!node) return res.json({ success: true, data: null });
+
+    res.json({
+      success: true,
+      data: {
+        memberCode: node.idCard.member.memberCode,
+        side: node.side,
+        placementType: node.placementType,
+        sponsoredBy: node.sponsorCard ? node.sponsorCard.member.memberCode : null,
+        sponsorName: node.sponsorCard ? node.sponsorCard.member.name : null,
+        placedUnder: node.parent ? node.parent.idCard.member.memberCode : null,
+        placedUnderName: node.parent ? node.parent.idCard.member.name : null
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports.getMyPlacement = getMyPlacement;

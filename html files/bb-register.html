@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .topbar {
+      background: var(--navy); color: #fff; padding: 14px 22px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
+    }
+
+    .container { width: min(680px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 22px; }
+    .panel h2 { font-size: 20px; color: var(--navy); margin-bottom: 6px; }
+    .panel .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+
+    .stepper {
+      display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .step-dot {
+      display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;
+      color: var(--muted); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border);
+    }
+    .step-dot.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .step-dot.done { background: #e8f8ee; color: var(--success); border-color: #b7e4c7; }
+
+    .field-label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin: 14px 0 6px; }
+    .field-label .hindi { font-weight: 400; color: var(--muted); }
+
+    input, select {
+      width: 100%; border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px; font-size: 15px; color: var(--navy); background: #fff; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--teal); }
+
+    .radio-group { display: grid; gap: 10px; margin-top: 8px; }
+    .radio-item {
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+      display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
+    }
+    .radio-item input { width: auto; margin-top: 3px; accent-color: var(--teal); }
+    .radio-item.selected { border-color: var(--teal); background: #f3fbfb; }
+
+    .btn-primary {
+      width: 100%; margin-top: 16px; background: var(--teal); color: #fff; border: none;
+      padding: 14px 16px; border-radius: var(--radius-btn); font-size: 15px; font-weight: 700; cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+
+    .btn-ghost {
+      width: 100%; margin-top: 10px; background: #fff; color: var(--navy);
+      border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-btn);
+      font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+
+    .note {
+      border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
+      padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 14px;
+    }
+    .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
+    .note.info { border-left-color: var(--info); background: #e8f4fd; color: #0c4a6e; }
+
+    .placement-display {
+      border: 2px solid var(--teal); border-radius: 10px; padding: 14px;
+      background: #f3fbfb; margin-top: 12px; text-align: center;
+    }
+    .placement-display .side {
+      font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px;
+    }
+    .placement-display .sub { font-size: 13px; color: var(--muted); }
+
+    .kit-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 14px;
+    }
+    .kit-item:last-child { border-bottom: none; }
+    .kit-check { color: var(--success); font-weight: 700; }
+
+    .confirm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .confirm-item {
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #fbfdff;
+    }
+    .confirm-item .label { font-size: 12px; color: var(--muted); }
+    .confirm-item .value { font-size: 15px; font-weight: 700; color: var(--navy); margin-top: 3px; }
+
+    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.info { background: #e8f6ff; color: var(--info); }
+
+    .hidden { display: none; }
+    .muted { color: var(--muted); }
+
+    @media (max-width: 640px) {
+      .confirm-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-badge"></span><span>Bharatiya Bazaar · भारतीय बाज़ार · Member Registration</span></div>
+    <a href="bb-bharatiya-bazaar-v2.html" style="color:#fff; text-decoration:none; font-size:14px;">← Home</a>
+  </header>
+
+  <main class="container">
+    <div class="stepper">
+      <span class="step-dot done" id="step1Dot">1 Eligibility</span>
+      <span class="step-dot done" id="step2Dot">2 Basic Info</span>
+      <span class="step-dot active" id="step3Dot">3 Sponsor</span>
+      <span class="step-dot" id="step4Dot">4 Payment</span>
+      <span class="step-dot" id="step5Dot">5 Confirm</span>
+    </div>
+
+    <!-- STEP 1: ELIGIBILITY (shown as completed for demo) -->
+    <section id="step1" class="card panel hidden">
+      <h2>Let's confirm you're eligible</h2>
+      <p class="subtitle">Three quick questions to check your eligibility · पात्रता जाँच</p>
+
+      <div class="note info">
+        Eligibility confirmed. Proceeding to Basic Info.
+      </div>
+      <button class="btn-primary" onclick="goToStep(2)">Continue</button>
+    </section>
+
+    <!-- STEP 2: BASIC INFO (shown as completed for demo) -->
+    <section id="step2" class="card panel hidden">
+      <h2>Tell us about yourself</h2>
+      <p class="subtitle">All fields are mandatory · अपनी जानकारी दें · This collects your KYC Tier 1 (Basic)</p>
+
+      <label class="field-label">Full Name <span class="hindi">पूरा नाम</span></label>
+      <input type="text" placeholder="e.g. Amit Shah" />
+
+      <label class="field-label">Date of Birth <span class="hindi">जन्म तिथि</span></label>
+      <input type="date" />
+
+      <label class="field-label">Mobile Number <span class="hindi">मोबाइल नंबर</span></label>
+      <input type="tel" placeholder="+91" />
+
+      <label class="field-label">Email Address <span class="hindi">ईमेल पता</span></label>
+      <input type="email" placeholder="your@email.com" />
+
+      <label class="field-label">Full Address <span class="hindi">पूरा पता</span></label>
+      <input type="text" placeholder="House no, street, area" />
+
+      <label class="field-label">PIN Code <span class="hindi">पिन कोड</span></label>
+      <input type="text" placeholder="e.g. 401303" />
+
+      <label class="field-label">Gender <span class="hindi">लिंग</span></label>
+      <div class="radio-group">
+        <label class="radio-item"><input type="radio" name="gender" /> Male</label>
+        <label class="radio-item"><input type="radio" name="gender" /> Female</label>
+        <label class="radio-item"><input type="radio" name="gender" /> Other</label>
+      </div>
+
+      <button class="btn-primary" onclick="goToStep(3)">Continue</button>
+      <button class="btn-ghost" onclick="goToStep(1)">Back</button>
+    </section>
+
+    <!-- STEP 3: SPONSOR — CORRECTED -->
+    <section id="step3" class="card panel">
+      <h2>Who invited you?</h2>
+      <p class="subtitle">Enter your sponsor's member ID · आपको किसने आमंत्रित किया?</p>
+
+      <label class="field-label">Sponsor ID <span class="hindi">स्पॉन्सर ID</span></label>
+      <input type="text" placeholder="e.g. BB10001" value="BB10001" />
+
+      <div class="note" style="margin-top:12px;">
+        <strong>Sponsor Found ✓</strong><br />
+        Rajesh Kumar · BB10001 · ✓ ACB Active
+      </div>
+
+      <!-- CORRECTED: Placement is sponsor-decided, shown as read-only -->
+      <label class="field-label" style="margin-top:18px;">Your Placement <span class="hindi">आपका प्लेसमेंट</span></label>
+
+      <div class="placement-display">
+        <div class="side">⬅ LEFT LEG</div>
+        <div class="sub">Your sponsor has placed you in the LEFT leg</div>
+        <div class="sub" style="margin-top:6px;">
+          Placement is locked by your sponsor and cannot be changed.
+        </div>
+      </div>
+
+      <div class="note info" style="margin-top:12px;">
+        <strong>How placement works:</strong><br />
+        • Your sponsor selects your placement (LEFT or RIGHT) before sending the registration invite.<br />
+        • You cannot change the placement during registration.<br />
+        • If you purchased multiple IDs, your SUB IDs will be auto-placed under your MAIN ID after registration.
+      </div>
+
+      <button class="btn-primary" onclick="goToStep(4)">Continue</button>
+      <button class="btn-ghost" onclick="goToStep(2)">Back</button>
+    </section>
+
+    <!-- STEP 4: PAYMENT -->
+    <section id="step4" class="card panel hidden">
+      <h2>Activate your membership</h2>
+      <p class="subtitle">One-time joining kit · Rs.600 · सदस्यता सक्रिय करें</p>
+
+      <h3 style="margin-bottom:10px;">Bharatiya Bazaar Joining Kit</h3>
+
+      <div class="kit-item"><span class="kit-check">✓</span> Welcome kit + Member ID card (MAIN ID)</div>
+      <div class="kit-item"><span class="kit-check">✓</span> Platform activation (12 months)</div>
+      <div class="kit-item"><span class="kit-check">✓</span> AutoPool entry — Anant Samriddhi Chakra (Level 0)</div>
+      <div class="kit-item"><span class="kit-check">✓</span> MY SYSTEM tree activation</div>
+      <div class="kit-item"><span class="kit-check">✓</span> Setu Kosh shopping access</div>
+      <div class="kit-item"><span class="kit-check">✓</span> KYC Tier 1 (Basic) — submitted</div>
+
+      <div class="note" style="margin-top:12px;">
+        Additional purchased IDs (SUB IDs) can be bought later from your dashboard.
+        The purchased ID cap is admin-configurable (currently max 5).
+        Rebirth IDs are free and exempt from the cap.
+      </div>
+
+      <div style="margin-top:16px; font-size:18px; font-weight:700; color:var(--navy);">
+        Total amount: ₹600
+      </div>
+
+      <label class="field-label" style="margin-top:14px;">Choose payment method <span class="hindi">भुगतान का तरीका</span></label>
+      <div class="radio-group">
+        <label class="radio-item selected"><input type="radio" name="payMethod" checked /> UPI — GPay · PhonePe · Paytm</label>
+        <label class="radio-item"><input type="radio" name="payMethod" /> Net Banking — All major Indian banks</label>
+        <label class="radio-item"><input type="radio" name="payMethod" /> Debit / Credit Card — Visa · Mastercard · RuPay</label>
+      </div>
+
+      <button class="btn-primary" onclick="goToStep(5)">Pay ₹600 Securely</button>
+      <button class="btn-ghost" onclick="goToStep(3)">Back</button>
+
+      <div class="muted" style="font-size:12px; text-align:center; margin-top:10px;">
+        🔒 256-bit SSL · ✓ RBI Compliant · ⚡ Instant Activation
+      </div>
+    </section>
+
+    <!-- STEP 5: CONFIRMATION — CORRECTED -->
+    <section id="step5" class="card panel hidden">
+      <h2>Welcome to Bharatiya Bazaar! 🎉</h2>
+      <p class="subtitle">Your membership is active. Let's begin your earning journey. आपकी सदस्यता सक्रिय है।</p>
+
+      <div class="confirm-grid">
+        <div class="confirm-item">
+          <div class="label">Your Member ID</div>
+          <div class="value">BB10042 <span class="badge info">MAIN ID</span></div>
+        </div>
+        <div class="confirm-item">
+          <div class="label">Status</div>
+          <div class="value">CB Member <span class="badge success">Community Builder</span></div>
+        </div>
+        <div class="confirm-item">
+          <div class="label">Your Sponsor</div>
+          <div class="value">Rajesh Kumar · BB10001</div>
+        </div>
+        <div class="confirm-item">
+          <div class="label">Placement</div>
+          <div class="value">LEFT LEG <span class="badge info">Sponsor-assigned</span></div>
+        </div>
+        <div class="confirm-item">
+          <div class="label">AutoPool Status</div>
+          <div class="value">Placed at Level 0 · Global queue position assigned</div>
+        </div>
+        <div class="confirm-item">
+          <div class="label">KYC Status</div>
+          <div class="value">Tier 1 (Basic) · Complete Tier 2 for withdrawal</div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:14px;">
+        <strong>Next Step:</strong> Refer 2 members (1 LEFT + 1 RIGHT) to unlock ACB status.
+        ACB unlocks withdrawal access for your earnings.
+        <br /><br />
+        <strong>Withdrawal rule:</strong> Earnings become withdrawable based on source ID and stream.
+        Setu Kosh earnings do not require ACB. AutoPool and MY SYSTEM earnings require the source ID to be ACB.
+      </div>
+
+      <button class="btn-primary">Go to My Dashboard →</button>
+      <button class="btn-ghost">Share My Referral Link</button>
+    </section>
+  </main>
+
+  <script>
+    const steps = {
+      1: document.getElementById("step1"),
+      2: document.getElementById("step2"),
+      3: document.getElementById("step3"),
+      4: document.getElementById("step4"),
+      5: document.getElementById("step5")
+    };
+
+    const dots = {
+      1: document.getElementById("step1Dot"),
+      2: document.getElementById("step2Dot"),
+      3: document.getElementById("step3Dot"),
+      4: document.getElementById("step4Dot"),
+      5: document.getElementById("step5Dot")
+    };
+
+    function goToStep(step) {
+      Object.keys(steps).forEach(key => {
+        const num = Number(key);
+        steps[num].classList.toggle("hidden", num !== step);
+
+        dots[num].classList.remove("active", "done");
+        if (num < step) dots[num].classList.add("done");
+        if (num === step) dots[num].classList.add("active");
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Initialize at step 3 for demo
+    goToStep(3);
+  </script>
+</body>
+</html>

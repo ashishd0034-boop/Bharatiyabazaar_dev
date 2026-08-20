@@ -8,6 +8,7 @@ datasource db {
 
 model Member {
   id              String                @id @default(cuid())
+  memberCode      String?               @unique  
   name            String
   mobile          String                @unique
   email           String?
@@ -37,22 +38,24 @@ model Member {
 }
 
 model MemberIdCard {
-  id             String            @id @default(cuid())
-  memberId       String
-  cardNumber     String            @unique
-  type           String
-  status         String            @default("ACTIVE")
-  acbStatus      Boolean           @default(false)
-  acbUnlockedAt  DateTime?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  autoPoolNode   AutoPoolNode?
-  commissions    CommissionEntry[]
-  member         Member            @relation(fields: [memberId], references: [id])
-  mySystemNode   MySystemNode?
-  payOnceEntries PayOnceLedger[]
+  id                   String   @id @default(cuid())
+  memberId             String
+  member               Member   @relation(fields: [memberId], references: [id])
+  cardNumber           String   @unique
+  type                 String   // MAIN, SUB, REBIRTH
+  status               String   @default("ACTIVE") // ACTIVE, INACTIVE
+  acbStatus            Boolean  @default(false)
+  acbUnlockedAt        DateTime?  // 🆕 ADDED THIS LINE — tracks when ACB unlocked
+  autoPoolNode         AutoPoolNode?
+  mySystemNode         MySystemNode?
+  commissionEntries    CommissionEntry[]
+  withdrawals          Withdrawal[]
+  sponsoredNodes       MySystemNode[] @relation("SponsoredNodes")
+  payOnceLedgerEntries PayOnceLedger[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
-  @@map("member_id_cards")
+  @@index([memberId])
 }
 
 model AutoPoolNode {
@@ -69,15 +72,21 @@ model AutoPoolNode {
 }
 
 model MySystemNode {
-  id            String       @id @default(cuid())
-  idCardId      String       @unique
-  parentNodeId  String?
-  side          String?
-  placementType String       @default("AUTO")
-  createdAt     DateTime     @default(now())
-  idCard        MemberIdCard @relation(fields: [idCardId], references: [id])
+  id             String   @id @default(cuid())
+  idCardId       String   @unique
+  idCard         MemberIdCard @relation(fields: [idCardId], references: [id])
+  parentNodeId   String?
+  parent         MySystemNode? @relation("MySystemTree", fields: [parentNodeId], references: [id])
+  children       MySystemNode[] @relation("MySystemTree")
+  side           String?  // LEFT or RIGHT
+  placementType  String   // ROOT, SPONSOR, AUTO
+  sponsorIdCardId String? // 🆕 Actual sponsor's ID card (for commission tracking)
+  sponsorCard    MemberIdCard? @relation("SponsoredNodes", fields: [sponsorIdCardId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  @@map("mysystem_nodes")
+  @@index([parentNodeId])
+  @@index([sponsorIdCardId])
 }
 
 model SetuKoshNode {
@@ -146,6 +155,8 @@ model CommissionEntry {
   createdAt      DateTime     @default(now())
   idCard         MemberIdCard @relation(fields: [idCardId], references: [id])
 
+  @@index([idCardId])
+  @@index([idCardId, status])
   @@map("commission_entries")
 }
 
@@ -180,6 +191,7 @@ model Withdrawal {
   id               String    @id @default(cuid())
   memberId         String
   idCardId         String
+  idCard           MemberIdCard @relation(fields: [idCardId], references: [id]) // 🆕 ADDED THIS LINE
   method           String
   grossPaise       Int
   tdsPaise         Int
@@ -192,6 +204,7 @@ model Withdrawal {
   rejectionReason  String?
   member           Member    @relation(fields: [memberId], references: [id])
 
+  @@index([idCardId]) // 🆕 Added for query performance
   @@map("withdrawals")
 }
 

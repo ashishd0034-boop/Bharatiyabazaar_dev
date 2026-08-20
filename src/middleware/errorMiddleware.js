@@ -5,6 +5,7 @@ function errorHandler(err, req, res, next) {
   let errorCode = "INTERNAL_SERVER_ERROR";
   let message = "An unexpected error occurred.";
 
+  // 1. Zod Validation Error
   if (err.name === "ZodError") {
     statusCode = 400;
     errorCode = "VALIDATION_ERROR";
@@ -15,23 +16,55 @@ function errorHandler(err, req, res, next) {
     });
   }
 
-  // Prisma error handling
+  // 2. Prisma P2002: Unique constraint failed (Duplicate entry)
   if (err.code === "P2002") {
-    statusCode = 409;
-    errorCode = "CONFLICT";
-    message = `A record with this value already exists: ${err.meta?.target}`;
-  } else if (err.code === "P2025") {
+    // Prisma 7+: meta.target can be undefined, array, or string
+    const target = err.meta?.target;
+    let field = "a unique field";
+    
+    if (Array.isArray(target)) {
+      field = target.join(", ");
+    } else if (typeof target === "string") {
+      field = target;
+    }
+    
+    // Map DB field names to user-friendly names
+    const friendlyNames = {
+      mobile: "mobile number",
+      email: "email address",
+      memberCode: "member code",
+      cardNumber: "card number",
+      globalPosition: "global position",
+      runDate: "settlement date"
+    };
+    
+    const friendlyField = friendlyNames[field] || field;
+    
+    return res.status(409).json({ 
+      success: false, 
+      error: { 
+        code: "DUPLICATE_ENTRY", 
+        message: `This ${friendlyField} is already registered. Please use a different one.` 
+      } 
+    });
+  }
+
+  // 3. Prisma P2025: Record not found
+  if (err.code === "P2025") {
     statusCode = 404;
     errorCode = "NOT_FOUND";
     message = "The requested record was not found.";
-  } else if (err.message && err.message.includes("Invalid")) {
-    // Custom throw
+  } 
+  
+  // 4. Custom "Invalid" throws
+  else if (err.message && err.message.includes("Invalid")) {
     statusCode = 400;
     errorCode = "BAD_REQUEST";
     message = err.message;
   }
 
-  res.status(statusCode).json({
+  // 5. Default fallback response
+  return res.status(statusCode).json({
     success: false,
     error: {
       code: errorCode,

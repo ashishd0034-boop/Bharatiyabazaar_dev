@@ -21,6 +21,16 @@ async function authMiddleware(req, res, next) {
     }
     
     req.member = member;
+    req.loginContext = {
+      loginCardId: decoded.loginCardId || null,
+      cardId: decoded.loginCardId || null,
+      cardNumber: decoded.loginCardNumber || member.memberCode,
+      loginCardNumber: decoded.loginCardNumber || member.memberCode,
+      cardType: decoded.loginCardType || "MAIN",
+      loginCardType: decoded.loginCardType || "MAIN",
+      isSubCard: decoded.loginCardType ? decoded.loginCardType !== "MAIN" : false,
+      ownerMemberCode: member.memberCode
+    };
     next();
   } catch (err) {
     return res.status(401).json({ success: false, error: { code: "UNAUTHORIZED", message: "Invalid or expired token" } });

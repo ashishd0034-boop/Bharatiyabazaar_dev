@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoPool | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .topbar {
+      background: var(--navy); color: #fff; padding: 14px 22px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 20;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
+    }
+
+    .member-chip { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.92); }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--teal);
+      display: grid; place-items: center; font-weight: 700; color: #fff;
+    }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head { margin-bottom: 16px; }
+    .page-head h1 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14.5px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 18px; margin-bottom: 16px; }
+    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 12px; }
+    .panel h3 { font-size: 15px; color: var(--navy); margin: 14px 0 8px; }
+
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px; margin-bottom: 16px;
+    }
+
+    .stat-card { padding: 16px; }
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 7px; }
+    .stat-card .value { font-size: 20px; font-weight: 700; color: var(--navy); }
+    .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.info { background: #e8f6ff; color: var(--info); }
+    .badge.danger { background: #fee2e2; color: var(--danger); }
+
+    .note {
+      border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
+      padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px;
+    }
+    .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
+    .note.info { border-left-color: var(--info); background: #e8f4fd; color: #0c4a6e; }
+
+    /* Tree visualization */
+    .tree-canvas {
+      overflow-x: auto; padding: 20px; background: #f8fafc;
+      border-radius: 10px; border: 1px solid var(--border); min-height: 300px;
+    }
+
+    .tree-level-label {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    .tree-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+
+    .tree-node {
+      border: 2px solid var(--border); border-radius: 10px; padding: 8px 12px;
+      background: #fff; min-width: 120px; text-align: center; font-size: 12.5px;
+    }
+    .tree-node.root { border-color: var(--teal); background: #f3fbfb; }
+    .tree-node.filled { border-color: var(--success); }
+    .tree-node.open { border-style: dashed; border-color: var(--muted); background: #fbfdff; }
+    .tree-node.voucher { border-color: var(--amber); background: #fffdf5; }
+    .tree-node.rebirth { border-color: var(--info); background: #f0f9ff; }
+
+    .tree-node .name { font-weight: 700; color: var(--navy); }
+    .tree-node .id { font-size: 11px; color: var(--muted); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 9px 10px; text-align: left; font-size: 13.5px; vertical-align: top; }
+    th { background: #f8fafc; color: var(--navy); }
+
+    .how-it-works { display: grid; gap: 10px; margin-top: 12px; }
+    .hiw-item {
+      display: flex; gap: 12px; border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px; background: #fbfdff;
+    }
+    .hiw-num {
+      width: 28px; height: 28px; border-radius: 50%; background: var(--navy);
+      color: #fff; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto;
+    }
+
+    .hidden { display: none; }
+    .muted { color: var(--muted); }
+
+    @media (max-width: 1080px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 640px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-badge"></span><span>Bharatiya Bazaar · भारतीय बाज़ार</span></div>
+    <div class="member-chip"><span>Rajesh Kumar · BB10042 · ✓ ACB Member</span><span class="avatar">RK</span></div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <h1>Anant Samriddhi Chakra — AutoPool</h1>
+      <p>Rajesh Kumar · BB10042 · Global AutoPool · Corrected as per validated rules</p>
+    </section>
+
+    <section class="summary-grid">
+      <div class="card stat-card">
+        <div class="label">AutoPool Status</div>
+        <div class="value"><span class="badge success">ACTIVE</span></div>
+        <div class="sub">Pool cycle 1 in progress</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Positions Filled</div>
+        <div class="value">3 / 255</div>
+        <div class="sub">254 downline + 1 root = 255 total</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Cash Earned</div>
+        <div class="value">Rs.800</div>
+        <div class="sub">L1 + L2 + L3 complete</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Rebirth IDs Generated</div>
+        <div class="value">0</div>
+        <div class="sub">Unlocks at Level 4</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Vouchers Earned</div>
+        <div class="value">Rs.0</div>
+        <div class="sub">Rs.200 at Levels 5, 6, 7</div>
+      </div>
+    </section>
+
+    <!-- TREE VISUALIZER -->
+    <div class="card panel">
+      <h2>AutoPool Tree Visualizer</h2>
+      <p class="muted" style="font-size:14px;">Use + / − to zoom · swipe sideways to scroll</p>
+
+      <div class="tree-canvas">
+        <!-- L0 -->
+        <div class="tree-level-label">L0 · ROOT</div>
+        <div class="tree-row">
+          <div class="tree-node root">
+            <div class="name">You — Rajesh Kumar</div>
+            <div class="id">BB10042 · Global position #2</div>
+          </div>
+        </div>
+
+        <!-- L1 -->
+        <div class="tree-level-label">L1 · CASH Rs.300 · COMPLETE ✓</div>
+        <div class="tree-row">
+          <div class="tree-node filled">
+            <div class="name">BB10043</div>
+            <div class="id">LEFT</div>
+          </div>
+          <div class="tree-node filled">
+            <div class="name">BB10044</div>
+            <div class="id">RIGHT</div>
+          </div>
+        </div>
+
+        <!-- L2 -->
+        <div class="tree-level-label">L2 · CASH Rs.300 · COMPLETE ✓</div>
+        <div class="tree-row">
+          <div class="tree-node filled"><div class="name">BB10045</div></div>
+          <div class="tree-node filled"><div class="name">BB10046</div></div>
+          <div class="tree-node filled"><div class="name">BB10047</div></div>
+          <div class="tree-node filled"><div class="name">BB10048</div></div>
+        </div>
+
+        <!-- L3 -->
+        <div class="tree-level-label">L3 · CASH Rs.200 · COMPLETE ✓</div>
+        <div class="tree-row">
+          <div class="tree-node filled"><div class="name">8 positions</div></div>
+        </div>
+
+        <!-- L4 -->
+        <div class="tree-level-label">L4 · REBIRTH ID UNLOCK · FILLING (0/16)</div>
+        <div class="tree-row">
+          <div class="tree-node rebirth"><div class="name">16 positions</div><div class="id">Rebirth ID on completion</div></div>
+        </div>
+
+        <!-- L5-L7 -->
+        <div class="tree-level-label">L5–L7 · REBIRTH + VOUCHER</div>
+        <div class="tree-row">
+          <div class="tree-node voucher"><div class="name">L5 · 32 positions</div><div class="id">Rebirth + Rs.200 voucher</div></div>
+          <div class="tree-node voucher"><div class="name">L6 · 64 positions</div><div class="id">Rebirth + Rs.200 voucher</div></div>
+          <div class="tree-node voucher"><div class="name">L7 · 128 positions</div><div class="id">Rebirth + Rs.200 voucher</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEVEL TABLE -->
+    <div class="card panel">
+      <h2>Pool Cycle — Level Summary</h2>
+
+      <table>
+        <thead>
+          <tr><th>Level</th><th>Positions</th><th>Status</th><th>Cash</th><th>Vouchers</th><th>Rebirth</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>L0</td><td>1 (root)</td><td><span class="badge success">ACTIVE</span></td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td>L1</td><td>2</td><td><span class="badge success">COMPLETE ✓</span></td><td>Rs.300</td><td>—</td><td>—</td></tr>
+          <tr><td>L2</td><td>4</td><td><span class="badge success">COMPLETE ✓</span></td><td>Rs.300</td><td>—</td><td>—</td></tr>
+          <tr><td>L3</td><td>8</td><td><span class="badge success">COMPLETE ✓</span></td><td>Rs.200</td><td>—</td><td>—</td></tr>
+          <tr><td>L4</td><td>16</td><td><span class="badge info">FILLING · 0/16</span></td><td>—</td><td>—</td><td>1 rebirth ID</td></tr>
+          <tr><td>L5</td><td>32</td><td><span class="badge pending">PENDING</span></td><td>—</td><td>Rs.200</td><td>1 rebirth ID</td></tr>
+          <tr><td>L6</td><td>64</td><td><span class="badge pending">PENDING</span></td><td>—</td><td>Rs.200</td><td>1 rebirth ID</td></tr>
+          <tr><td>L7</td><td>128</td><td><span class="badge pending">PENDING</span></td><td>—</td><td>Rs.200</td><td>1 rebirth ID</td></tr>
+          <tr style="background:#f8fafc; font-weight:700;">
+            <td>TOTAL</td><td>254 downline + 1 root = 255</td><td>—</td><td>Rs.800</td><td>Rs.600</td><td>4 rebirth IDs</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note" style="margin-top:14px;">
+        <strong>Pool completion behaviour:</strong> When all 255 positions in your AutoPool subtree are filled,
+        your ID stops earning AutoPool income permanently. It remains in the global AutoPool tree as a filled node.
+        Your 4 generated rebirth IDs continue independently in the global AutoPool.
+        If this is a purchased ID, it continues earning MY SYSTEM income (if applicable).
+      </div>
+    </div>
+
+    <!-- REBIRTH LOGIC -->
+    <div class="card panel">
+      <h2>How AutoPool Works</h2>
+
+      <div class="how-it-works">
+        <div class="hiw-item">
+          <div class="hiw-num">1</div>
+          <div>
+            <strong>Breadth-first auto-placement</strong>
+            <div class="muted" style="font-size:13.5px;">
+              All IDs — purchased MAIN, SUB, and rebirth — are placed automatically in the global AutoPool
+              using breadth-first positioning. Each ID receives a global position number based on entry order.
+            </div>
+          </div>
+        </div>
+
+        <div class="hiw-item">
+          <div class="hiw-num">2</div>
+          <div>
+            <strong>Cash at Levels 1–3</strong>
+            <div class="muted" style="font-size:13.5px;">
+              Rs.300 + Rs.300 + Rs.200 = Rs.800 per complete pool cycle.
+              Pay-Once Rule applies: Level 1–3 cash is paid only once per ID across AutoPool and MY SYSTEM.
+            </div>
+          </div>
+        </div>
+
+        <div class="hiw-item">
+          <div class="hiw-num">3</div>
+          <div>
+            <strong>Rebirth IDs at Levels 4–7</strong>
+            <div class="muted" style="font-size:13.5px;">
+              Each of Levels 4, 5, 6, and 7 generates 1 rebirth ID when complete.
+              Rebirth IDs are placed at the next available position in the global AutoPool.
+              They do NOT create a separate tree.
+            </div>
+          </div>
+        </div>
+
+        <div class="hiw-item">
+          <div class="hiw-num">4</div>
+          <div>
+            <strong>Product vouchers at Levels 5–7</strong>
+            <div class="muted" style="font-size:13.5px;">
+              Rs.200 voucher at each of Levels 5, 6, and 7. Total Rs.600 in vouchers per pool cycle.
+              Vouchers are issued at AutoPool Levels 5, 6, and 7 only.
+            </div>
+          </div>
+        </div>
+
+        <div class="hiw-item">
+          <div class="hiw-num">5</div>
+          <div>
+            <strong>Rebirth ID economics</strong>
+            <div class="muted" style="font-size:13.5px;">
+              Rebirth IDs generate the same AutoPool economics as purchased IDs:
+              cash at L1–L3, rebirth IDs at L4–L7, vouchers at L5–L7.
+              However, rebirth IDs do NOT get MY SYSTEM, MY SYSTEM earnings, or ACB status.
+            </div>
+          </div>
+        </div>
+
+        <div class="hiw-item">
+          <div class="hiw-num">6</div>
+          <div>
+            <strong>Rebirth ID withdrawal rule</strong>
+            <div class="muted" style="font-size:13.5px;">
+              Rebirth ID earnings become withdrawable only when the owner's MAIN ID achieves ACB status.
+              Rebirth IDs cannot achieve ACB themselves.
+            </div>
+          </div>
+        </div>
+
+        <div class="hiw-item">
+          <div class="hiw-num">7</div>
+          <div>
+            <strong>ACB is earned in MY SYSTEM, not AutoPool</strong>
+            <div class="muted" style="font-size:13.5px;">
+              AutoPool placement is automatic. Manual placement applies only in MY SYSTEM.
+              ACB status is achieved through MY SYSTEM (2 direct referrals: 1 Left + 1 Right).
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

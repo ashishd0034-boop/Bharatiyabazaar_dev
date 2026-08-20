@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Network | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .topbar {
+      background: var(--navy); color: #fff; padding: 14px 22px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 20;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
+    }
+
+    .member-chip { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.92); }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--teal);
+      display: grid; place-items: center; font-weight: 700; color: #fff;
+    }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head { margin-bottom: 16px; }
+    .page-head h1 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14.5px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 18px; margin-bottom: 16px; }
+    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 12px; }
+    .panel h3 { font-size: 15px; color: var(--navy); margin: 14px 0 8px; }
+
+    .tabs { display: flex; gap: 10px; margin: 18px 0; flex-wrap: wrap; }
+    .tab-btn {
+      border: 1px solid var(--border); background: #fff; color: var(--navy);
+      padding: 10px 16px; border-radius: 999px; font-weight: 700; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+    /* Tree visualization */
+    .tree-canvas {
+      overflow-x: auto; padding: 20px; background: #f8fafc;
+      border-radius: 10px; border: 1px solid var(--border);
+      min-height: 320px; position: relative;
+    }
+
+    .tree-level-label {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    .tree-row { display: flex; justify-content: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+
+    .tree-node {
+      border: 2px solid var(--border); border-radius: 10px; padding: 10px 14px;
+      background: #fff; min-width: 140px; text-align: center; position: relative;
+    }
+    .tree-node.root { border-color: var(--teal); background: #f3fbfb; }
+    .tree-node.filled { border-color: var(--success); }
+    .tree-node.open { border-style: dashed; border-color: var(--muted); background: #fbfdff; }
+    .tree-node.inactive { border-color: var(--danger); opacity: 0.6; }
+
+    .tree-node .name { font-weight: 700; color: var(--navy); font-size: 13px; }
+    .tree-node .id { font-size: 11.5px; color: var(--muted); }
+    .tree-node .status { font-size: 11px; margin-top: 4px; }
+
+    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.blocked { background: #f1f5f9; color: #475569; }
+    .badge.info { background: #e8f6ff; color: var(--info); }
+    .badge.danger { background: #fee2e2; color: var(--danger); }
+
+    .note {
+      border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
+      padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px;
+    }
+    .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
+    .note.info { border-left-color: var(--info); background: #e8f4fd; color: #0c4a6e; }
+
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px; margin-bottom: 16px;
+    }
+
+    .stat-card { padding: 16px; }
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 7px; }
+    .stat-card .value { font-size: 20px; font-weight: 700; color: var(--navy); }
+    .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 9px 10px; text-align: left; font-size: 13.5px; vertical-align: top; }
+    th { background: #f8fafc; color: var(--navy); }
+
+    .how-it-works { display: grid; gap: 10px; margin-top: 12px; }
+    .hiw-item {
+      display: flex; gap: 12px; border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px; background: #fbfdff;
+    }
+    .hiw-num {
+      width: 28px; height: 28px; border-radius: 50%; background: var(--navy);
+      color: #fff; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto;
+    }
+
+    .hidden { display: none; }
+    .muted { color: var(--muted); }
+
+    @media (max-width: 1080px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-badge"></span><span>Bharatiya Bazaar · भारतीय बाज़ार</span></div>
+    <div class="member-chip"><span>Rajesh Kumar · BB10042 · ✓ ACB Member</span><span class="avatar">RK</span></div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <h1>My Network — MY SYSTEM Tree</h1>
+      <p>Rajesh Kumar · BB10042 · ACB Member · Corrected as per validated rules</p>
+    </section>
+
+    <section class="summary-grid">
+      <div class="card stat-card">
+        <div class="label">Total Referrals</div>
+        <div class="value">2 members</div>
+        <div class="sub">1 LEFT · 1 RIGHT</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">MY SYSTEM Level</div>
+        <div class="value">Level 2</div>
+        <div class="sub">L1 complete · L2 filling (2/4)</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Earned So Far</div>
+        <div class="value">Rs.0.00</div>
+        <div class="sub">L1 Pay-Once blocked via AutoPool</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">ACB Status</div>
+        <div class="value" style="color:var(--success);">✓ ACHIEVED</div>
+        <div class="sub">Unlocked 05 Aug 2026</div>
+      </div>
+    </section>
+
+    <section class="tabs">
+      <button class="tab-btn active" id="tabTreeBtn" type="button">🌳 MY SYSTEM Tree</button>
+      <button class="tab-btn" id="tabAutopoolBtn" type="button">⚙ AutoPool Position</button>
+    </section>
+
+    <!-- ================= MY SYSTEM TREE TAB ================= -->
+    <section id="treeTab">
+      <div class="card panel">
+        <h2>MY SYSTEM Tree Visualization</h2>
+        <p class="muted" style="font-size:14px;">Use + / − to zoom · swipe sideways to scroll</p>
+
+        <div class="tree-canvas">
+          <!-- Level 0 -->
+          <div class="tree-level-label">L0 · ROOT</div>
+          <div class="tree-row">
+            <div class="tree-node root">
+              <div class="name">You — Rajesh Kumar</div>
+              <div class="id">BB10042 · MAIN ID</div>
+              <div class="status"><span class="badge success">✓ ACB</span></div>
+            </div>
+          </div>
+
+          <!-- Level 1 -->
+          <div class="tree-level-label">L1 · Rs.300 — PAY-ONCE BLOCKED (AutoPool paid first)</div>
+          <div class="tree-row">
+            <div class="tree-node filled">
+              <div class="name">Amit Shah</div>
+              <div class="id">BB10055 · CB Member</div>
+              <div class="status"><span class="badge success">Direct referral</span></div>
+            </div>
+            <div class="tree-node filled">
+              <div class="name">Sunita Devi</div>
+              <div class="id">BB10061 · CB Member</div>
+              <div class="status"><span class="badge success">Direct referral</span></div>
+            </div>
+          </div>
+
+          <!-- Level 2 -->
+          <div class="tree-level-label">L2 · Rs.300 — 2/4 filled · PENDING 7-day hold when complete</div>
+          <div class="tree-row">
+            <div class="tree-node filled">
+              <div class="name">Mohan Lal</div>
+              <div class="id">BB10078 · CB Member</div>
+              <div class="status"><span class="badge info">Under Amit</span></div>
+            </div>
+            <div class="tree-node open">
+              <div class="name">+ Open Position</div>
+              <div class="id">RIGHT · Under Amit</div>
+            </div>
+            <div class="tree-node open">
+              <div class="name">+ Open Position</div>
+              <div class="id">LEFT · Under Sunita</div>
+            </div>
+            <div class="tree-node open">
+              <div class="name">+ Open Position</div>
+              <div class="id">RIGHT · Under Sunita</div>
+            </div>
+          </div>
+
+          <!-- Level 3 -->
+          <div class="tree-level-label">L3 · Rs.200 — 0/8 filled</div>
+          <div class="tree-row">
+            <div class="tree-node open"><div class="name">+ Open</div><div class="id">8 positions</div></div>
+          </div>
+
+          <!-- Level 4+ Inactive -->
+          <div class="tree-level-label" style="color:var(--danger);">⚠️ L4–L7 — MY SYSTEM INACTIVE BELOW THIS LINE</div>
+          <div class="tree-row">
+            <div class="tree-node inactive">
+              <div class="name">No cash · No rebirth · No vouchers</div>
+              <div class="id">Levels 4–7 run only through AutoPool</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note warning" style="margin-top:14px;">
+          <strong>7-Day Validity Hold:</strong> MY SYSTEM Level 1, Level 2 and Level 3 commissions remain
+          PENDING for 7 days after level completion. They become CONFIRMED only after the 7-day validity
+          check completes. During this period, commissions may be reversed if fraud, dispute, or invalid
+          referral is detected.
+        </div>
+      </div>
+
+      <div class="card panel">
+        <h2>MY SYSTEM Earnings Summary</h2>
+
+        <table>
+          <thead>
+            <tr><th>Level</th><th>Members</th><th>Cash</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>L1</td><td>2/2 ✓</td><td>Rs.300</td>
+              <td><span class="badge blocked">PAY-ONCE BLOCKED — ACB UNLOCKED</span></td>
+            </tr>
+            <tr>
+              <td>L2</td><td>2/4</td><td>Rs.300</td>
+              <td><span class="badge pending">PENDING — 2 more needed</span></td>
+            </tr>
+            <tr>
+              <td>L3</td><td>0/8</td><td>Rs.200</td>
+              <td><span class="badge info">LOCKED</span></td>
+            </tr>
+            <tr>
+              <td>L4–L7</td><td>—</td><td>—</td>
+              <td><span class="badge danger">INACTIVE — MY SYSTEM ends at L3</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note" style="margin-top:14px;">
+          <strong>Total possible (Levels 1–3):</strong> Rs.800<br />
+          <strong>Earned so far from MY SYSTEM:</strong> Rs.0.00 (Level 1 paid via AutoPool — Pay-Once Rule)<br />
+          <strong>ACB Status:</strong> ✓ ACHIEVED (unlocked 05 Aug 2026)
+        </div>
+      </div>
+
+      <div class="card panel">
+        <h2>How MY SYSTEM Works</h2>
+
+        <div class="how-it-works">
+          <div class="hiw-item">
+            <div class="hiw-num">1</div>
+            <div>
+              <strong>Sponsor-decided placement for new members</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Your sponsor selects your placement (LEFT or RIGHT) before sending the registration invite.
+                You cannot change it during registration.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">2</div>
+            <div>
+              <strong>SUB IDs auto-placed under MAIN ID</strong>
+              <div class="muted" style="font-size:13.5px;">
+                If you purchase multiple IDs, the first is your MAIN ID.
+                Additional SUB IDs are automatically placed under your MAIN ID in breadth-first order.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">3</div>
+            <div>
+              <strong>Later additions can be manually placed</strong>
+              <div class="muted" style="font-size:13.5px;">
+                If you add extra IDs or members later, you may choose an open position in your MY SYSTEM structure.
+                If no position is selected, the system uses the next available breadth-first position.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">4</div>
+            <div>
+              <strong>Cash pays only Levels 1–3</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Rs.800 total is the maximum cash payout from MY SYSTEM.
+                Levels 4 and below do not generate MY SYSTEM income.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">5</div>
+            <div>
+              <strong>ACB unlock</strong>
+              <div class="muted" style="font-size:13.5px;">
+                2 direct referrals (1 Left + 1 Right) achieves ACB status.
+                ACB unlocks withdrawal access for that ID's earnings.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">6</div>
+            <div>
+              <strong>MY SYSTEM applies to all purchased IDs</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Every purchased ID (MAIN and SUB) can earn MY SYSTEM commissions and achieve ACB.
+                Rebirth IDs do NOT participate in MY SYSTEM.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= AUTOPOOL POSITION TAB ================= -->
+    <section id="autopoolTab" class="hidden">
+      <div class="card panel">
+        <h2>AutoPool Position</h2>
+
+        <div class="note info">
+          The AutoPool is a separate global binary tree from MY SYSTEM.
+          Your AutoPool position is assigned by global breadth-first queue based on entry order.
+          The full 8-level AutoPool visualizer is available on the AutoPool page.
+        </div>
+
+        <table style="margin-top:14px;">
+          <thead>
+            <tr><th>Property</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Global Position Number</td><td>#2</td></tr>
+            <tr><td>Current Level</td><td>Level 4 filling (0/16)</td></tr>
+            <tr><td>Cash Earned</td><td>Rs.800 (L1 + L2 + L3)</td></tr>
+            <tr><td>Rebirth IDs Generated</td><td>0</td></tr>
+            <tr><td>Vouchers Earned</td><td>0</td></tr>
+            <tr><td>Pool Status</td><td>ACTIVE — filling Level 4</td></tr>
+          </tbody>
+        </table>
+
+        <a href="bb-autopool.html" style="display:inline-block; margin-top:14px; color:var(--teal-dark); font-weight:700; text-decoration:none;">
+          View Full AutoPool Tree →
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const tabs = {
+      tree: document.getElementById("treeTab"),
+      autopool: document.getElementById("autopoolTab")
+    };
+    const btns = {
+      tree: document.getElementById("tabTreeBtn"),
+      autopool: document.getElementById("tabAutopoolBtn")
+    };
+
+    function switchTab(tab) {
+      Object.keys(tabs).forEach(key => {
+        tabs[key].classList.toggle("hidden", key !== tab);
+        btns[key].classList.toggle("active", key === tab);
+      });
+    }
+
+    btns.tree.addEventListener("click", () => switchTab("tree"));
+    btns.autopool.addEventListener("click", () => switchTab("autopool"));
+  </script>
+</body>
+</html>

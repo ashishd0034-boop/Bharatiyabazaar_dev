@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bharatiya Bazaar — Admin KYC Verification. Review pending applications, verified members and flagged accounts.">
+<title>KYC Verification | Bharatiya Bazaar Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B3A6B;
+    --navy-dark:#12294c;
+    --teal:#1A6B5A;
+    --teal-dark:#135241;
+    --amber:#B8860B;
+    --red:#d64545;
+    --red-dark:#b33636;
+    --orange:#d97a1a;
+    --blue:#2e5fa8;
+    --gray:#7b8798;
+    --bg:#F5F7FA;
+    --white:#ffffff;
+    --ink:#1f2a3a;
+    --muted:#5b6b7f;
+    --border:#e4e9f0;
+    --success:#1e8e5a;
+    --shadow:0 10px 30px rgba(27,58,107,.10);
+    --shadow-sm:0 3px 12px rgba(27,58,107,.08);
+    --radius-card:12px;
+    --radius-btn:8px;
+    --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-display:'Poppins',var(--font);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2}
+  a{text-decoration:none;color:inherit}
+  img{max-width:100%;display:block}
+  button{font-family:var(--font)}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--font);font-weight:600;font-size:.88rem;
+    padding:11px 18px;border-radius:var(--radius-btn);
+    border:2px solid transparent;cursor:pointer;transition:.22s ease;line-height:1;
+  }
+  .btn-sm{padding:8px 13px;font-size:.78rem}
+  .btn-navy{background:var(--navy);color:#fff}
+  .btn-navy:hover{background:var(--navy-dark)}
+  .btn-teal{background:var(--teal);color:#fff}
+  .btn-teal:hover{background:var(--teal-dark)}
+  .btn-red{background:var(--red);color:#fff}
+  .btn-red:hover{background:var(--red-dark)}
+  .btn-outline-navy{background:transparent;color:var(--navy);border-color:var(--navy)}
+  .btn-outline-navy:hover{background:var(--navy);color:#fff}
+  .btn-outline-teal{background:transparent;color:var(--teal);border-color:var(--teal)}
+  .btn-outline-teal:hover{background:var(--teal);color:#fff}
+  .btn-outline-red{background:transparent;color:var(--red);border-color:var(--red)}
+  .btn-outline-red:hover{background:var(--red);color:#fff}
+  .btn-outline-amber{background:transparent;color:var(--amber);border-color:var(--amber)}
+  .btn-outline-amber:hover{background:var(--amber);color:#fff}
+  .btn-outline-gray{background:transparent;color:var(--muted);border-color:var(--border)}
+  .btn-outline-gray:hover{background:var(--muted);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;width:280px;z-index:120;
+    background:var(--navy);color:#fff;
+    display:flex;flex-direction:column;
+  }
+  .sb-logo{
+    display:flex;align-items:center;gap:12px;
+    padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .sb-logo .logo-mark{
+    width:42px;height:42px;flex:none;border-radius:12px;
+    background:#fff;border:1px solid rgba(255,255,255,.6);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .sb-logo .logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
+  .sb-logo .lt{display:flex;flex-direction:column;line-height:1.15}
+  .sb-logo .lt-name{font-family:var(--font-display);font-weight:700;font-size:1rem}
+  .sb-logo .lt-sub{font-size:.7rem;color:rgba(255,255,255,.72);letter-spacing:.04em}
+  .admin-info{background:rgba(255,255,255,.07);margin:16px;border-radius:12px;padding:14px}
+  .a-head{display:flex;align-items:center;gap:11px}
+  .avatar{
+    width:44px;height:44px;flex:none;border-radius:50%;
+    background:var(--red);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.95rem;
+  }
+  .a-name{font-weight:700;font-size:.9rem;line-height:1.2}
+  .a-id{font-size:.7rem;color:rgba(255,255,255,.72);margin-top:1px}
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:.68rem;font-weight:800;letter-spacing:.03em;
+    padding:4px 10px;border-radius:999px;margin-top:8px;
+  }
+  .badge-red{background:var(--red);color:#fff}
+  .badge-teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .badge-amber{background:rgba(184,134,11,.14);color:#8a6508}
+  .badge-navy{background:rgba(27,58,107,.1);color:var(--navy)}
+  .sb-nav{flex:1;overflow-y:auto;padding:10px 12px}
+  .sb-nav a{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:10px;margin-bottom:3px;
+    color:rgba(255,255,255,.84);font-weight:500;font-size:.88rem;
+    transition:.2s;
+  }
+  .sb-nav a .ic{font-size:1rem;width:20px;text-align:center;flex:none}
+  .sb-nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+  .sb-nav a.active{background:var(--navy-dark);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--teal)}
+  .sb-nav a.logout{color:#ff9a9a;margin-top:6px}
+  .sb-nav a.logout:hover{background:rgba(214,69,69,.22);color:#fff}
+  .sb-foot{
+    padding:14px 20px;border-top:1px solid rgba(255,255,255,.12);
+    font-size:.68rem;color:rgba(255,255,255,.5);
+  }
+
+  /* ---------- MAIN LAYOUT ---------- */
+  .main{margin-left:280px;min-height:100vh;background:var(--bg)}
+  .main .container{max-width:1180px;margin:0 auto;padding:26px 26px 70px}
+  .page-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .page-head h1{font-size:1.45rem;font-weight:800;color:var(--navy)}
+  .page-sub{font-size:.84rem;color:var(--muted);margin-top:2px}
+
+  /* ---------- MOBILE TOP HEADER ---------- */
+  .mobile-top{
+    position:sticky;top:0;z-index:150;
+    background:var(--navy);color:#fff;
+    display:none;align-items:center;justify-content:space-between;
+    padding:10px 14px;box-shadow:0 2px 14px rgba(18,41,76,.35);gap:10px;
+  }
+  .mt-logo{width:38px;height:38px;flex:none;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .mt-logo img{width:100%;height:100%;object-fit:cover}
+  .mt-center{flex:1;text-align:center;font-family:var(--font-display);font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mt-right{display:flex;align-items:center;gap:14px;flex:none}
+  .bell-wrap{position:relative}
+  .bell{position:relative;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;line-height:1}
+  .bell-badge{
+    position:absolute;top:-5px;right:-8px;
+    background:var(--red);color:#fff;font-size:.6rem;font-weight:800;
+    min-width:16px;height:16px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;padding:0 3px;
+  }
+  .bell-drop{
+    position:absolute;right:0;top:44px;width:300px;z-index:260;
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow);display:none;overflow:hidden;
+  }
+  .bell-drop.show{display:block;animation:fadeUp .25s ease}
+  .bd-head{padding:12px 16px;font-family:var(--font-display);font-weight:700;font-size:.9rem;color:var(--navy);border-bottom:1px solid var(--border)}
+  .bd-item{display:flex;gap:11px;align-items:flex-start;padding:12px 16px;border-bottom:1px dashed var(--border);font-size:.82rem}
+  .bd-item:last-child{border-bottom:none}
+  .bd-ico{width:28px;height:28px;flex:none;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+  .bd-ico.red{background:rgba(214,69,69,.12);color:var(--red)}
+  .bd-ico.amber{background:rgba(184,134,11,.14);color:var(--amber)}
+  .bd-ico.teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .bd-ico.blue{background:rgba(27,58,107,.1);color:var(--navy)}
+  .bd-item b{display:block;font-size:.82rem;color:var(--ink)}
+  .bd-item span{font-size:.7rem;color:var(--muted)}
+  .mt-avatar{
+    width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.78rem;
+  }
+
+  /* ---------- SUMMARY CHIPS ---------- */
+  .chips-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .chip{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:13px 16px;box-shadow:var(--shadow-sm);
+    display:flex;flex-direction:column;gap:3px;
+  }
+  .chip-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .chip-val{font-family:var(--font-display);font-weight:800;font-size:1.2rem;color:var(--navy)}
+  .chip-sub{font-size:.68rem;color:var(--muted)}
+  .chip .c-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px}
+
+  /* ---------- VIEW TABS ---------- */
+  .view-tabs{
+    display:flex;background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:5px;gap:5px;margin-bottom:20px;
+    box-shadow:var(--shadow-sm);flex-wrap:wrap;
+  }
+  .vt{
+    flex:1;min-width:150px;border:none;cursor:pointer;font-family:var(--font);font-weight:600;font-size:.86rem;
+    padding:11px 12px;border-radius:9px;background:transparent;color:var(--muted);transition:.2s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .vt:hover{color:var(--navy)}
+  .vt.active{background:var(--navy);color:#fff;box-shadow:0 4px 12px rgba(27,58,107,.25)}
+  .vt-badge{
+    background:var(--amber);color:#fff;font-size:.64rem;font-weight:800;
+    padding:2px 8px;border-radius:999px;letter-spacing:.02em;
+  }
+  .vt.active .vt-badge{background:#fff;color:var(--navy)}
+  .view{display:none}
+  .view.active{display:block;animation:fadeUp .35s ease}
+
+  /* ---------- KYC CARDS ---------- */
+  .pending-stack{display:flex;flex-direction:column;gap:22px}
+  .kyc-card{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow-sm);overflow:hidden;transition:opacity .35s ease,transform .35s ease,max-height .4s ease;
+  }
+  .kyc-card.removing{opacity:0;transform:translateX(40px)}
+  .kc-head{
+    background:var(--navy);color:#fff;padding:16px 18px;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  }
+  .kc-hl{display:flex;align-items:center;gap:14px}
+  .kc-avatar{
+    width:64px;height:64px;flex:none;border-radius:50%;background:var(--amber);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:1.35rem;
+  }
+  .kc-name{font-family:var(--font-display);font-weight:800;font-size:1.05rem}
+  .kc-id{font-size:.74rem;color:rgba(255,255,255,.78);font-weight:600}
+  .kc-sub{font-size:.72rem;color:rgba(255,255,255,.82);margin-top:4px}
+  .kc-badges{display:flex;gap:8px;flex-direction:column;align-items:flex-end}
+  .st-badge{display:inline-flex;align-items:center;gap:5px;font-size:.66rem;font-weight:800;letter-spacing:.03em;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .st-pending{background:rgba(184,134,11,.16);color:#ffd98a}
+  .st-high{background:var(--red);color:#fff}
+  .st-normal{background:rgba(255,255,255,.16);color:rgba(255,255,255,.9)}
+  .kc-priority-note{font-size:.68rem;color:rgba(255,255,255,.8);margin-top:6px;max-width:280px;text-align:right;line-height:1.45}
+  .kc-body{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:18px}
+  .kc-col-title{
+    font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+    margin-bottom:12px;display:flex;align-items:center;gap:7px;
+  }
+  .d-row{display:flex;justify-content:space-between;gap:12px;font-size:.82rem;padding:7px 0;border-bottom:1px dashed var(--border);align-items:center}
+  .d-row:last-child{border-bottom:none}
+  .d-row .k{color:var(--muted);flex:none}
+  .d-row .v{font-weight:600;color:var(--ink);text-align:right}
+  .verify-tag{color:var(--success);font-weight:800;font-size:.72rem;margin-left:6px}
+  .btn-verify{
+    margin-top:7px;background:rgba(26,107,90,.1);border:1.5px solid var(--teal);color:var(--teal);
+    font-weight:700;font-size:.72rem;padding:6px 12px;border-radius:7px;cursor:pointer;transition:.2s;
+  }
+  .btn-verify:hover{background:var(--teal);color:#fff}
+  .btn-verify.loading{opacity:.6;pointer-events:none}
+  .btn-verify.verified{background:rgba(26,107,90,.14);border-color:var(--teal);color:var(--teal);pointer-events:none}
+  .btn-verify.verified:hover{background:rgba(26,107,90,.14);color:var(--teal)}
+
+  /* ---------- DOCUMENT TILES ---------- */
+  .doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .doc-tile{
+    border:1px dashed var(--border);border-radius:10px;padding:13px;text-align:center;
+    background:var(--bg);transition:.2s;
+  }
+  .doc-tile:hover{background:#EEF1F7}
+  .doc-ph{
+    height:74px;background:#e5eaf2;border-radius:8px;margin-bottom:10px;
+    display:flex;align-items:center;justify-content:center;font-size:1.7rem;color:var(--muted);
+  }
+  .doc-name{font-size:.74rem;font-weight:700;color:var(--ink)}
+  .doc-file{font-size:.66rem;color:var(--muted);margin:2px 0 9px}
+  .btn-preview{
+    background:transparent;border:1.5px solid var(--navy);color:var(--navy);
+    font-weight:700;font-size:.7rem;padding:5px 14px;border-radius:7px;cursor:pointer;transition:.2s;
+  }
+  .btn-preview:hover{background:var(--navy);color:#fff}
+
+  /* ---------- KYC WARNING ---------- */
+  .kc-warn{
+    background:#fffdf7;border:1px solid #f0dfb6;border-left:5px solid var(--amber);
+    border-radius:10px;padding:12px 16px;font-size:.82rem;color:#7a5c08;margin:14px 0 0;line-height:1.6;
+  }
+
+  /* ---------- KYC FOOTER / ACTION BAR ---------- */
+  .kc-foot{
+    display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+    padding:16px 18px;border-top:1px solid var(--border);background:var(--bg);
+  }
+  .kc-reason{flex:1;min-width:230px}
+  .input{
+    width:100%;font-family:var(--font);font-size:.86rem;
+    padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-btn);
+    background:var(--white);color:var(--ink);outline:none;transition:.2s;
+  }
+  .input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,90,.12)}
+  .input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(214,69,69,.12)}
+  .kc-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+  /* ---------- FILTER BAR (VERIFIED TAB) ---------- */
+  .filter-bar{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    padding:16px;box-shadow:var(--shadow-sm);margin-bottom:16px;
+  }
+  .search-row{position:relative}
+  .search-row .s-ico{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    color:var(--muted);font-size:.9rem;pointer-events:none;
+  }
+  .input.search{padding-left:38px}
+  .filter-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:13px}
+  .fb-group{display:flex;flex-direction:column;gap:5px}
+  .fb-group label{font-size:.66rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .fb-group .input{width:170px;max-width:100%}
+  .filter-actions{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+
+  /* ---------- TABLE ---------- */
+  .card{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);box-shadow:var(--shadow-sm);padding:20px;
+  }
+  .card-title{
+    font-family:var(--font-display);font-weight:700;font-size:1.03rem;color:var(--navy);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+  }
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;min-width:760px;font-size:.82rem}
+  thead th{
+    text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--muted);font-weight:700;padding:11px 12px;background:var(--bg);
+    border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  tbody td{padding:11px 12px;border-bottom:1px dashed var(--border);white-space:nowrap;vertical-align:middle}
+  tbody tr:hover{background:#F7F9FF}
+  tbody tr:last-child td{border-bottom:none}
+  td.id-cell{font-family:var(--font-display);font-weight:700;color:var(--navy)}
+  td.name-cell{font-weight:600;color:var(--ink)}
+  td.sub-cell{color:var(--muted)}
+  .action-link{
+    background:none;border:none;cursor:pointer;font-weight:700;font-size:.76rem;padding:4px 8px;
+    border-radius:7px;transition:.2s;
+  }
+  .action-link.view{color:var(--navy);background:rgba(27,58,107,.08)}
+  .action-link.view:hover{background:var(--navy);color:#fff}
+
+  /* ---------- REJECTED / FLAGGED CARDS ---------- */
+  .rej-grid{display:flex;flex-direction:column;gap:16px}
+  .rej-card{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow-sm);padding:18px;border-left:5px solid var(--red);
+  }
+  .rej-card.flagged{border-left-color:var(--amber)}
+  .rej-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .rej-id{font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--navy)}
+  .rej-name{font-size:.76rem;color:var(--muted);font-weight:600}
+  .rej-reason{
+    background:var(--bg);border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;font-size:.84rem;color:var(--ink);margin-bottom:12px;
+  }
+  .rej-reason b{color:var(--navy)}
+  .rej-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:.74rem;color:var(--muted);margin-bottom:14px}
+  .rej-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+  /* ---------- DRAWER ---------- */
+  .drawer-overlay{
+    position:fixed;inset:0;z-index:300;background:rgba(18,41,76,.45);
+    opacity:0;pointer-events:none;transition:opacity .28s ease;
+  }
+  .drawer-overlay.show{opacity:1;pointer-events:auto}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100vw;z-index:310;
+    background:var(--white);box-shadow:-10px 0 40px rgba(18,41,76,.25);
+    transform:translateX(100%);transition:transform .32s ease;
+    display:flex;flex-direction:column;
+  }
+  .drawer.show{transform:translateX(0)}
+  .drawer-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:18px 20px;background:var(--navy);color:#fff;
+  }
+  .drawer-head .dh-title{font-family:var(--font-display);font-weight:700;font-size:1rem}
+  .drawer-head .dh-sub{font-size:.72rem;color:rgba(255,255,255,.75)}
+  .drawer-close{
+    flex:none;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+    background:rgba(255,255,255,.14);color:#fff;font-size:1.05rem;transition:.2s;
+  }
+  .drawer-close:hover{background:var(--red)}
+  .drawer-body{flex:1;overflow-y:auto;padding:20px}
+  .dr-section{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-card);padding:16px;margin-bottom:16px}
+  .dr-sec-title{font-family:var(--font-display);font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .profile-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .p-avatar{
+    width:64px;height:64px;flex:none;border-radius:50%;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:1.4rem;
+  }
+  .p-name{font-family:var(--font-display);font-weight:800;font-size:1.08rem;color:var(--ink)}
+  .p-id{font-size:.76rem;color:var(--muted);font-weight:600}
+  .dr-row{display:flex;justify-content:space-between;gap:12px;font-size:.8rem;padding:6px 0;border-bottom:1px dashed var(--border)}
+  .dr-row:last-child{border-bottom:none}
+  .dr-row .k{color:var(--muted);flex:none}
+  .dr-row .v{font-weight:600;color:var(--ink);text-align:right}
+  .dr-actions{display:flex;flex-direction:column;gap:10px}
+  .dr-actions .btn{width:100%}
+
+  /* ---------- MODAL / LIGHTBOX ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:360;background:rgba(18,41,76,.5);
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.show{display:flex}
+  .modal-card{
+    width:100%;max-width:420px;background:var(--white);border-radius:var(--radius-card);
+    box-shadow:var(--shadow);overflow:hidden;animation:fadeUp .25s ease;
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+  .modal-head h3{font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--navy)}
+  .modal-x{background:none;border:none;font-size:1.15rem;cursor:pointer;color:var(--muted);line-height:1}
+  .modal-x:hover{color:var(--red)}
+  .modal-body{padding:18px 20px;font-size:.86rem}
+  .modal-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border)}
+  .modal-foot .btn{flex:1}
+  .m-msg{color:var(--ink);line-height:1.6}
+  .m-msg b{color:var(--navy)}
+  .lb-stage{
+    width:min(260px,72vw);aspect-ratio:3/4;background:#e5eaf2;border:1px dashed var(--border);
+    border-radius:12px;margin:0 auto 14px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:10px;color:var(--muted);
+  }
+  .lb-stage .lb-ic{font-size:2.4rem}
+  .lb-stage .lb-type{font-family:var(--font-display);font-weight:700;font-size:.92rem;color:var(--navy)}
+  .lb-file{text-align:center;font-size:.8rem;color:var(--muted)}
+  .lb-file b{color:var(--ink)}
+  .lb-note{text-align:center;font-size:.68rem;color:var(--muted);margin-top:4px}
+
+  /* ---------- EMPTY STATE ---------- */
+  .empty-state{
+    text-align:center;padding:52px 20px;color:var(--muted);
+    background:var(--white);border:1px dashed var(--border);border-radius:var(--radius-card);
+  }
+  .empty-state .es-ic{font-size:2.4rem;margin-bottom:10px}
+  .empty-state p{font-size:.9rem;font-weight:600}
+
+  /* ---------- BOTTOM TABS (MOBILE) ---------- */
+  .bottom-tabs{
+    position:fixed;bottom:0;left:0;right:0;z-index:200;
+    background:var(--white);border-top:1px solid var(--border);
+    display:none;justify-content:space-around;align-items:stretch;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    box-shadow:0 -4px 16px rgba(27,58,107,.08);
+  }
+  .tab{
+    flex:1;background:none;border:none;cursor:pointer;font-family:var(--font);
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:.64rem;font-weight:600;color:var(--muted);padding:4px 2px;border-radius:10px;
+  }
+  .tab .ti{font-size:1.15rem;line-height:1}
+  .tab.active{color:var(--teal)}
+  .tab.active .ti{transform:translateY(-1px)}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(80px);
+    background:var(--navy);color:#fff;font-size:.84rem;font-weight:600;
+    padding:12px 22px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+    opacity:0;transition:.3s ease;z-index:400;pointer-events:none;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:1100px){
+    .chips-grid{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:900px){
+    .sidebar{display:none}
+    .main{margin-left:0}
+    .mobile-top{display:flex}
+    .bottom-tabs{display:flex}
+    .main .container{padding:18px 14px 96px}
+    .drawer{width:100%}
+    .kc-body{grid-template-columns:1fr}
+    .filter-actions{width:100%;margin-left:0}
+    .filter-actions .btn{flex:1}
+    .toast{bottom:86px}
+  }
+  @media(max-width:560px){
+    .kc-badges{align-items:flex-start}
+    .kc-head{flex-direction:column;align-items:flex-start}
+    .doc-grid{grid-template-columns:1fr}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR (DESKTOP) ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="logo-mark"><img src="BB-8.png" alt="Bharatiya Bazaar logo"></div>
+      <div class="lt">
+        <span class="lt-name">Bharatiya Bazaar</span>
+        <span class="lt-sub">भारतीय बाज़ार · Admin</span>
+      </div>
+    </div>
+
+    <div class="admin-info">
+      <div class="a-head">
+        <div class="avatar">SA</div>
+        <div>
+          <div class="a-name">Super Admin</div>
+          <div class="a-id">Platform Administrator</div>
+        </div>
+      </div>
+      <span class="badge badge-red">SUPER ADMIN</span>
+    </div>
+
+    <nav class="sb-nav">
+      <a href="bb-admin.html"><span class="ic">🏠</span>Dashboard</a>
+      <a href="bb-admin-members.html"><span class="ic">👥</span>Member Management</a>
+      <a href="#"><span class="ic">🏪</span>Vendor Management</a>
+      <a href="bb-admin-kyc.html" class="active"><span class="ic">📄</span>KYC Verification</a>
+      <a href="bb-admin-payouts.html"><span class="ic">💸</span>Payout Management</a>
+      <a href="bb-admin-disputes.html"><span class="ic">⚖️</span>Dispute Resolution</a>
+      <a href="#"><span class="ic">⚙️</span>Commission Engine</a>
+      <a href="bb-admin-reports.html"><span class="ic">📊</span>Reports &amp; Export</a>
+      <a href="bb-admin-settings.html"><span class="ic">🔐</span>System Settings</a>
+      <a href="bb-bharatiya-bazaar-v2.html" class="logout"><span class="ic">🚪</span>Logout</a>
+    </nav>
+
+    <div class="sb-foot">© 2026 Bharatiya Bazaar<br>Admin Portal v1.0</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+
+    <!-- MOBILE TOP HEADER -->
+    <header class="mobile-top">
+      <div class="mt-logo"><img src="BB-8.png" alt="Bharatiya Bazaar"></div>
+      <div class="mt-center">Admin Panel</div>
+      <div class="mt-right">
+        <div class="bell-wrap">
+          <button class="bell" id="bell" aria-label="Notifications">🔔</button>
+          <span class="bell-badge">5</span>
+          <div class="bell-drop" id="bellDrop">
+            <div class="bd-head">Notifications</div>
+            <div class="bd-item">
+              <div class="bd-ico amber">📄</div>
+              <div><b>3 KYC verifications pending — oldest: 48 hours</b><span>Awaiting documents</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico red">⚖️</div>
+              <div><b>Dispute #DIS-2026-0892 — awaiting investigation</b><span>Opened 10:15 today</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico teal">🔵</div>
+              <div><b>Pool 3 at 75% — 16 IDs needed to complete</b><span>AutoPool stream</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico amber">⚠️</div>
+              <div><b>Vendor BBV10089 security deposit at Rs.4,650</b><span>Replenish to stay protected</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico blue">🏦</div>
+              <div><b>Weekly settlement batch due Monday 11 Aug</b><span>Setu Kosh stream</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-avatar">SA</div>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <div class="page-head">
+        <div>
+          <h1>KYC Verification</h1>
+          <p class="page-sub">Review applications, verify documents and manage compliance</p>
+        </div>
+      </div>
+
+      <!-- TOP SUMMARY BAR -->
+      <div class="chips-grid">
+        <div class="chip">
+          <span class="chip-label"><span class="c-dot" style="background:var(--amber)"></span>Pending Review</span>
+          <span class="chip-val" id="chipPending">3</span>
+          <span class="chip-sub">Awaiting admin action</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label"><span class="c-dot" style="background:var(--teal)"></span>Verified Today</span>
+          <span class="chip-val" id="chipVerifiedToday">12</span>
+          <span class="chip-sub">Approved in last 24h</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label"><span class="c-dot" style="background:var(--red)"></span>Rejected Today</span>
+          <span class="chip-val" id="chipRejectedToday">1</span>
+          <span class="chip-sub">Denied in last 24h</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label"><span class="c-dot" style="background:var(--navy)"></span>Total Verified</span>
+          <span class="chip-val">9,104</span>
+          <span class="chip-sub">All-time approvals</span>
+        </div>
+      </div>
+
+      <!-- VIEW TABS -->
+      <div class="view-tabs" role="tablist">
+        <button class="vt active" data-view="pending" type="button">🕒 Pending KYC <span class="vt-badge" id="pendingBadge">3</span></button>
+        <button class="vt" data-view="verified" type="button">✅ Verified Members</button>
+        <button class="vt" data-view="rejected" type="button">🚫 Rejected / Flagged</button>
+      </div>
+
+      <!-- ===== TAB 1 : PENDING KYC ===== -->
+      <div class="view active" id="viewPending">
+        <div class="pending-stack" id="pendingStack"></div>
+        <div class="empty-state" id="pendingEmpty" style="display:none">
+          <div class="es-ic">🎉</div>
+          <p>No pending KYC applications</p>
+        </div>
+      </div>
+
+      <!-- ===== TAB 2 : VERIFIED MEMBERS ===== -->
+      <div class="view" id="viewVerified">
+
+        <div class="filter-bar">
+          <div class="search-row">
+            <span class="s-ico">🔍</span>
+            <input class="input search" type="text" id="vSearch" placeholder="Search by Member ID or name...">
+          </div>
+          <div class="filter-row">
+            <div class="fb-group">
+              <label for="vFrom">Date Verified From</label>
+              <input class="input" type="date" id="vFrom">
+            </div>
+            <div class="fb-group">
+              <label for="vTo">Date Verified To</label>
+              <input class="input" type="date" id="vTo">
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-outline-teal btn-sm" id="vExport" type="button">Export CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Verified Members <span class="badge badge-teal" id="vCount">10 members</span></div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Member ID</th>
+                  <th>Name</th>
+                  <th>PAN (masked)</th>
+                  <th>Bank</th>
+                  <th>Verified On</th>
+                  <th>Verified By</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="vBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="vEmpty" style="display:none">
+            <span class="pg-info">No members match the current filters.</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== TAB 3 : REJECTED / FLAGGED ===== -->
+      <div class="view" id="viewRejected">
+        <div class="rej-grid" id="rejGrid"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== MOBILE BOTTOM TABS ===== -->
+  <nav class="bottom-tabs" id="bottomTabs">
+    <button class="tab" data-name="Dashboard"><span class="ti">🏠</span>Dashboard</button>
+    <button class="tab" data-name="Members"><span class="ti">👥</span>Members</button>
+    <button class="tab" data-name="Vendors"><span class="ti">🏪</span>Vendors</button>
+    <button class="tab active" data-name="KYC"><span class="ti">📄</span>KYC</button>
+    <button class="tab" data-name="More"><span class="ti">☰</span>More</button>
+  </nav>
+
+  <!-- ===== DRAWER (VERIFIED MEMBER) ===== -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-label="KYC record">
+    <div class="drawer-head">
+      <div>
+        <div class="dh-title">KYC Record</div>
+        <div class="dh-sub" id="drawerSub">Verified member details</div>
+      </div>
+      <button class="drawer-close" id="drawerClose" type="button" aria-label="Close">✕</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <!-- ===== CONFIRM MODAL ===== -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="confirmTitle">Confirm Action</h3>
+        <button class="modal-x" data-close="confirmModal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="m-msg" id="confirmMsg"></p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline-gray" id="confirmCancel" type="button">Cancel</button>
+        <button class="btn btn-teal" id="confirmOk" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DOCUMENT LIGHTBOX ===== -->
+  <div class="modal-overlay" id="lbModal">
+    <div class="modal-card" style="max-width:380px;text-align:center">
+      <div class="modal-head">
+        <h3>Document Preview</h3>
+        <button class="modal-x" data-close="lbModal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="lb-stage">
+          <span class="lb-ic" id="lbIcon">🪪</span>
+          <span class="lb-type" id="lbType">Aadhaar Card</span>
+        </div>
+        <div class="lb-file"><b id="lbFile">aadhaar_front.jpg</b> · <span id="lbSize">1.2MB</span></div>
+        <div class="lb-note">Document viewer (simulated) — no actual file loaded</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  function $(s){ return document.querySelector(s); }
+  function $$(s){ return Array.from(document.querySelectorAll(s)); }
+
+  /* ---------- TOAST ---------- */
+  var toastTimer = null;
+  function showToast(msg){
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  }
+
+  /* ---------- HELPERS ---------- */
+  var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function initials(name){
+    return name.split(' ').map(function(w){ return w[0]; }).join('');
+  }
+  function fmtDate(iso){
+    var d = new Date(iso + 'T00:00:00');
+    return d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear();
+  }
+  function fmtDateTime(iso, time){
+    return fmtDate(iso) + ', ' + time;
+  }
+  function fmtWait(h){
+    return h < 24 ? h + ' hour' + (h === 1 ? '' : 's') : Math.round(h / 24) + ' day' + (Math.round(h / 24) === 1 ? '' : 's');
+  }
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ---------- PENDING KYC DATA ---------- */
+  var DOCS = [
+    { type:'Aadhaar Card',  icon:'🪪', file:'aadhaar_front.jpg', size:'1.2MB' },
+    { type:'PAN Card',      icon:'💳', file:'pan_card.jpg',      size:'0.8MB' },
+    { type:'Bank Proof',    icon:'🏦', file:'cancelled_cheque.pdf', size:'0.5MB' },
+    { type:'Passport Photo',icon:'👤', file:'photo.jpg',         size:'0.3MB' }
+  ];
+
+  var PENDING = [
+    {
+      id:'BB10061', name:'Sunita Devi', submitted:'2026-08-07', time:'09:15 AM', waitH:23, priority:'NORMAL', priorityNote:null, warning:null,
+      details:{
+        dob:'22 Apr 1995', mobile:'87654XXXXX', email:'sunita.d***@gmail.com',
+        address:'Thane West, Maharashtra — 400601', pan:'FGHIJ5678K',
+        bank:'Axis Bank', acct:'**5678', ifsc:'UTIB0001234'
+      }
+    },
+    {
+      id:'BB10078', name:'Mohan Lal', submitted:'2026-08-07', time:'11:30 AM', waitH:21, priority:'NORMAL', priorityNote:null, warning:null,
+      details:{
+        dob:'14 Jul 1988', mobile:'76543XXXXX', email:'mohan.l***@gmail.com',
+        address:'Kalyan, Maharashtra — 421301', pan:'KLMNO9012P',
+        bank:'SBI', acct:'**9012', ifsc:'SBIN0001234'
+      }
+    },
+    {
+      id:'BB10134', name:'Rahul Tiwari', submitted:'2026-08-08', time:'08:45 AM', waitH:2, priority:'HIGH', priorityNote:'Member has Rs.450 pending earnings awaiting KYC', warning:'This member has Rs.450 in confirmed earnings that cannot be withdrawn until KYC is approved.',
+      details:{
+        dob:'03 Nov 1992', mobile:'97321XXXXX', email:'rahul.t***@gmail.com',
+        address:'Nashik Road, Maharashtra — 422101', pan:'PQRST3456U',
+        bank:'HDFC Bank', acct:'**3456', ifsc:'HDFC0001234'
+      }
+    }
+  ];
+
+  function pendingCardHtml(k, idx){
+    var d = k.details;
+    var pBadge = k.priority === 'HIGH'
+      ? '<span class="st-badge st-high">HIGH</span>'
+      : '<span class="st-badge st-normal">NORMAL</span>';
+    var pNote = k.priorityNote ? '<div class="kc-priority-note">Priority: ' + esc(k.priorityNote) + '</div>' : '';
+    var warn = k.warning ? '<div class="kc-warn">⚠️ ' + esc(k.warning) + '</div>' : '';
+    var docs = DOCS.map(function(doc, i){
+      return '<div class="doc-tile">' +
+        '<div class="doc-ph">' + doc.icon + '</div>' +
+        '<div class="doc-name">' + doc.type + '</div>' +
+        '<div class="doc-file">' + doc.file + ' · ' + doc.size + '</div>' +
+        '<button class="btn-preview" data-preview="' + k.id + '-' + i + '" type="button">Preview</button>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="kyc-card" id="card-' + k.id + '" data-id="' + k.id + '">' +
+      '<div class="kc-head">' +
+        '<div class="kc-hl">' +
+          '<div class="kc-avatar">' + initials(k.name) + '</div>' +
+          '<div>' +
+            '<div class="kc-name">' + k.name + '</div>' +
+            '<div class="kc-id">' + k.id + '</div>' +
+            '<div class="kc-sub">Submitted: ' + fmtDateTime(k.submitted, k.time) + ' · Waiting: ' + fmtWait(k.waitH) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="kc-badges">' +
+          '<span class="st-badge st-pending">● PENDING</span>' +
+          pBadge +
+          pNote +
+        '</div>' +
+      '</div>' +
+
+      '<div class="kc-body">' +
+        '<div>' +
+          '<div class="kc-col-title">📋 Submitted Details</div>' +
+          '<div class="d-row"><span class="k">Full Name</span><span class="v">' + k.name + '</span></div>' +
+          '<div class="d-row"><span class="k">DOB</span><span class="v">' + d.dob + '</span></div>' +
+          '<div class="d-row"><span class="k">Mobile</span><span class="v">+91 ' + d.mobile + ' <span class="verify-tag">(OTP verified ✓)</span></span></div>' +
+          '<div class="d-row"><span class="k">Email</span><span class="v">' + d.email + '</span></div>' +
+          '<div class="d-row"><span class="k">Address</span><span class="v">' + d.address + '</span></div>' +
+          '<div class="d-row"><span class="k">PAN Number</span><span class="v">' + d.pan + '<button class="btn-verify" id="verifyPan-' + k.id + '" type="button">Verify PAN</button></span></div>' +
+          '<div class="d-row"><span class="k">Bank</span><span class="v">' + d.bank + '</span></div>' +
+          '<div class="d-row"><span class="k">Account</span><span class="v">' + d.acct + '</span></div>' +
+          '<div class="d-row"><span class="k">IFSC</span><span class="v">' + d.ifsc + ' <button class="btn-verify" id="verifyBank-' + k.id + '" type="button">Verify Bank</button></span></div>' +
+        '</div>' +
+        '<div>' +
+          '<div class="kc-col-title">🖼 Document Preview</div>' +
+          '<div class="doc-grid">' + docs + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      (warn ? '<div class="kc-body" style="padding-top:0">' + warn + '</div>' : '') +
+
+      '<div class="kc-foot">' +
+        '<div class="kc-reason"><div class="fb-group"><label for="reason-' + k.id + '" style="font-size:.66rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Rejection reason (required if rejecting)</label></div>' +
+        '<input class="input" id="reason-' + k.id + '" type="text" placeholder="e.g. document not clear, name mismatch..."></div>' +
+        '<div class="kc-actions">' +
+          '<button class="btn btn-teal" id="app-' + k.id + '" type="button">✓ Approve KYC</button>' +
+          '<button class="btn btn-outline-red" id="rej-' + k.id + '" type="button">✗ Reject KYC</button>' +
+          '<button class="btn btn-outline-amber" id="info-' + k.id + '" type="button">Request More Info</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ---------- CONFIRM MODAL ---------- */
+  var confirmAction = null;
+  function openConfirm(title, msg, btnLabel, fn, cls){
+    $('#confirmTitle').textContent = title;
+    $('#confirmMsg').innerHTML = msg;
+    var ok = $('#confirmOk');
+    ok.textContent = btnLabel;
+    ok.className = 'btn ' + (cls || 'btn-teal');
+    confirmAction = fn;
+    $('#confirmModal').classList.add('show');
+  }
+  function closeConfirm(){ $('#confirmModal').classList.remove('show'); confirmAction = null; }
+
+  $('#confirmOk').addEventListener('click', function(){
+    if(confirmAction){ var fn = confirmAction; confirmAction = null; fn(); }
+    closeConfirm();
+  });
+  $('#confirmCancel').addEventListener('click', function(){ closeConfirm(); });
+
+  /* ---------- LIGHTBOX ---------- */
+  function openLb(k, idx){
+    var doc = DOCS[idx];
+    $('#lbIcon').textContent = doc.icon;
+    $('#lbType').textContent = doc.type;
+    $('#lbFile').textContent = doc.file;
+    $('#lbSize').textContent = doc.size;
+    $('#lbModal').classList.add('show');
+  }
+
+  /* ---------- PENDING ACTIONS ---------- */
+  var verifyTimers = {};
+
+  function bindVerify(btn, label){
+    if(btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', function(){
+      if(btn.classList.contains('verified') || btn.classList.contains('loading')) return;
+      btn.classList.add('loading');
+      var orig = btn.textContent;
+      btn.textContent = 'Verifying…';
+      verifyTimers[label] = setTimeout(function(){
+        btn.classList.remove('loading');
+        btn.classList.add('verified');
+        btn.textContent = 'Verified ✓';
+      }, 1500);
+    });
+  }
+
+  function removeCard(id){
+    var card = document.getElementById('card-' + id);
+    if(!card) return;
+    card.classList.add('removing');
+    setTimeout(function(){
+      card.remove();
+      PENDING = PENDING.filter(function(k){ return k.id !== id; });
+      updatePendingCounters();
+      if(!PENDING.length){
+        $('#pendingStack').innerHTML = '';
+        $('#pendingEmpty').style.display = '';
+      }
+    }, 350);
+  }
+
+  function updatePendingCounters(){
+    var n = PENDING.length;
+    $('#chipPending').textContent = n;
+    var badge = $('#pendingBadge');
+    badge.textContent = n;
+    badge.style.display = n ? '' : 'none';
+  }
+
+  function bindPending(){
+    PENDING.forEach(function(k){
+      var vp = $('#verifyPan-' + k.id), vb = $('#verifyBank-' + k.id);
+      if(vp) bindVerify(vp, 'pan-' + k.id);
+      if(vb) bindVerify(vb, 'bank-' + k.id);
+
+      DOCS.forEach(function(doc, i){
+        var p = document.querySelector('[data-preview="' + k.id + '-' + i + '"]');
+        if(p) p.addEventListener('click', function(){ openLb(k, i); });
+      });
+
+      var app = $('#app-' + k.id);
+      if(app) app.addEventListener('click', function(){
+        openConfirm(
+          'Approve KYC for ' + k.name + '?',
+          'Approve KYC for <b>' + k.name + ' (' + k.id + ')</b>? Member will be able to withdraw earnings.',
+          'Approve',
+          function(){
+            removeCard(k.id);
+            $('#chipVerifiedToday').textContent = parseInt($('#chipVerifiedToday').textContent, 10) + 1;
+            showToast('KYC approved — ' + k.id);
+          }
+        );
+      });
+
+      var rej = $('#rej-' + k.id);
+      if(rej) rej.addEventListener('click', function(){
+        var input = $('#reason-' + k.id);
+        var reason = input.value.trim();
+        input.classList.remove('err');
+        if(!reason){
+          input.classList.add('err');
+          showToast('Please enter a rejection reason');
+          return;
+        }
+        openConfirm(
+          'Reject KYC for ' + k.name + '?',
+          'Reject KYC for <b>' + k.name + ' (' + k.id + ')</b>?<br><br>Reason: ' + esc(reason),
+          'Reject',
+          function(){
+            removeCard(k.id);
+            $('#chipRejectedToday').textContent = parseInt($('#chipRejectedToday').textContent, 10) + 1;
+            showToast('KYC rejected — ' + k.id);
+          },
+          'btn-red'
+        );
+      });
+
+      var info = $('#info-' + k.id);
+      if(info) info.addEventListener('click', function(){
+        showToast('Info request sent to ' + k.id);
+      });
+    });
+  }
+
+  function renderPending(){
+    $('#pendingStack').innerHTML = PENDING.map(pendingCardHtml).join('');
+    if(!PENDING.length) $('#pendingEmpty').style.display = '';
+    bindPending();
+  }
+
+  /* ---------- VERIFIED TAB ---------- */
+  var VERIFIED = [
+    { id:'BB10042', name:'Rajesh Kumar',  pan:'ABCDE**', bank:'HDFC **1234', on:'2026-07-26', by:'Admin-01' },
+    { id:'BB10001', name:'Arjun Mehta',   pan:'BCDEF**', bank:'SBI **5678',  on:'2026-01-02', by:'Admin-01' },
+    { id:'BB10055', name:'Amit Shah',     pan:'CDEFG**', bank:'Axis **9012', on:'2026-08-02', by:'Admin-02' },
+    { id:'BB10088', name:'Kavita Rao',    pan:'DEFGH**', bank:'HDFC **3456', on:'2026-08-06', by:'Admin-02' },
+    { id:'BB10099', name:'Deepak Verma',  pan:'EFGHI**', bank:'SBI **7890',  on:'2026-08-05', by:'Admin-01' },
+    { id:'BB10115', name:'Ravi Kumar',    pan:'FGHIJ**', bank:'Axis **1234', on:'2026-08-04', by:'Admin-02' },
+    { id:'BB10128', name:'Sita Menon',    pan:'GHIJK**', bank:'HDFC **5678', on:'2026-08-03', by:'Admin-01' },
+    { id:'BB10141', name:'Meena Pillai',  pan:'HIJKL**', bank:'SBI **9012',  on:'2026-08-02', by:'Admin-02' },
+    { id:'BB10158', name:'Anil Gupta',    pan:'IJKLM**', bank:'Axis **3456', on:'2026-08-01', by:'Admin-01' },
+    { id:'BB10189', name:'Lakshmi Iyer',  pan:'JKLMN**', bank:'HDFC **7890', on:'2026-06-21', by:'Admin-01' }
+  ];
+
+  function filteredVerified(){
+    var q = $('#vSearch').value.trim().toLowerCase();
+    var from = $('#vFrom').value;
+    var to = $('#vTo').value;
+    return VERIFIED.filter(function(m){
+      if(q){
+        var hay = (m.id + ' ' + m.name).toLowerCase();
+        if(hay.indexOf(q) === -1) return false;
+      }
+      if(from && m.on < from) return false;
+      if(to && m.on > to) return false;
+      return true;
+    });
+  }
+
+  function renderVerified(){
+    var list = filteredVerified();
+    $('#vBody').innerHTML = list.map(function(m){
+      return '<tr>' +
+        '<td class="id-cell">' + m.id + '</td>' +
+        '<td class="name-cell">' + m.name + '</td>' +
+        '<td class="sub-cell">' + m.pan + '</td>' +
+        '<td class="sub-cell">' + m.bank + '</td>' +
+        '<td class="sub-cell">' + fmtDate(m.on) + '</td>' +
+        '<td class="sub-cell">' + m.by + '</td>' +
+        '<td><button class="action-link view" data-viewv="' + m.id + '" type="button">View</button></td>' +
+      '</tr>';
+    }).join('');
+    $('#vCount').textContent = list.length + ' member' + (list.length === 1 ? '' : 's');
+    $('#vEmpty').style.display = list.length ? 'none' : '';
+    $$('#vBody [data-viewv]').forEach(function(b){
+      b.addEventListener('click', function(){ openVerifiedDrawer(b.dataset.viewv); });
+    });
+  }
+
+  $('#vSearch').addEventListener('input', renderVerified);
+  $('#vFrom').addEventListener('change', renderVerified);
+  $('#vTo').addEventListener('change', renderVerified);
+
+  $('#vExport').addEventListener('click', function(){
+    var list = filteredVerified();
+    var lines = ['Member ID,Name,PAN,Bank,Verified On,Verified By'];
+    list.forEach(function(m){
+      lines.push([m.id, '"' + m.name + '"', m.pan, m.bank, fmtDate(m.on), m.by].join(','));
+    });
+    var blob = new Blob(['\ufeff' + lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bb-verified-members.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showToast('Exporting ' + list.length + ' verified member' + (list.length === 1 ? '' : 's') + '...');
+  });
+
+  /* ---------- VERIFIED DRAWER ---------- */
+  function openVerifiedDrawer(id){
+    var m = VERIFIED.find(function(x){ return x.id === id; });
+    if(!m) return;
+    $('#drawerSub').textContent = m.id + ' · ' + m.name;
+    $('#drawerBody').innerHTML =
+      '<div class="dr-section">' +
+        '<div class="dr-sec-title">👤 Member</div>' +
+        '<div class="profile-top">' +
+          '<div class="p-avatar">' + initials(m.name) + '</div>' +
+          '<div><div class="p-name">' + m.name + '</div>' +
+          '<div class="p-id">Member ID: ' + m.id + '</div>' +
+          '<span class="badge badge-teal">✔ KYC VERIFIED</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dr-section">' +
+        '<div class="dr-sec-title">🪪 KYC Record</div>' +
+        '<div class="dr-row"><span class="k">PAN</span><span class="v">' + m.pan + '</span></div>' +
+        '<div class="dr-row"><span class="k">Bank</span><span class="v">' + m.bank + '</span></div>' +
+        '<div class="dr-row"><span class="k">Verified On</span><span class="v">' + fmtDate(m.on) + '</span></div>' +
+        '<div class="dr-row"><span class="k">Verified By</span><span class="v">' + m.by + '</span></div>' +
+      '</div>' +
+      '<div class="dr-section">' +
+        '<div class="dr-sec-title">🛠 Admin Actions</div>' +
+        '<div class="dr-actions">' +
+          '<button class="btn btn-outline-red" id="revokeKyc" type="button">🚫 Revoke KYC</button>' +
+        '</div>' +
+      '</div>';
+    $('#revokeKyc').addEventListener('click', function(){
+      openConfirm(
+        'Revoke KYC for ' + m.name + '?',
+        'Revoke KYC for <b>' + m.name + ' (' + m.id + ')</b>? Member will lose withdrawal access until re-verification.',
+        'Revoke KYC',
+        function(){
+          closeDrawer();
+          showToast('KYC revoked — ' + m.id);
+        },
+        'btn-red'
+      );
+    });
+    $('#drawerOverlay').classList.add('show');
+    $('#drawer').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer(){
+    $('#drawerOverlay').classList.remove('show');
+    $('#drawer').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  /* ---------- REJECTED / FLAGGED TAB ---------- */
+  function renderRejected(){
+    $('#rejGrid').innerHTML =
+      '<div class="rej-card">' +
+        '<div class="rej-head">' +
+          '<div><div class="rej-id">BB10175 — Suresh Nair</div><div class="rej-name">Rejected application</div></div>' +
+          '<span class="badge badge-red">REJECTED</span>' +
+        '</div>' +
+        '<div class="rej-reason"><b>Reason:</b> "PAN card image blurry — unreadable"</div>' +
+        '<div class="rej-meta"><span>📅 Rejected: 05 Aug 2026</span><span>👤 Rejected by: Admin-02</span></div>' +
+        '<div class="rej-actions">' +
+          '<button class="btn btn-teal btn-sm" id="resub-10175" type="button">↻ Allow Resubmission</button>' +
+          '<button class="btn btn-outline-navy btn-sm" id="view-10175" type="button">View Details</button>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="rej-card flagged">' +
+        '<div class="rej-head">' +
+          '<div><div class="rej-id">BB10201 — Vikash Pandey</div><div class="rej-name">Flagged account (not rejected)</div></div>' +
+          '<span class="badge badge-red">FLAGGED</span>' +
+        '</div>' +
+        '<div class="rej-reason"><b>Reason:</b> "PAN number mismatch with submitted Aadhaar name"</div>' +
+        '<div class="rej-meta"><span>🚩 Flagged by: Admin-01 on 12 May 2026</span><span>🔒 Account status: SUSPENDED (linked)</span></div>' +
+        '<div class="rej-actions">' +
+          '<button class="btn btn-red btn-sm" id="inv-10201" type="button">🔎 Investigate</button>' +
+          '<button class="btn btn-outline-teal btn-sm" id="clear-10201" type="button">Clear Flag</button>' +
+          '<button class="btn btn-outline-navy btn-sm" id="view-10201" type="button">View Member</button>' +
+        '</div>' +
+      '</div>';
+
+    $('#resub-10175').addEventListener('click', function(){ showToast('Resubmission allowed — BB10175'); });
+    $('#view-10175').addEventListener('click', function(){ showToast('Opening details for BB10175...'); });
+    $('#inv-10201').addEventListener('click', function(){ showToast('Investigating BB10201...'); });
+    $('#clear-10201').addEventListener('click', function(){ showToast('Flag cleared — BB10201'); });
+    $('#view-10201').addEventListener('click', function(){ showToast('Opening member profile BB10201...'); });
+  }
+
+  /* ---------- VIEW TABS ---------- */
+  $$('.vt').forEach(function(t){
+    t.addEventListener('click', function(){
+      $$('.vt').forEach(function(x){ x.classList.toggle('active', x === t); });
+      var v = t.dataset.view;
+      $('#viewPending').classList.toggle('active', v === 'pending');
+      $('#viewVerified').classList.toggle('active', v === 'verified');
+      $('#viewRejected').classList.toggle('active', v === 'rejected');
+    });
+  });
+
+  /* ---------- DRAWER / MODAL CLOSE ---------- */
+  $('#drawerClose').addEventListener('click', closeDrawer);
+  $('#drawerOverlay').addEventListener('click', closeDrawer);
+  $$('[data-close]').forEach(function(b){
+    b.addEventListener('click', function(){ $('#' + b.dataset.close).classList.remove('show'); });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      closeDrawer();
+      $('#confirmModal').classList.remove('show');
+      $('#lbModal').classList.remove('show');
+      confirmAction = null;
+    }
+  });
+
+  /* ---------- SIDEBAR / TABS / BELL ---------- */
+  $$('.sb-nav a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      if(a.classList.contains('active')) return;
+      if(a.getAttribute('href') && a.getAttribute('href') !== '#') return;
+      e.preventDefault();
+      if(a.classList.contains('logout')){ showToast('Logging out (demo)'); return; }
+      showToast('Coming soon: ' + a.textContent.trim());
+    });
+  });
+
+  var ADMIN_TABS = { 'Dashboard':'bb-admin.html', 'Members':'bb-admin-members.html', 'KYC':'bb-admin-kyc.html' };
+  $$('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      if(t.classList.contains('active')) return;
+      var name = t.getAttribute('data-name');
+      if(ADMIN_TABS[name]) location.href = ADMIN_TABS[name]; else showToast('Coming soon: ' + name);
+    });
+  });
+
+  var bell = $('#bell');
+  var drop = $('#bellDrop');
+  bell.addEventListener('click', function(e){
+    e.stopPropagation();
+    drop.classList.toggle('show');
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.bell-wrap')) drop.classList.remove('show');
+  });
+
+  /* ---------- INIT ---------- */
+  renderPending();
+  renderVerified();
+  renderRejected();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoPool · Anant Samriddhi Chakra | Bharatiya Bazaar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0d1b2a; --navy-2: #14263b; --teal: #0f9d9d; --teal-dark: #0b7c7c;
+      --amber: #f5a623; --bg: #f4f7fb; --card: #ffffff; --text: #17233a;
+      --muted: #64748b; --border: #dbe4ef; --success: #16a34a; --warning: #d97706;
+      --info: #0369a1; --radius-card: 12px; --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13,27,42,0.08); --sidebar-width: 260px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Inter", "Noto Sans Devanagari", sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; }
+    h1, h2, h3 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width); background: linear-gradient(180deg, var(--navy), var(--navy-2)); color: #fff; display: flex; flex-direction: column; z-index: 50; box-shadow: 4px 0 20px rgba(13,27,42,0.15); }
+    .sidebar-brand { padding: 22px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .brand-badge { width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, #fff 55% 100%); }
+    .brand-text .title { font-weight: 700; font-size: 15px; }
+    .brand-text .subtitle { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+    .sidebar-profile { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 16px; }
+    .profile-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-code { font-size: 11.5px; color: var(--amber); font-weight: 600; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+    .nav-section-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); padding: 8px 12px 6px; font-weight: 700; margin-top: 12px; }
+    .nav-section-title:first-child { margin-top: 0; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500; margin-bottom: 3px; transition: all 0.2s; }
+    .nav-item .icon { font-size: 17px; width: 22px; text-align: center; }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+    .nav-item.active { background: linear-gradient(90deg, var(--teal), var(--teal-dark)); color: #fff; box-shadow: 0 4px 12px rgba(15,157,157,0.25); }
+    .sidebar-footer { padding: 14px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .nav-item.logout:hover { background: rgba(220,38,38,0.15); color: #fca5a5; }
+
+    .main { margin-left: var(--sidebar-width); min-height: 100vh; }
+    .topbar { background: #fff; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
+    .topbar h2 { color: var(--navy); font-size: 18px; }
+    .topbar p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .topbar-btn { border: 1px solid var(--border); background: #fff; color: var(--navy); padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .topbar-btn:hover { border-color: var(--teal); color: var(--teal-dark); }
+    .topbar-btn.primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+    .topbar-btn.amber { background: var(--amber); color: #fff; border-color: var(--amber); }
+    .container { padding: 28px 32px; max-width: 1400px; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow); }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat-card { padding: 16px; }
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 7px; }
+    .stat-card .value { font-size: 20px; font-weight: 700; color: var(--navy); font-family: "Poppins", sans-serif; }
+    .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
+    .stat-card.highlight { background: linear-gradient(135deg, var(--navy), var(--navy-2)); border-color: transparent; }
+    .stat-card.highlight .label, .stat-card.highlight .sub { color: rgba(255,255,255,0.8); }
+    .stat-card.highlight .value { color: var(--amber); }
+
+    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.info { background: #e8f6ff; color: var(--info); }
+
+    .panel { padding: 20px; margin-bottom: 20px; }
+    .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 6px; }
+    .panel .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; font-size: 12.5px; color: var(--muted); }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .legend .dot { width: 12px; height: 12px; border-radius: 4px; }
+
+    .zoom-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; box-shadow: 0 3px 12px rgba(13,27,42,0.08); }
+    .zoom-group { display: flex; align-items: center; gap: 8px; }
+    .zoom-btn { width: 36px; height: 36px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg); color: var(--navy); font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: .2s; line-height: 1; }
+    .zoom-btn:hover:not(:disabled) { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .zoom-btn:disabled { opacity: .4; cursor: default; }
+    .zoom-pct { min-width: 54px; text-align: center; font-family: "Poppins", sans-serif; font-weight: 800; font-size: .88rem; }
+    .zoom-hint { font-size: .73rem; color: var(--muted); }
+
+    .tree-layout { display: block; }
+    @media(min-width:900px) { .tree-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; align-items: start; } }
+
+    .chakra-wrap { overflow: auto; padding: 20px 10px; background: #f8fafc; border-radius: 10px; border: 1px solid var(--border); max-height: 70vh; }
+    .tree-container { display: inline-block; min-width: 100%; transition: transform 0.3s ease; transform-origin: top left; }
+    .chakra ul { display: flex; justify-content: center; padding-top: 30px; position: relative; }
+    .chakra > ul { padding-top: 0; }
+    .chakra li { list-style-type: none; position: relative; padding: 30px 4px 0; text-align: center; }
+    .chakra > ul > li { padding-top: 0; }
+    .chakra > ul > li::before, .chakra > ul > li::after { display: none; }
+    .chakra li::before, .chakra li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 2px solid var(--teal); width: 50%; height: 30px; opacity: 0.4; }
+    .chakra li::after { right: auto; left: 50%; border-left: 2px solid var(--teal); }
+    .chakra li:only-child::after, .chakra li:only-child::before { display: none; }
+    .chakra li:first-child::before, .chakra li:last-child::after { border: 0 none; }
+    .chakra li:last-child::before { border-right: 2px solid var(--teal); border-radius: 0 8px 0 0; }
+    .chakra li:first-child::after { border-radius: 8px 0 0 0; }
+    .chakra ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid var(--teal); width: 0; height: 30px; opacity: 0.4; }
+
+    .pool-node { display: inline-block; width: 120px; padding: 10px 6px 28px; border: 2px solid var(--border); border-radius: 10px; background: #fff; box-shadow: var(--shadow); position: relative; vertical-align: top; cursor: pointer; transition: all 0.2s; }
+    .pool-node:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(15,157,157,0.2); }
+    .pool-node.selected { outline: 3px solid var(--teal); outline-offset: 2px; }
+    .pool-node .pos { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--navy); color: var(--amber); font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+    .pool-node .name { font-size: 12px; font-weight: 700; color: var(--navy); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pool-node .code { font-size: 10.5px; color: var(--teal-dark); font-weight: 700; margin-top: 2px; }
+    .pool-node .level { font-size: 10px; color: var(--muted); margin-top: 3px; }
+    .pool-node .sponsor { font-size: 9px; color: var(--muted); font-style: italic; margin-top: 2px; }
+    .pool-node.me { border-color: var(--amber); background: linear-gradient(135deg, #fff8e9, #fff); }
+    .pool-node.acb { border-color: var(--success); }
+    .pool-node.rebirth { border-color: #8b5cf6; background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%); box-shadow: 0 4px 14px rgba(139, 92, 246, 0.18); }
+    .pool-node.rebirth .pos { background: #7c3aed; color: #fff; }
+    .pool-node.empty { border-style: dashed; background: #fbfdff; box-shadow: none; padding-bottom: 10px; }
+    .pool-node.empty .name { color: var(--muted); font-weight: 500; font-size: 11px; }
+    .side-tag { display: inline-block; font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 4px; margin-top: 4px; }
+    .side-tag.left { background: #e8f6ff; color: #0369a1; }
+    .side-tag.right { background: #fff4e0; color: #d97706; }
+    .badge-rebirth { background: #7c3aed; color: #fff; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; margin-top: 2px; }
+    .badge-sub { background: #0f9d9d; color: #fff; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; font-weight: 700; display: inline-block; margin-top: 2px; }
+
+    .toggle-btn { position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: #fff; border: 2px solid #fff; display: grid; place-items: center; cursor: pointer; font-weight: 800; font-size: 13px; line-height: 1; box-shadow: 0 2px 6px rgba(13,27,42,0.25); transition: all 0.2s ease; z-index: 5; }
+    .toggle-btn:hover { background: var(--teal); transform: translateX(-50%) scale(1.15); }
+    .chakra li.collapsed > ul { display: none; }
+    .chakra li.collapsed > .pool-node { border-style: dashed; opacity: 0.85; }
+    .hidden-count { display: block; font-size: 9px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+    .node-detail { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); margin-top: 22px; }
+    @media(min-width:900px) { .node-detail { margin-top: 0; position: sticky; top: 24px; } }
+    .nd-head { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; }
+    .nd-avatar { width: 50px; height: 50px; flex: none; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-family: "Poppins", sans-serif; font-weight: 800; font-size: 1.05rem; }
+    .nd-avatar.navy { background: var(--navy); color: #fff; }
+    .nd-avatar.teal { background: rgba(15,157,157,.12); color: var(--teal); }
+    .nd-avatar.muted { background: var(--bg); color: var(--muted); border: 1px dashed var(--border); }
+    .nd-head h4 { font-size: 1.02rem; color: var(--navy); }
+    .nd-head .nd-id { font-size: .76rem; color: var(--muted); font-weight: 600; }
+    .nd-rows { border-top: 1px dashed var(--border); padding-top: 10px; margin-bottom: 16px; }
+    .nd-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; font-size: .84rem; border-bottom: 1px dashed var(--border); }
+    .nd-row:last-child { border-bottom: none; }
+    .nd-row .k { color: var(--muted); }
+    .nd-row .v { font-weight: 600; color: var(--text); text-align: right; }
+    .nd-row .v.green { color: var(--success); }
+    .nd-empty-box { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; background: var(--bg); margin-bottom: 14px; }
+    .nd-empty-box .eb-title { font-weight: 800; color: var(--text); font-size: .95rem; }
+    .nd-empty-box .eb-sub { font-size: .78rem; color: var(--muted); margin-top: 3px; }
+    .nd-actions { display: grid; gap: 10px; }
+    .nd-note { font-size: .72rem; color: var(--muted); margin-top: 12px; text-align: center; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: "Inter", sans-serif; font-weight: 600; font-size: .9rem; padding: 11px 20px; border-radius: var(--radius-btn); border: 2px solid transparent; cursor: pointer; transition: .22s ease; line-height: 1; }
+    .btn-navy { background: var(--navy); color: #fff; }
+    .btn-teal { background: var(--teal); color: #fff; }
+    .btn-teal:hover { background: var(--teal-dark); }
+    .btn-outline-teal { background: transparent; color: var(--teal); border-color: var(--teal); }
+    .btn-outline-teal:hover { background: var(--teal); color: #fff; }
+
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(13,27,42,0.55); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(520px, 100%); background: #fff; border-radius: 14px; padding: 22px; max-height: 88vh; overflow: auto; }
+    .modal h3 { color: var(--navy); margin-bottom: 14px; }
+    .modal-actions { display: grid; gap: 10px; margin-top: 6px; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 9px 10px; text-align: left; font-size: 13.5px; }
+    th { background: #f8fafc; color: var(--navy); }
+
+    .note { border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e; padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 14px; }
+
+    .how-it-works { display: grid; gap: 10px; margin-top: 12px; }
+    .hiw-item { display: flex; gap: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #fbfdff; }
+    .hiw-num { width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: #fff; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+
+    .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .hidden { display: none; }
+    .muted { color: var(--muted); }
+
+    @media (max-width: 1080px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px) {
+      :root { --sidebar-width: 0px; }
+      .sidebar { top: auto; bottom: 0; width: 100%; height: 70px; flex-direction: row; background: #fff; border-top: 1px solid var(--border); }
+      .sidebar-brand, .sidebar-profile, .sidebar-footer, .nav-section-title { display: none; }
+      .sidebar-nav { padding: 0; display: flex; flex-direction: row; justify-content: space-around; align-items: center; width: 100%; }
+      .nav-item { flex-direction: column; gap: 2px; padding: 6px 8px; font-size: 10.5px; margin: 0; color: var(--muted); }
+      .nav-item.active { background: transparent; color: var(--teal-dark); box-shadow: none; }
+      .main { margin-left: 0; margin-bottom: 70px; }
+      .container { padding: 20px; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .pool-node { width: 85px; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-badge"></span>
+      <div class="brand-text"><div class="title">Bharatiya Bazaar</div><div class="subtitle">भारतीय बाज़ार</div></div>
+    </div>
+    <div class="sidebar-profile">
+      <div class="avatar" id="memberAvatar">?</div>
+      <div style="min-width:0;"><div class="profile-name" id="memberName">Loading...</div><div class="profile-code" id="memberCode">BB-----</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="/bb-dashboard.html" class="nav-item"><span class="icon">🏠</span><span>Dashboard</span></a>
+      <a href="/bb-tree.html" class="nav-item"><span class="icon">🤝</span><span>My Network</span></a>
+      <a href="/bb-wallet.html" class="nav-item"><span class="icon">👛</span><span>Wallet</span></a>
+      <a href="/bb-commissions.html" class="nav-item"><span class="icon">💰</span><span>Commissions</span></a>
+      <div class="nav-section-title">Earnings</div>
+      <a href="/bb-autopool.html" class="nav-item active"><span class="icon">🌀</span><span>AutoPool</span></a>
+      <a href="/bb-setu-kosh.html" class="nav-item"><span class="icon">🛒</span><span>Setu Kosh</span></a>
+      <a href="/bb-rebirth.html" class="nav-item"><span class="icon">🎭</span><span>Rebirth IDs</span></a>
+      <div class="nav-section-title">Account</div>
+      <a href="/bb-notifications.html" class="nav-item"><span class="icon">🔔</span><span>Notifications</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" class="nav-item logout" onclick="handleLogout(); return false;"><span class="icon">🚪</span><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="pageHeaderTitle">Anant Samriddhi Chakra — AutoPool</h2>
+        <p id="pageHeaderSub">The global 8-level binary pool · हर ID के लिए एक स्थान</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-btn amber hidden" id="backToMyBtn" onclick="backToMyTree()">⬅ My Pool</button>
+        <button class="topbar-btn" onclick="expandAll()">➕ Expand All</button>
+        <button class="topbar-btn" onclick="collapseAll()">➖ Collapse All</button>
+        <button class="topbar-btn primary" onclick="fitToScreen()">⚡ Fit to Screen</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="loadingIndicator" class="loading">Loading the Chakra...</div>
+
+      <div id="poolContent" class="hidden">
+        <section class="summary-grid">
+          <div class="card stat-card highlight">
+            <div class="label">📍 My Global Position</div>
+            <div class="value" id="myPosition">—</div>
+            <div class="sub" id="myLevel">Level —</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">🌐 Positions Filled</div>
+            <div class="value" id="totalInPool">0</div>
+            <div class="sub">Members in the global Chakra</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">💵 Cash Earned</div>
+            <div class="value" id="cashEarned">Rs.0</div>
+            <div class="sub">L1–L3 completions (Pay-Once)</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">🎭 Rebirth IDs</div>
+            <div class="value" id="rebirthIds">0</div>
+            <div class="sub">Unlocked at Levels 4–7</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">🎁 Vouchers</div>
+            <div class="value" id="vouchers">Rs.0</div>
+            <div class="sub">Rs.200 at Levels 5, 6, 7</div>
+          </div>
+        </section>
+
+        <div class="card panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+            <div>
+              <h2>My Pool Cycle · मेरा पूल</h2>
+              <p class="sub" id="treeSubText" style="margin-bottom:0;">The positions below YOU in the global Chakra. Click any node for details.</p>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input type="text" id="exploreCardInput" placeholder="Card No. (e.g. RB10032, SB10016)" 
+                     style="padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:13px; width:220px; outline:none;" 
+                     onkeydown="if(event.key==='Enter') handleExploreSearch();" />
+              <button class="topbar-btn primary" onclick="handleExploreSearch()" style="padding:8px 14px;">🔍 Explore</button>
+            </div>
+          </div>
+
+          <div id="explorerBreadcrumbs" style="display:none; background:#f0f7ff; border:1px solid #cce3ff; padding:10px 14px; border-radius:8px; font-size:13.5px; margin-bottom:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <div id="breadcrumbTrail" style="font-weight:600; color:var(--navy);"></div>
+            <div style="display:flex; gap:8px;">
+              <button class="topbar-btn amber" id="backHistoryBtn" onclick="popExplorerHistory()" style="padding:4px 10px; font-size:12px;">⬅ Back to previous root</button>
+              <button class="topbar-btn" onclick="resetToMyPool()" style="padding:4px 10px; font-size:12px;">🏠 Reset to My Pool</button>
+            </div>
+          </div>
+
+          <div class="legend">
+            <span><span class="dot" style="background:#fff8e9; border:2px solid var(--amber);"></span> You / Viewing Root</span>
+            <span><span class="dot" style="background:#f5f3ff; border:2px solid #8b5cf6;"></span> 🎭 Rebirth ID</span>
+            <span><span class="dot" style="background:#fff; border:2px solid var(--success);"></span> ACB Unlocked</span>
+            <span><span class="dot" style="background:#fbfdff; border:2px dashed var(--muted);"></span> Waiting</span>
+          </div>
+
+          <div class="zoom-bar">
+            <div class="zoom-group">
+              <button class="zoom-btn" id="zoomOut" type="button">−</button>
+              <span class="zoom-pct" id="zoomPct">100%</span>
+              <button class="zoom-btn" id="zoomIn" type="button">+</button>
+            </div>
+            <span class="zoom-hint">Use + / − to zoom · Click nodes for details</span>
+          </div>
+
+          <div class="tree-layout">
+            <div class="chakra-wrap" id="treeWrap">
+              <div class="tree-container" id="treeContainer">
+                <div id="myTreeContainer"></div>
+              </div>
+            </div>
+            <div class="node-detail" id="nodeDetail"></div>
+          </div>
+        </div>
+
+        <div class="card panel">
+          <h2>Pool Cycle — Level Summary</h2>
+          <table>
+            <thead>
+              <tr><th>Level</th><th>Positions</th><th>Status</th><th>Cash</th><th>Vouchers</th><th>Rebirth</th></tr>
+            </thead>
+            <tbody id="levelTableBody"></tbody>
+          </table>
+          <div class="note">
+            <strong>Pool completion behaviour:</strong> When all 255 positions in your AutoPool subtree are filled,
+            your ID stops earning AutoPool income permanently but remains a filled node in the global tree.
+            Your 4 generated rebirth IDs continue independently. ACB is earned in MY SYSTEM, not AutoPool.
+          </div>
+        </div>
+
+        <div class="card panel">
+          <h2>Global Chakra · वैश्विक पूल</h2>
+          <p class="sub">The entire world pool from Position #1. Every new member takes the next free position.</p>
+          <div class="chakra-wrap" id="globalTreeContainer"></div>
+        </div>
+
+        <div class="card panel">
+          <h2>How AutoPool Works</h2>
+          <div class="how-it-works">
+            <div class="hiw-item"><div class="hiw-num">1</div><div><strong>Breadth-first auto-placement</strong><div class="muted" style="font-size:13.5px;">All IDs — purchased MAIN, SUB, and rebirth — are placed automatically in the global AutoPool using breadth-first positioning based on entry order.</div></div></div>
+            <div class="hiw-item"><div class="hiw-num">2</div><div><strong>Cash at Levels 1–3</strong><div class="muted" style="font-size:13.5px;">Rs.300 + Rs.300 + Rs.200 = Rs.800 per complete pool cycle. Pay-Once Rule applies: Level 1–3 cash is paid only once per ID across AutoPool and MY SYSTEM.</div></div></div>
+            <div class="hiw-item"><div class="hiw-num">3</div><div><strong>Rebirth IDs at Levels 4–7</strong><div class="muted" style="font-size:13.5px;">Each of Levels 4, 5, 6, and 7 generates 1 rebirth ID when complete. Rebirth IDs join the next free global position — they do NOT create a separate tree.</div></div></div>
+            <div class="hiw-item"><div class="hiw-num">4</div><div><strong>Product vouchers at Levels 5–7</strong><div class="muted" style="font-size:13.5px;">Rs.200 voucher at each of Levels 5, 6, and 7. Total Rs.600 in vouchers per pool cycle.</div></div></div>
+            <div class="hiw-item"><div class="hiw-num">5</div><div><strong>Rebirth ID economics</strong><div class="muted" style="font-size:13.5px;">Rebirth IDs earn the same AutoPool economics (cash L1–L3, rebirths L4–7, vouchers L5–7) but do NOT get MY SYSTEM placement or ACB status.</div></div></div>
+            <div class="hiw-item"><div class="hiw-num">6</div><div><strong>Rebirth withdrawal rule</strong><div class="muted" style="font-size:13.5px;">Rebirth ID earnings become withdrawable only when the owner's MAIN ID achieves ACB status.</div></div></div>
+            <div class="hiw-item"><div class="hiw-num">7</div><div><strong>ACB is earned in MY SYSTEM</strong><div class="muted" style="font-size:13.5px;">AutoPool placement is automatic. ACB status is achieved only through MY SYSTEM (1 LEFT + 1 RIGHT direct referral).</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="profileModal">
+    <div class="modal">
+      <h3>👤 Member Profile</h3>
+      <div id="profileModalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:4000/api';
+    function getToken() { return localStorage.getItem('jwt_token'); }
+    function logout() { localStorage.removeItem('jwt_token'); localStorage.removeItem('member'); window.location.href = '/bb-register.html'; }
+    function handleLogout() { if (confirm('Logout?')) logout(); }
+    function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function formatINR(paise) { return 'Rs.' + (Number(paise) / 100).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+    function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
+
+    async function apiCall(endpoint) {
+      const token = getToken();
+      if (!token) { logout(); return null; }
+      try {
+        const r = await fetch(`${API_BASE}${endpoint}`, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+        if (r.status === 401) { logout(); return null; }
+        const d = await r.json();
+        return d.success ? d.data : null;
+      } catch (e) { return null; }
+    }
+
+    let activeTree = null;
+    let activeTreeKey = 'myTree';
+    let viewRootNode = null;
+    let myId = null;
+    let zoom = 100;
+    let rootHistory = [];
+
+    function countSubtree(node) {
+      if (!node || !node.filled) return 0;
+      let count = 1;
+      if (node.children) {
+        count += countSubtree(node.children.LEFT);
+        count += countSubtree(node.children.RIGHT);
+      }
+      return count;
+    }
+
+    function findNode(node, position) {
+      if (!node) return null;
+      if (node.position === position) return node;
+      if (node.children) {
+        return findNode(node.children.LEFT, position) || findNode(node.children.RIGHT, position);
+      }
+      return null;
+    }
+
+    function renderNode(node, depth) {
+      let html = '';
+      if (!node) return '';
+      if (node.filled) {
+        const isMe = node.memberId === myId;
+        const isViewRoot = viewRootNode && node.position === viewRootNode.position;
+        const isRebirth = node.cardType === 'REBIRTH' || (node.cardNumber && node.cardNumber.startsWith('RB'));
+        const isSubCard = node.cardType === 'SUB' || (node.cardNumber && node.cardNumber.startsWith('SB'));
+
+        const hasChildren = node.children && (node.children.LEFT || node.children.RIGHT);
+        const hasFilledChild = node.children && (
+          (node.children.LEFT && node.children.LEFT.filled) ||
+          (node.children.RIGHT && node.children.RIGHT.filled)
+        );
+        const totalBelow = countSubtree(node) - 1;
+        const shouldCollapse = depth >= 2 && hasFilledChild;
+
+        let badgeHtml = '';
+        if (isRebirth) {
+          badgeHtml = `<span class="badge-rebirth">🎭 REBIRTH</span>`;
+        } else if (isSubCard) {
+          badgeHtml = `<span class="badge-sub">SUB</span>`;
+        }
+
+        const ownerLabel = (isSubCard || isRebirth) && node.memberCode
+          ? `<span style="font-size:10px; opacity:0.85; display:block; margin-top:2px;">(owner ${escapeHtml(node.memberCode)})</span>`
+          : '';
+
+        html += `<li ${shouldCollapse ? 'class="collapsed"' : ''}>`;
+        html += `<div class="pool-node ${(isMe || isViewRoot) ? 'me' : ''} ${isRebirth ? 'rebirth' : ''} ${node.acbStatus ? 'acb' : ''}" onclick="selectNode(event, ${node.position})">`;
+        html += `<div class="pos">#${node.position}</div>`;
+        html += `<div class="name">${escapeHtml(node.memberName)}${isMe ? ' (You)' : ''}</div>`;
+        html += `<div class="code">${escapeHtml(node.cardNumber || node.memberCode)} ${badgeHtml} ${ownerLabel}</div>`;
+        if (node.sponsorCode && !isMe) html += `<div class="sponsor">👤 ${escapeHtml(node.sponsorCode)}</div>`;
+        html += node.position > 1 && node.side ? `<div class="side-tag ${node.side.toLowerCase()}">${node.side}</div>` : `<div class="level">Level ${node.level}</div>`;
+        if (totalBelow > 0) html += `<span class="hidden-count">${totalBelow} below</span>`;
+        html += `</div>`;
+
+        if (hasChildren) {
+          html += `<span class="toggle-btn" onclick="toggleNode(event, this)">${shouldCollapse ? '+' : '−'}</span>`;
+          html += '<ul>';
+          if (node.children.LEFT) html += renderNode(node.children.LEFT, depth + 1);
+          if (node.children.RIGHT) html += renderNode(node.children.RIGHT, depth + 1);
+          html += '</ul>';
+        }
+        html += '</li>';
+      } else {
+        html += '<li>';
+        html += `<div class="pool-node empty">`;
+        html += `<div class="pos" style="background:var(--muted); color:#fff;">#${node.position}</div>`;
+        html += `<div class="name">Waiting</div>`;
+        html += node.side ? `<div class="side-tag ${node.side.toLowerCase()}">${node.side}</div>` : '';
+        html += `</div>`;
+        html += '</li>';
+      }
+      return html;
+    }
+
+    function toggleNode(event, btn) {
+      event.stopPropagation();
+      const li = btn.closest('li');
+      const isCollapsed = li.classList.toggle('collapsed');
+      btn.textContent = isCollapsed ? '+' : '−';
+    }
+
+    function expandAll() {
+      document.querySelectorAll('.chakra li.collapsed').forEach(li => {
+        li.classList.remove('collapsed');
+        const btn = li.querySelector(':scope > .toggle-btn');
+        if (btn) btn.textContent = '−';
+      });
+      setTimeout(fitToScreen, 100);
+    }
+
+    function collapseAll() {
+      document.querySelectorAll('.chakra li').forEach((li, idx) => {
+        if (idx === 0 && li.parentElement.parentElement.classList.contains('chakra')) return;
+        const btn = li.querySelector(':scope > .toggle-btn');
+        if (btn) { li.classList.add('collapsed'); btn.textContent = '+'; }
+      });
+      setTimeout(fitToScreen, 100);
+    }
+
+    function fitToScreen() {
+      const wrap = document.getElementById('treeWrap');
+      const container = document.getElementById('treeContainer');
+      const inner = document.getElementById('myTreeContainer');
+      if (!wrap || !container || !inner) return;
+      const wrapWidth = wrap.clientWidth - 40;
+      const treeWidth = inner.scrollWidth;
+      if (treeWidth === 0) return;
+      zoom = Math.min(100, Math.max(30, Math.floor((wrapWidth / treeWidth) * 100)));
+      applyZoom();
+      setTimeout(() => { wrap.scrollLeft = (container.scrollWidth - wrap.clientWidth) / 2; }, 150);
+    }
+
+    function applyZoom() {
+      const sc = zoom / 100;
+      document.getElementById('treeContainer').style.transform = `scale(${sc})`;
+      document.getElementById('zoomPct').textContent = zoom + '%';
+      document.getElementById('zoomIn').disabled = zoom >= 150;
+      document.getElementById('zoomOut').disabled = zoom <= 30;
+    }
+
+    document.getElementById('zoomIn').addEventListener('click', () => { zoom = Math.min(150, zoom + 10); applyZoom(); });
+    document.getElementById('zoomOut').addEventListener('click', () => { zoom = Math.max(30, zoom - 10); applyZoom(); });
+
+    function renderActiveTree() {
+      const tree = viewRootNode ? (activeTree || viewRootNode) : activeTree;
+      if (!tree) return;
+      document.getElementById('myTreeContainer').innerHTML = `<div class="chakra"><ul>${renderNode(tree, 0)}</ul></div>`;
+      document.getElementById('backToMyBtn').classList.toggle('hidden', !viewRootNode && rootHistory.length === 0);
+      document.getElementById('treeSubText').innerHTML = viewRootNode
+        ? `🔍 Viewing sub-pool of <strong>#${viewRootNode.position} (${escapeHtml(viewRootNode.cardNumber || viewRootNode.memberCode)})</strong>.`
+        : 'The positions below YOU in the global Chakra. Click any node for details.';
+      setTimeout(fitToScreen, 150);
+    }
+
+    function selectNode(event, position) {
+      document.querySelectorAll('.pool-node.selected').forEach(n => n.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      const node = findNode(activeTree, position) || findNode(globalTreeRef, position);
+      if (node) renderDetail(node);
+    }
+
+    function renderDetail(node) {
+      const isMe = node.memberId === myId;
+      const initials = (node.memberName || 'M').charAt(0).toUpperCase();
+      const el = document.getElementById('nodeDetail');
+      const leftSize = node.children ? countSubtree(node.children.LEFT) : 0;
+      const rightSize = node.children ? countSubtree(node.children.RIGHT) : 0;
+      const isRebirth = node.cardType === 'REBIRTH' || (node.cardNumber && node.cardNumber.startsWith('RB'));
+      const isSub = node.cardType === 'SUB' || (node.cardNumber && node.cardNumber.startsWith('SB'));
+
+      if (!node.filled) {
+        el.innerHTML = `
+          <div class="nd-head"><div class="nd-avatar muted">⏭</div><div><h4>Position #${node.position}</h4><div class="nd-id">Waiting to be filled</div></div></div>
+          <div class="nd-empty-box"><div class="eb-title">Next Member Joins Here</div><div class="eb-sub">Side: ${node.side || 'ROOT'}</div></div>
+          <div class="nd-note">AutoPool places members breadth-first from position #1</div>
+        `;
+        return;
+      }
+
+      let sponsorRow = '';
+      if (node.sponsorCode && !isMe) sponsorRow = `<div class="nd-row"><span class="k">Sponsor (MY SYSTEM)</span><span class="v green">${escapeHtml(node.sponsorCode)}</span></div>`;
+
+      let badgeLabel = node.cardType || '-';
+      if (isRebirth) badgeLabel = '🎭 REBIRTH';
+      else if (isSub) badgeLabel = 'SUB';
+
+      el.innerHTML = `
+        <div class="nd-head">
+          <div class="nd-avatar ${isRebirth ? 'navy' : isMe ? 'navy' : 'teal'}">${initials}</div>
+          <div><h4>${escapeHtml(node.cardNumber || node.memberCode)}${isMe ? ' (You)' : ''}</h4><div class="nd-id">${escapeHtml(node.memberName)} (Owner: ${escapeHtml(node.memberCode)}) · #${node.position}</div></div>
+        </div>
+        <div class="nd-rows">
+          <div class="nd-row"><span class="k">Global Position</span><span class="v">#${node.position}</span></div>
+          <div class="nd-row"><span class="k">Level</span><span class="v">L${node.level}</span></div>
+          <div class="nd-row"><span class="k">Side</span><span class="v">${node.side || 'ROOT'}</span></div>
+          <div class="nd-row"><span class="k">Card Number</span><span class="v">${escapeHtml(node.cardNumber || '-')}</span></div>
+          <div class="nd-row"><span class="k">Card Type</span><span class="v">${escapeHtml(badgeLabel)}</span></div>
+          ${sponsorRow}
+          <div class="nd-row"><span class="k">Joined</span><span class="v">${fmtDate(node.joinedAt)}</span></div>
+          <div class="nd-row"><span class="k">ACB Status</span><span class="v ${node.acbStatus ? 'green' : ''}">${node.acbStatus ? '✓ Unlocked' : 'Pending'}</span></div>
+          <div class="nd-row"><span class="k">⬅ LEFT Sub-pool</span><span class="v">${leftSize}</span></div>
+          <div class="nd-row"><span class="k">➡ RIGHT Sub-pool</span><span class="v">${rightSize}</span></div>
+        </div>
+        <div class="nd-actions">
+          <button class="btn btn-navy" onclick="openProfileModal(${node.position})">View Full Profile</button>
+          <button class="btn btn-outline-teal" onclick="viewSubPool(${node.position})">🌳 View Sub-pool</button>
+        </div>
+      `;
+    }
+
+    function openProfileModal(position) {
+      const node = findNode(activeTree, position) || findNode(globalTreeRef, position);
+      if (!node) return;
+      const leftSize = node.children ? countSubtree(node.children.LEFT) : 0;
+      const rightSize = node.children ? countSubtree(node.children.RIGHT) : 0;
+      const isRebirth = node.cardType === 'REBIRTH' || (node.cardNumber && node.cardNumber.startsWith('RB'));
+      const badgeLabel = isRebirth ? '🎭 REBIRTH' : (node.cardType || '-');
+
+      document.getElementById('profileModalBody').innerHTML = `
+        <div class="nd-head"><div class="nd-avatar navy">${(node.memberName || 'M').charAt(0).toUpperCase()}</div><div><h4>${escapeHtml(node.cardNumber || node.memberCode)}</h4><div class="nd-id">${escapeHtml(node.memberName)} (Owner: ${escapeHtml(node.memberCode)}) · #${node.position}</div></div></div>
+        <div class="nd-rows">
+          <div class="nd-row"><span class="k">Global Position</span><span class="v">#${node.position}</span></div>
+          <div class="nd-row"><span class="k">Level</span><span class="v">L${node.level}</span></div>
+          <div class="nd-row"><span class="k">Card Type</span><span class="v">${escapeHtml(badgeLabel)}</span></div>
+          <div class="nd-row"><span class="k">Joined</span><span class="v">${fmtDate(node.joinedAt)}</span></div>
+          <div class="nd-row"><span class="k">Sponsor (MY SYSTEM)</span><span class="v green">${escapeHtml(node.sponsorCode || '—')}</span></div>
+          <div class="nd-row"><span class="k">ACB Status</span><span class="v ${node.acbStatus ? 'green' : ''}">${node.acbStatus ? '✓ Unlocked' : 'Pending'}</span></div>
+          ${node.acbUnlockedAt ? `<div class="nd-row"><span class="k">ACB Unlocked On</span><span class="v green">${fmtDate(node.acbUnlockedAt)}</span></div>` : ''}
+          <div class="nd-row"><span class="k">⬅ LEFT Sub-pool</span><span class="v">${leftSize}</span></div>
+          <div class="nd-row"><span class="k">➡ RIGHT Sub-pool</span><span class="v">${rightSize}</span></div>
+          <div class="nd-row"><span class="k">🌐 Total Below</span><span class="v">${leftSize + rightSize}</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline-teal" onclick="closeProfileModal(); viewSubPool(${node.position})">🌳 View Sub-pool</button>
+          <button class="btn btn-navy" onclick="closeProfileModal()">Close</button>
+        </div>`;
+      document.getElementById('profileModal').classList.add('open');
+    }
+    function closeProfileModal() { document.getElementById('profileModal').classList.remove('open'); }
+    document.getElementById('profileModal').addEventListener('click', (e) => { if (e.target.id === 'profileModal') closeProfileModal(); });
+
+    async function explorePool(cardNumberOrPos, pushHistory = true) {
+      if (!cardNumberOrPos) return;
+      const data = await apiCall(`/members/autopool-explorer?root=${encodeURIComponent(cardNumberOrPos)}&depth=7`);
+      if (!data || !data.tree) {
+        alert(`⚠️ AutoPool node for "${cardNumberOrPos}" not found.`);
+        return;
+      }
+
+      if (pushHistory && viewRootNode) {
+        rootHistory.push({
+          position: viewRootNode.position,
+          cardNumber: viewRootNode.cardNumber || viewRootNode.memberCode
+        });
+      }
+
+      viewRootNode = data.rootNode;
+      activeTree = data.tree;
+
+      updateBreadcrumbs();
+      renderActiveTree();
+      renderDetail(data.rootNode);
+    }
+
+    function handleExploreSearch() {
+      const input = document.getElementById('exploreCardInput');
+      const val = input ? input.value.trim() : '';
+      if (!val) return;
+      explorePool(val, true);
+    }
+
+    function popExplorerHistory() {
+      if (rootHistory.length === 0) {
+        resetToMyPool();
+        return;
+      }
+      const prev = rootHistory.pop();
+      explorePool(prev.cardNumber || prev.position, false);
+    }
+
+    function resetToMyPool() {
+      rootHistory = [];
+      viewRootNode = null;
+      updateBreadcrumbs();
+      load();
+    }
+
+    function updateBreadcrumbs() {
+      const crumbContainer = document.getElementById('explorerBreadcrumbs');
+      const trail = document.getElementById('breadcrumbTrail');
+      if (!crumbContainer || !trail) return;
+
+      if (!viewRootNode && rootHistory.length === 0) {
+        crumbContainer.style.display = 'none';
+        return;
+      }
+
+      crumbContainer.style.display = 'flex';
+      let html = '<span style="color:var(--muted); font-weight:normal;">Root: </span>';
+      
+      const fullHistory = [...rootHistory];
+      if (viewRootNode) {
+        fullHistory.push({
+          position: viewRootNode.position,
+          cardNumber: viewRootNode.cardNumber || viewRootNode.memberCode
+        });
+      }
+
+      html += fullHistory.map((item, idx) => {
+        const isLast = idx === fullHistory.length - 1;
+        if (isLast) {
+          return `<span style="color:var(--teal-dark);">${escapeHtml(item.cardNumber)} (#${item.position})</span>`;
+        } else {
+          return `<a href="#" onclick="navigateToHistoryIdx(${idx}); return false;" style="color:var(--navy); text-decoration:underline;">${escapeHtml(item.cardNumber)} (#${item.position})</a>`;
+        }
+      }).join(' &gt; ');
+
+      trail.innerHTML = html;
+    }
+
+    function navigateToHistoryIdx(targetIdx) {
+      if (targetIdx < 0 || targetIdx >= rootHistory.length) return;
+      const target = rootHistory[targetIdx];
+      rootHistory = rootHistory.slice(0, targetIdx);
+      explorePool(target.cardNumber || target.position, false);
+    }
+
+    function viewSubPool(position) {
+      const node = findNode(activeTree, position) || findNode(globalTreeRef, position);
+      if (!node) return;
+      explorePool(node.cardNumber || position, true);
+    }
+
+    function backToMyTree() { resetToMyPool(); }
+
+    const LEVEL_META = {
+      1: { cash: 'Rs.300', voucher: '—', rebirth: '—' },
+      2: { cash: 'Rs.300', voucher: '—', rebirth: '—' },
+      3: { cash: 'Rs.200', voucher: '—', rebirth: '—' },
+      4: { cash: '—', voucher: '—', rebirth: '1 rebirth ID' },
+      5: { cash: '—', voucher: 'Rs.200', rebirth: '1 rebirth ID' },
+      6: { cash: '—', voucher: 'Rs.200', rebirth: '1 rebirth ID' },
+      7: { cash: '—', voucher: 'Rs.200', rebirth: '1 rebirth ID' }
+    };
+
+    let globalTreeRef = null;
+
+    async function load() {
+      const [profile, data] = await Promise.all([
+        apiCall('/members/profile'),
+        apiCall('/members/autopool-tree')
+      ]);
+
+      document.getElementById('loadingIndicator').classList.add('hidden');
+      document.getElementById('poolContent').classList.remove('hidden');
+
+      if (profile) {
+        myId = profile.id;
+        const loginCtx = localStorage.getItem('loginContext') ? JSON.parse(localStorage.getItem('loginContext')) : null;
+        const name = profile.name || 'Member';
+        const mainCard = (profile.idCards || []).find(c => c.type === 'MAIN');
+        const activeCard = loginCtx?.cardNumber || mainCard?.cardNumber || profile.memberCode;
+        const isSub = loginCtx?.isSubCard || false;
+        const ownerCode = loginCtx?.ownerMemberCode || profile.memberCode;
+
+        document.getElementById('memberName').textContent = name;
+        document.getElementById('memberCode').innerHTML = `${activeCard} ${isSub ? `<span style="font-size:10px; opacity:0.8;">(owner ${ownerCode})</span>` : ''}`;
+        document.getElementById('memberAvatar').textContent = name.charAt(0).toUpperCase();
+
+        if (isSub) {
+          document.getElementById('pageHeaderTitle').textContent = `AutoPool (${activeCard})`;
+          document.getElementById('pageHeaderSub').textContent = `The global 8-level binary pool for ${activeCard} (owner ${ownerCode})`;
+        }
+      }
+
+      if (!data || !data.myStats) {
+        document.getElementById('myTreeContainer').innerHTML = '<div class="loading">No pool position yet.</div>';
+        return;
+      }
+
+      const { globalTree, myTree, myStats, levelStatus } = data;
+      activeTree = myTree;
+      activeTreeKey = 'myTree';
+      globalTreeRef = globalTree;
+
+      document.getElementById('myPosition').textContent = '#' + myStats.position;
+      document.getElementById('myLevel').textContent = 'Level ' + myStats.level;
+      document.getElementById('totalInPool').textContent = myStats.totalInPool;
+      document.getElementById('cashEarned').textContent = formatINR(myStats.cashEarnedPaise);
+      document.getElementById('rebirthIds').textContent = myStats.rebirthIds;
+      document.getElementById('vouchers').textContent = formatINR(myStats.vouchersPaise);
+
+      renderActiveTree();
+      if (myTree && myTree.filled) renderDetail(myTree);
+
+      document.getElementById('globalTreeContainer').innerHTML = `<div class="chakra"><ul>${renderNode(globalTree, 0)}</ul></div>`;
+
+      let rows = '';
+      for (const ls of levelStatus) {
+        const meta = LEVEL_META[ls.level];
+        const status = ls.complete
+          ? '<span class="badge success">COMPLETE ✓</span>'
+          : ls.filled > 0
+            ? `<span class="badge info">FILLING · ${ls.filled}/${ls.size}</span>`
+            : '<span class="badge pending">PENDING</span>';
+        rows += `<tr><td>L${ls.level}</td><td>${ls.size}</td><td>${status}</td><td>${meta.cash}</td><td>${meta.voucher}</td><td>${meta.rebirth}</td></tr>`;
+      }
+      rows += `<tr style="background:#f8fafc; font-weight:700;"><td>TOTAL</td><td>254 + 1 root</td><td>—</td><td>Rs.800</td><td>Rs.600</td><td>4 rebirth IDs</td></tr>`;
+      document.getElementById('levelTableBody').innerHTML = rows;
+    }
+
+    load();
+  </script>
+</body>
+</html>

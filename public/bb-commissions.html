@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commission History | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0d1b2a; --navy-2: #14263b; --teal: #0f9d9d; --teal-dark: #0b7c7c;
+      --amber: #f5a623; --white: #ffffff; --bg: #f4f7fb; --card: #ffffff;
+      --text: #17233a; --muted: #64748b; --border: #dbe4ef; --success: #16a34a;
+      --warning: #d97706; --danger: #dc2626; --info: #0369a1;
+      --radius-card: 12px; --radius-btn: 8px; --shadow: 0 10px 30px rgba(13,27,42,0.08);
+      --sidebar-width: 260px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Inter", "Noto Sans Devanagari", sans-serif; background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%); color: var(--text); line-height: 1.5; min-height: 100vh; }
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width); background: linear-gradient(180deg, var(--navy), var(--navy-2)); color: #fff; display: flex; flex-direction: column; z-index: 50; box-shadow: 4px 0 20px rgba(13,27,42,0.15); }
+    .sidebar-brand { padding: 22px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .brand-badge { width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, #fff 55% 100%); }
+    .brand-text .title { font-weight: 700; font-size: 15px; }
+    .brand-text .subtitle { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+    .sidebar-profile { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 16px; }
+    .profile-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-code { font-size: 11.5px; color: var(--amber); font-weight: 600; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+    .nav-section-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); padding: 8px 12px 6px; font-weight: 700; margin-top: 12px; }
+    .nav-section-title:first-child { margin-top: 0; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500; margin-bottom: 3px; transition: all 0.2s; }
+    .nav-item .icon { font-size: 17px; width: 22px; text-align: center; }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+    .nav-item.active { background: linear-gradient(90deg, var(--teal), var(--teal-dark)); color: #fff; box-shadow: 0 4px 12px rgba(15,157,157,0.25); }
+    .sidebar-footer { padding: 14px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .nav-item.logout:hover { background: rgba(220,38,38,0.15); color: #fca5a5; }
+
+    .main { margin-left: var(--sidebar-width); min-height: 100vh; }
+    .topbar { background: #fff; padding: 16px 32px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
+    .topbar h2 { color: var(--navy); font-size: 18px; }
+    .topbar p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .container { padding: 28px 32px; max-width: 1400px; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow); }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .stat-card { padding: 16px; }
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 7px; }
+    .stat-card .value { font-size: 22px; font-weight: 700; color: var(--navy); font-family: "Poppins", sans-serif; }
+    .stat-card .sub { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+
+    .panel { padding: 20px; margin-bottom: 18px; }
+    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 6px; }
+    .panel h3 { font-size: 15px; color: var(--navy); margin: 14px 0 8px; }
+    .panel .sub { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 13.5px; vertical-align: top; }
+    th { background: #f8fafc; color: var(--navy); font-weight: 600; }
+
+    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.blocked { background: #f1f5f9; color: #475569; }
+    .badge.info { background: #e8f6ff; color: var(--info); }
+    .badge.danger { background: #fee2e2; color: var(--danger); }
+
+    .note { border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e; padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px; }
+    .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
+    .note.info { border-left-color: var(--info); background: #e8f4fd; color: #0c4a6e; }
+
+    .stream-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .stream-icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 18px; font-weight: 700; color: #fff; flex: 0 0 auto; }
+    .stream-icon.autopool { background: var(--teal); }
+    .stream-icon.mysystem { background: var(--navy); }
+    .stream-icon.setu { background: var(--amber); }
+    .stream-header-text h3 { margin: 0; font-size: 16px; color: var(--navy); }
+    .stream-header-text p { font-size: 12.5px; color: var(--muted); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .pay-once-box { border: 2px solid var(--teal); border-radius: 10px; padding: 14px; background: #f3fbfb; margin-top: 14px; }
+    .pay-once-box h4 { color: var(--navy); margin-bottom: 6px; }
+    .pay-once-box p { font-size: 13.5px; color: var(--text); }
+
+    .acb-event-box { border: 2px solid var(--navy); border-radius: 10px; padding: 14px; background: #f8fafc; margin-top: 14px; }
+    .acb-event-box h4 { color: var(--navy); margin-bottom: 6px; }
+    .acb-event-box p { font-size: 13.5px; color: var(--text); }
+
+    .setu-item { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-top: 10px; background: #fbfdff; }
+    .setu-item .si-header { display: flex; justify-content: space-between; font-weight: 700; color: var(--navy); font-size: 14px; }
+    .setu-item .si-detail { font-size: 13px; color: var(--muted); margin-top: 5px; }
+
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .filters select, .filters input { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; color: var(--navy); background: #fff; outline: none; }
+
+    .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .muted { color: var(--muted); }
+    .hidden { display: none; }
+
+    @media (max-width: 1080px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 980px) { .grid-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+      :root { --sidebar-width: 0px; }
+      .sidebar { top: auto; bottom: 0; width: 100%; height: 70px; flex-direction: row; background: #fff; border-top: 1px solid var(--border); }
+      .sidebar-brand, .sidebar-profile, .sidebar-footer, .nav-section-title { display: none; }
+      .sidebar-nav { padding: 0; display: flex; flex-direction: row; justify-content: space-around; align-items: center; width: 100%; }
+      .nav-item { flex-direction: column; gap: 2px; padding: 6px 8px; font-size: 10.5px; margin: 0; color: var(--muted); }
+      .nav-item.active { background: transparent; color: var(--teal-dark); box-shadow: none; }
+      .main { margin-left: 0; margin-bottom: 70px; }
+      .container { padding: 20px; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-badge"></span>
+      <div class="brand-text"><div class="title">Bharatiya Bazaar</div><div class="subtitle">भारतीय बाज़ार</div></div>
+    </div>
+    <div class="sidebar-profile">
+      <div class="avatar" id="memberAvatar">?</div>
+      <div style="min-width:0;"><div class="profile-name" id="memberName">Loading...</div><div class="profile-code" id="memberCode">BB-----</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="/bb-dashboard.html" class="nav-item"><span class="icon">🏠</span><span>Dashboard</span></a>
+      <a href="/bb-tree.html" class="nav-item"><span class="icon">🤝</span><span>My Network</span></a>
+      <a href="/bb-wallet.html" class="nav-item"><span class="icon">👛</span><span>Wallet</span></a>
+      <a href="/bb-commissions.html" class="nav-item active"><span class="icon">💰</span><span>Commissions</span></a>
+      <div class="nav-section-title">Earnings</div>
+      <a href="/bb-autopool.html" class="nav-item"><span class="icon">🌀</span><span>AutoPool</span></a>
+      <a href="/bb-setu-kosh.html" class="nav-item"><span class="icon">🛒</span><span>Setu Kosh</span></a>
+      <a href="/bb-rebirth.html" class="nav-item"><span class="icon">🎭</span><span>Rebirth IDs</span></a>
+      <div class="nav-section-title">Account</div>
+      <a href="/bb-notifications.html" class="nav-item"><span class="icon">🔔</span><span>Notifications</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" class="nav-item logout" onclick="handleLogout(); return false;"><span class="icon">🚪</span><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="pageHeaderTitle">Commission History · कमीशन इतिहास</h2>
+        <p id="pageHeaderSub">All earning streams — AutoPool, MY SYSTEM, Setu Kosh</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="loadingIndicator" class="loading">Loading commissions...</div>
+
+      <div id="commissionsContent" class="hidden">
+        <section class="summary-grid">
+          <div class="card stat-card">
+            <div class="label">Total Earned</div>
+            <div class="value" id="totalEarned">Rs.0.00</div>
+            <div class="sub">Across all 3 streams</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Confirmed</div>
+            <div class="value" id="confirmedEarned">Rs.0.00</div>
+            <div class="sub">Finalised earnings</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Pending</div>
+            <div class="value" id="pendingEarned" style="color:var(--warning);">Rs.0.00</div>
+            <div class="sub">Awaiting settlement</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Vouchers</div>
+            <div class="value" id="voucherEarned">Rs.0.00</div>
+            <div class="sub">Unlock at AutoPool L5-L7</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">Rebirth IDs</div>
+            <div class="value" id="rebirthIds">0</div>
+            <div class="sub">Unlock at AutoPool L4</div>
+          </div>
+        </section>
+
+        <!-- ALL COMMISSIONS TABLE -->
+        <div class="card panel">
+          <h2>All Commissions</h2>
+          <p class="sub">Live commission entries from the database</p>
+
+          <div class="filters">
+            <select id="filterStream">
+              <option value="all">All Streams</option>
+              <option value="AUTOPOOL">AutoPool</option>
+              <option value="MY_SYSTEM">MY SYSTEM</option>
+              <option value="SETU_KOSH">Setu Kosh</option>
+            </select>
+            <select id="filterStatus">
+              <option value="all">All Statuses</option>
+              <option value="confirmed">CONFIRMED (incl. Withdrawable)</option>
+              <option value="pending">PENDING (7-Day / Locked)</option>
+              <option value="blocked">PAY-ONCE BLOCKED</option>
+            </select>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Stream</th><th>Level</th><th>Description</th><th>Amount</th><th>Status</th></tr>
+              </thead>
+              <tbody id="commissionTableBody">
+                <tr><td colspan="6" style="text-align:center; color:var(--muted);">No commissions yet. Start referring friends to earn!</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- AUTOPOOL STREAM -->
+        <div class="card panel">
+          <div class="stream-header">
+            <div class="stream-icon autopool">🌀</div>
+            <div class="stream-header-text">
+              <h3>Anant Samriddhi Chakra</h3>
+              <p>Company AutoPool · 8-level global binary pool · Stream 1</p>
+            </div>
+          </div>
+
+          <table>
+            <thead><tr><th>Level</th><th>Trigger</th><th>Cash</th><th>Status</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>L0</td><td>Root</td><td>—</td><td><span class="badge success">ACTIVE</span></td><td>Your position in global pool</td></tr>
+              <tr><td>L1</td><td>2 IDs</td><td>Rs.300</td><td><span class="badge info">FILLING</span></td><td>Pay-Once via AutoPool</td></tr>
+              <tr><td>L2</td><td>4 IDs</td><td>Rs.300</td><td><span class="badge info">FILLING</span></td><td>Cash bonus</td></tr>
+              <tr><td>L3</td><td>8 IDs</td><td>Rs.200</td><td><span class="badge info">FILLING</span></td><td>Cash bonus</td></tr>
+              <tr><td>L4</td><td>16 IDs</td><td>—</td><td><span class="badge info">LOCKED</span></td><td>Rebirth ID on completion</td></tr>
+              <tr><td>L5</td><td>32 IDs</td><td>—</td><td><span class="badge info">LOCKED</span></td><td>Rebirth + Rs.200 voucher</td></tr>
+              <tr><td>L6</td><td>64 IDs</td><td>—</td><td><span class="badge info">LOCKED</span></td><td>Rebirth + Rs.200 voucher</td></tr>
+              <tr><td>L7</td><td>128 IDs</td><td>—</td><td><span class="badge info">LOCKED</span></td><td>Rebirth + Rs.200 voucher</td></tr>
+            </tbody>
+          </table>
+
+          <div class="note" style="margin-top:14px;">
+            <strong>Rebirth ID earnings:</strong> Rebirth IDs generate the same AutoPool economics as purchased IDs,
+            but do NOT get MY SYSTEM or ACB status. Rebirth ID earnings become withdrawable only when the owner's
+            MAIN ID achieves ACB status.
+          </div>
+        </div>
+
+        <!-- MY SYSTEM STREAM -->
+        <div class="card panel">
+          <div class="stream-header">
+            <div class="stream-icon mysystem">🤝</div>
+            <div class="stream-header-text">
+              <h3>MY SYSTEM</h3>
+              <p>Your binary referral tree · Levels 1–3 pay cash · Stream 2</p>
+            </div>
+          </div>
+
+          <table>
+            <thead><tr><th>Level</th><th>Members</th><th>Cash</th><th>Status</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>L1</td><td>2 (1L + 1R)</td><td>Rs.300</td><td><span class="badge success">ACB UNLOCK</span></td><td>Pay-Once applies</td></tr>
+              <tr><td>L2</td><td>4</td><td>Rs.300</td><td><span class="badge info">PENDING</span></td><td>7-day hold after completion</td></tr>
+              <tr><td>L3</td><td>8</td><td>Rs.200</td><td><span class="badge info">LOCKED</span></td><td>7-day hold after completion</td></tr>
+              <tr><td>L4–L7</td><td>—</td><td>—</td><td><span class="badge danger">INACTIVE</span></td><td>MY SYSTEM ends at L3</td></tr>
+            </tbody>
+          </table>
+
+          <div class="pay-once-box">
+            <h4>Pay-Once Rule</h4>
+            <p>Level 1 cash (Rs.300) is paid only ONCE per ID across AutoPool and MY SYSTEM combined.
+               If AutoPool paid it first, MY SYSTEM will NOT pay it again when Level 1 completes.</p>
+          </div>
+
+          <div class="acb-event-box">
+            <h4>ACB Unlock Event</h4>
+            <p>Completing MY SYSTEM Level 1 (1 LEFT + 1 RIGHT direct referral) triggers ACB status unlock.</p>
+            <p style="margin-top:6px;">
+              <strong>Result:</strong><br />
+              1. ACB status unlocked ✓<br />
+              2. All locked AutoPool earnings become withdrawable ✓<br />
+              3. Rebirth ID earnings become withdrawable ✓
+            </p>
+          </div>
+
+          <div class="note warning" style="margin-top:14px;">
+            <strong>7-Day Validity Hold:</strong> MY SYSTEM Level 1, 2 and 3 commissions remain PENDING for 7 days
+            after level completion. They become CONFIRMED only after the validity check completes. During this
+            period, commissions may be reversed if fraud, dispute, or invalid referral is detected.
+          </div>
+        </div>
+
+        <!-- SETU KOSH STREAM -->
+        <div class="card panel">
+          <div class="stream-header">
+            <div class="stream-icon setu">🛒</div>
+            <div class="stream-header-text">
+              <h3>Setu Kosh</h3>
+              <p>Shopping commissions from your referral network · Stream 3</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3>Commission Formula</h3>
+              <div class="note info">
+                <strong>Base level rate</strong> = vendor margin × 0.071428<br /><br />
+                <strong>Level structure:</strong><br />
+                L1, L2, L3 = full rate<br />
+                L4 = half rate<br />
+                L5, L6 = full rate<br />
+                L7 = half rate<br />
+                L8, L9, L10 = full rate<br /><br />
+                <strong>Referral bonus</strong> = 0.25% of purchase amount<br />
+                <strong>Cap:</strong> Total payout cannot exceed vendor margin from that purchase.
+              </div>
+
+              <div class="note" style="margin-top:12px;">
+                <strong>Settlement:</strong> Setu Kosh commissions are PENDING until Monday vendor settlement,
+                then become CONFIRMED. No ACB required for withdrawal of Setu Kosh earnings.
+              </div>
+            </div>
+
+            <div>
+              <h3>Shopping Summary</h3>
+              <div class="setu-item">
+                <div class="si-header"><span>Total Shopping (this cycle)</span><span>Rs.0</span></div>
+                <div class="si-detail">Tracked across all partner vendors</div>
+              </div>
+              <div class="setu-item">
+                <div class="si-header"><span>Commissions Earned</span><span id="setuKoshTotal">Rs.0.00</span></div>
+                <div class="si-detail">Total from referral shopping</div>
+              </div>
+              <div class="setu-item">
+                <div class="si-header"><span>Setu Kosh IDs</span><span>0</span></div>
+                <div class="si-detail">Earn more to unlock Setu Kosh IDs</div>
+              </div>
+
+              <h3 style="margin-top:20px;">Recent Setu Kosh Activity</h3>
+              <div id="setuKoshRecent" style="color:var(--muted); font-size:13px; padding:12px;">
+                No Setu Kosh commissions yet. Shopping from your referral network will appear here.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:4000/api';
+    function getToken() { return localStorage.getItem('jwt_token'); }
+    function logout() { localStorage.removeItem('jwt_token'); localStorage.removeItem('member'); window.location.href = '/bb-register.html'; }
+    function handleLogout() { if (confirm('Logout?')) logout(); }
+    function formatINR(paise) { return 'Rs.' + (Number(paise) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function formatDate(d) { return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); }
+
+    async function apiCall(endpoint) {
+      const token = getToken();
+      if (!token) { logout(); return null; }
+      try {
+        const r = await fetch(`${API_BASE}${endpoint}`, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+        if (r.status === 401) { logout(); return null; }
+        const d = await r.json();
+        return d.success ? d.data : null;
+      } catch (e) { return null; }
+    }
+
+    let allCommissions = [];
+
+    async function load() {
+      const [profile, commissions] = await Promise.all([
+        apiCall('/members/profile'),
+        apiCall('/wallet/commissions?limit=200')
+      ]);
+
+      document.getElementById('loadingIndicator').classList.add('hidden');
+      document.getElementById('commissionsContent').classList.remove('hidden');
+
+      if (profile) {
+        const loginCtx = localStorage.getItem('loginContext') ? JSON.parse(localStorage.getItem('loginContext')) : null;
+        const name = profile.name || 'Member';
+        const mainCard = (profile.idCards || []).find(c => c.type === 'MAIN');
+        const activeCard = loginCtx?.cardNumber || mainCard?.cardNumber || profile.memberCode;
+        const isSub = loginCtx?.isSubCard || false;
+        const ownerCode = loginCtx?.ownerMemberCode || profile.memberCode;
+
+        document.getElementById('memberName').textContent = name;
+        document.getElementById('memberCode').innerHTML = `${activeCard} ${isSub ? `<span style="font-size:10px; opacity:0.8;">(owner ${ownerCode})</span>` : ''}`;
+        document.getElementById('memberAvatar').textContent = (name || 'M').charAt(0).toUpperCase();
+
+        if (isSub) {
+          document.getElementById('pageHeaderTitle').textContent = `Commissions (${activeCard})`;
+          document.getElementById('pageHeaderSub').textContent = `Earning streams for ${activeCard} (owner ${ownerCode})`;
+        }
+      }
+
+      allCommissions = commissions || [];
+
+      if (allCommissions.length > 0) {
+        const total = allCommissions.reduce((s, c) => s + c.amountPaise, 0);
+        const confirmed = allCommissions.filter(c => c.status === 'CONFIRMED' || c.status === 'WITHDRAWABLE').reduce((s, c) => s + c.amountPaise, 0);
+        const pending = allCommissions.filter(c => c.status === 'PENDING' || c.status === 'PENDING_7_DAY' || c.status === 'LOCKED_ACB').reduce((s, c) => s + c.amountPaise, 0);
+        const setuKosh = allCommissions.filter(c => c.stream === 'SETU_KOSH').reduce((s, c) => s + c.amountPaise, 0);
+
+        document.getElementById('totalEarned').textContent = formatINR(total);
+        document.getElementById('confirmedEarned').textContent = formatINR(confirmed);
+        document.getElementById('pendingEarned').textContent = formatINR(pending);
+        document.getElementById('voucherEarned').textContent = 'Rs.0.00';
+        document.getElementById('setuKoshTotal').textContent = formatINR(setuKosh);
+      }
+
+      renderTable();
+    }
+
+      const STATUS_GROUPS = {
+        confirmed: ["CONFIRMED", "WITHDRAWABLE"],
+        CONFIRMED: ["CONFIRMED", "WITHDRAWABLE"],
+        WITHDRAWABLE: ["CONFIRMED", "WITHDRAWABLE"],
+        pending: ["PENDING_7_DAY", "LOCKED_ACB"],
+        PENDING: ["PENDING_7_DAY", "LOCKED_ACB"],
+        blocked: ["PAY_ONCE_BLOCKED"],
+        PAY_ONCE_BLOCKED: ["PAY_ONCE_BLOCKED"]
+      };
+
+    const STATUS_LABEL = {
+      CONFIRMED: "CONFIRMED ✓",
+      WITHDRAWABLE: "CONFIRMED ✓",
+      PENDING_7_DAY: "PENDING (7-DAY)",
+      LOCKED_ACB: "LOCKED (ACB)",
+      PAY_ONCE_BLOCKED: "PAY-ONCE BLOCKED"
+    };
+
+    function badgeFor(status) {
+      if (status === "CONFIRMED" || status === "WITHDRAWABLE") return "success";
+      if (status === "PAY_ONCE_BLOCKED") return "blocked";
+      if (status === "LOCKED_ACB") return "danger";
+      return "pending";
+    }
+
+    function renderTable() {
+      const stream = document.getElementById('filterStream').value;
+      const status = document.getElementById('filterStatus').value;
+
+      let filtered = allCommissions;
+      if (stream !== 'all') filtered = filtered.filter(c => c.stream === stream);
+      if (status !== 'all') {
+        const group = STATUS_GROUPS[status] || [status];
+        filtered = filtered.filter(c => group.includes(c.status));
+      }
+
+      const tbody = document.getElementById('commissionTableBody');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:32px;">No commissions generated for this ID yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(c => `
+        <tr data-stream="${c.stream}" data-status="${c.status}">
+          <td>${formatDate(c.createdAt)}</td>
+          <td>${c.stream}</td>
+          <td>Level ${c.level || '-'}</td>
+          <td>${c.description || c.stream + ' commission'}</td>
+          <td>+${formatINR(c.amountPaise)}</td>
+          <td><span class="badge ${badgeFor(c.status)}">${STATUS_LABEL[c.status] || c.status}</span></td>
+        </tr>`).join('');
+    }
+
+    document.getElementById('filterStream').addEventListener('change', renderTable);
+    document.getElementById('filterStatus').addEventListener('change', renderTable);
+
+    load();
+  </script>
+</body>
+</html>

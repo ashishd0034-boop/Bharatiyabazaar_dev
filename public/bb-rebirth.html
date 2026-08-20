@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoPool Rebirth Journey | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --sidebar-width: 260px;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+      box-shadow: 4px 0 20px rgba(13, 27, 42, 0.15);
+    }
+
+    .sidebar-brand {
+      padding: 22px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, #fff 55% 100%);
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-text .title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .brand-text .subtitle {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 2px;
+    }
+
+    /* Profile Card */
+    .sidebar-profile {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: #fff;
+      font-size: 16px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(15, 157, 157, 0.3);
+    }
+
+    .profile-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .profile-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-code {
+      font-size: 11.5px;
+      color: var(--amber);
+      font-weight: 600;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Navigation */
+    .sidebar-nav {
+      padding: 16px 12px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-section-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: rgba(255,255,255,0.4);
+      padding: 12px 12px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 13.5px;
+      transition: all 0.2s;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .nav-item.active {
+      background: var(--teal);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(15, 157, 157, 0.35);
+    }
+    .nav-item .icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-item.logout {
+      color: #f87171;
+    }
+    .nav-item.logout:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+    }
+
+    /* ===== MAIN CONTENT AREA ===== */
+    .main {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: #fff;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .topbar h2 {
+      color: var(--navy);
+      font-size: 18px;
+    }
+    .topbar p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    .topbar-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      display: grid;
+      place-items: center;
+      text-decoration: none;
+      color: var(--navy);
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+      background: #f8fafc;
+    }
+
+    .container {
+      padding: 28px 32px 48px;
+      max-width: 1400px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    .panel h2 {
+      font-size: 18px;
+      color: var(--navy);
+      margin-bottom: 12px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .stat-box .label {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .stat-box .val {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      font-family: "Poppins", sans-serif;
+    }
+    .stat-box .sub {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.info { background: #e8f6ff; color: var(--info); }
+    .badge.danger { background: #fee2e2; color: var(--danger); }
+
+    .note {
+      border-left: 4px solid var(--teal);
+      background: #f3fbfb;
+      color: #155e5e;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 14px;
+    }
+    .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
+    .note.info { border-left-color: var(--info); background: #e8f4fd; color: #0c4a6e; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13.5px;
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    .status-card {
+      border: 2px solid var(--teal);
+      border-radius: 12px;
+      padding: 22px;
+      background: #f3fbfb;
+      margin-bottom: 20px;
+    }
+    .status-card h3 {
+      color: var(--navy);
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+    .status-card p {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 16px;
+      border-radius: 999px;
+      background: #e5edf6;
+      overflow: hidden;
+      margin: 12px 0 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--teal), var(--amber));
+      transition: width 0.5s ease;
+    }
+
+    .how-it-works {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .hiw-item {
+      display: flex;
+      gap: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      background: #fbfdff;
+    }
+    .hiw-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #fff;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .muted { color: var(--muted); }
+
+    .sub-login-alert {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 12px 18px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 16px;
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    @media (max-width: 980px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-width: 0px; }
+      .sidebar {
+        top: auto;
+        bottom: 0;
+        width: 100%;
+        height: 70px;
+        flex-direction: row;
+        background: #fff;
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -4px 12px rgba(13, 27, 42, 0.08);
+      }
+      .sidebar-brand, .sidebar-profile, .sidebar-footer, .nav-section-title {
+        display: none;
+      }
+      .sidebar-nav {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+      }
+      .nav-item {
+        flex-direction: column;
+        gap: 2px;
+        padding: 6px 8px;
+        font-size: 10.5px;
+        margin: 0;
+        color: var(--muted);
+      }
+      .nav-item.active {
+        background: transparent;
+        color: var(--teal-dark);
+        box-shadow: none;
+      }
+      .main {
+        margin-left: 0;
+        margin-bottom: 70px;
+      }
+      .container {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-badge"></span>
+      <div class="brand-text">
+        <div class="title">Bharatiya Bazaar</div>
+        <div class="subtitle">भारतीय बाज़ार</div>
+      </div>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="avatar" id="memberAvatar">?</div>
+      <div class="profile-info">
+        <div class="profile-name" id="memberName">Loading...</div>
+        <div class="profile-code" id="memberCode">BB-----</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="/bb-dashboard.html" class="nav-item">
+        <span class="icon">🏠</span><span>Dashboard</span>
+      </a>
+      <a href="/bb-tree.html" class="nav-item">
+        <span class="icon">🤝</span><span>My Network</span>
+      </a>
+      <a href="/bb-wallet.html" class="nav-item">
+        <span class="icon">👛</span><span>Wallet</span>
+      </a>
+      <a href="/bb-commissions.html" class="nav-item">
+        <span class="icon">💰</span><span>Commissions</span>
+      </a>
+
+      <div class="nav-section-title">Earnings</div>
+      <a href="/bb-autopool.html" class="nav-item">
+        <span class="icon">🌀</span><span>AutoPool</span>
+      </a>
+      <a href="/bb-setu-kosh.html" class="nav-item">
+        <span class="icon">🛒</span><span>Setu Kosh</span>
+      </a>
+      <a href="/bb-rebirth.html" class="nav-item active">
+        <span class="icon">🎭</span><span>Rebirth IDs</span>
+      </a>
+
+      <div class="nav-section-title">Account</div>
+      <a href="/bb-notifications.html" class="nav-item">
+        <span class="icon">🔔</span><span>Notifications</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="#" class="nav-item logout" onclick="handleLogout(); return false;">
+        <span class="icon">🚪</span><span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="topbarTitle">AutoPool Rebirth Journey</h2>
+        <p id="topbarSubtitle">The global 8-level pool · Rebirth cycle & vouchers</p>
+      </div>
+      <div class="topbar-actions">
+        <a href="/bb-notifications.html" class="icon-btn" title="Notifications">🔔</a>
+        <a href="/bb-hindi.html" class="icon-btn" title="हिंदी">हि</a>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- SUB LOGIN CONTEXT BANNER -->
+      <div id="subLoginBanner" class="sub-login-alert" style="display:none;"></div>
+
+      <!-- LIVE POOL STATUS -->
+      <div class="status-card" id="poolStatusCard">
+        <h3 id="poolStatusHeading">AutoPool Cycle — Loading...</h3>
+        <p id="poolStatusDesc">
+          Your AutoPool is building up. Rebirth IDs are generated at AutoPool Levels 4, 5, 6, and 7 as each level completes.
+        </p>
+
+        <div class="progress-bar">
+          <div class="progress-fill" id="poolProgressBar"></div>
+        </div>
+        <div class="muted" id="poolProgressText" style="font-size:13px; font-weight:600;">
+          Calculating filled positions...
+        </div>
+
+        <div class="stat-grid" style="margin-top:16px;">
+          <div class="stat-box">
+            <div class="label">AutoPool Position</div>
+            <div class="val" id="statPosition">#—</div>
+            <div class="sub">Global binary position</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Cash Earned (L1–L3)</div>
+            <div class="val" id="statCash" style="color:var(--teal);">Rs.0.00</div>
+            <div class="sub">Available in wallet</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Rebirth IDs (L4–L7)</div>
+            <div class="val" id="statRebirths" style="color:var(--amber);">0 / 4</div>
+            <div class="sub">New global pool IDs</div>
+          </div>
+          <div class="stat-box">
+            <div class="label">Product Vouchers (L5–L7)</div>
+            <div class="val" id="statVouchers">Rs.0.00</div>
+            <div class="sub">Shopping vouchers</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Pool completion behaviour:</strong> When your pool completes (all 255 positions filled),
+          your original MAIN ID remains <strong>ACTIVE</strong> in MY SYSTEM and continues earning there.
+          It stops earning AutoPool income but remains in the global tree as a filled node.
+          Your 4 Rebirth IDs continue independently in the global AutoPool.
+        </div>
+      </div>
+
+      <!-- YOUR REBIRTH IDs TABLE -->
+      <div class="card panel">
+        <h2>Your Rebirth ID Cards (RB Series)</h2>
+        <p class="muted" style="font-size:13.5px; margin-bottom:12px;">
+          Every Rebirth ID generated from AutoPool Levels 4–7 operates as an independent node in the global AutoPool.
+        </p>
+
+        <table id="rebirthTable">
+          <thead>
+            <tr>
+              <th>Card Number</th>
+              <th>Type</th>
+              <th>AutoPool Pos.</th>
+              <th>Cash Generated</th>
+              <th>ACB Status</th>
+              <th>Status</th>
+              <th>Created Date</th>
+            </tr>
+          </thead>
+          <tbody id="rebirthTableBody">
+            <tr>
+              <td colspan="7" class="empty-state">
+                ⏳ Loading your Rebirth IDs...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PRODUCT VOUCHERS TABLE -->
+      <div class="card panel">
+        <h2>Product Vouchers — Earned at Levels 5, 6, 7</h2>
+        <div class="note info" style="margin-top:0; margin-bottom:14px;">
+          Rs.200 product vouchers are issued ONLY at AutoPool Levels 5, 6, and 7 upon level completion (total Rs.600 in vouchers per pool cycle).
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Level</th>
+              <th>Voucher Value</th>
+              <th>Voucher Code / Ref</th>
+              <th>Status</th>
+              <th>Expiry Date</th>
+            </tr>
+          </thead>
+          <tbody id="voucherTableBody">
+            <tr>
+              <td>Level 5 (32 IDs)</td>
+              <td>Rs.200</td>
+              <td id="v5Code">—</td>
+              <td id="v5Status"><span class="badge pending">Pending — Level not reached</span></td>
+              <td id="v5Expiry">—</td>
+            </tr>
+            <tr>
+              <td>Level 6 (64 IDs)</td>
+              <td>Rs.200</td>
+              <td id="v6Code">—</td>
+              <td id="v6Status"><span class="badge pending">Pending — Level not reached</span></td>
+              <td id="v6Expiry">—</td>
+            </tr>
+            <tr>
+              <td>Level 7 (128 IDs)</td>
+              <td>Rs.200</td>
+              <td id="v7Code">—</td>
+              <td id="v7Status"><span class="badge pending">Pending — Level not reached</span></td>
+              <td id="v7Expiry">—</td>
+            </tr>
+            <tr style="background:#f8fafc; font-weight:700;">
+              <td>TOTAL PER CYCLE</td>
+              <td>Rs.600</td>
+              <td colspan="3">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- HOW REBIRTH WORKS -->
+      <div class="card panel">
+        <h2>How Rebirth Works (Validated Rules)</h2>
+
+        <div class="how-it-works">
+          <div class="hiw-item">
+            <div class="hiw-num">1</div>
+            <div>
+              <strong>Pool completes at 255 positions</strong>
+              <div class="muted" style="font-size:13.5px;">
+                254 downline positions + 1 root position = 255 total.
+                When all are filled, your pool cycle is complete.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">2</div>
+            <div>
+              <strong>4 rebirth IDs are generated</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Rebirth IDs are generated at AutoPool Levels 4, 5, 6, and 7 — one at each level.
+                They are generated as each level completes, not all at pool completion.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">3</div>
+            <div>
+              <strong>Rebirth IDs placed in global AutoPool</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Each rebirth ID is placed at the next available breadth-first position in the global AutoPool.
+                Rebirth IDs do NOT create a separate tree. They join the same global tree.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">4</div>
+            <div>
+              <strong>Rebirth ID economics</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Rebirth IDs generate the same AutoPool economics as purchased IDs:
+                cash at L1–L3, rebirth IDs at L4–L7, vouchers at L5–L7.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">5</div>
+            <div>
+              <strong>Rebirth IDs do NOT get MY SYSTEM or ACB</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Rebirth IDs have no MY SYSTEM tree, no MY SYSTEM earnings, and no ACB status.
+                They participate only in the global AutoPool.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">6</div>
+            <div>
+              <strong>Rebirth ID withdrawal rule</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Rebirth ID earnings become withdrawable only when the owner's MAIN ID achieves ACB status.
+                Rebirth IDs cannot achieve ACB themselves.
+              </div>
+            </div>
+          </div>
+
+          <div class="hiw-item">
+            <div class="hiw-num">7</div>
+            <div>
+              <strong>Rebirth IDs generate further rebirths</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Each rebirth ID can generate its own rebirth IDs when its L4–L7 fill.
+                This creates an exponential growth pattern through the global AutoPool.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REBIRTH PROJECTION -->
+      <div class="grid-2">
+        <div class="card panel">
+          <h2>Rebirth ID Projection</h2>
+          <p class="muted" style="font-size:13.5px;">Per complete 8-level AutoPool cycle</p>
+
+          <table>
+            <thead>
+              <tr><th>AutoPool Level</th><th>Rebirth Generated</th><th>Voucher</th><th>Cash</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Level 4 (16 IDs)</td><td>1 rebirth ID</td><td>—</td><td>—</td></tr>
+              <tr><td>Level 5 (32 IDs)</td><td>1 rebirth ID</td><td>Rs.200</td><td>—</td></tr>
+              <tr><td>Level 6 (64 IDs)</td><td>1 rebirth ID</td><td>Rs.200</td><td>—</td></tr>
+              <tr><td>Level 7 (128 IDs)</td><td>1 rebirth ID</td><td>Rs.200</td><td>—</td></tr>
+              <tr style="background:#f8fafc; font-weight:700;">
+                <td>TOTAL</td><td>4 rebirth IDs</td><td>Rs.600</td><td>Rs.800 (L1–L3)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card panel">
+          <h2>Exponential Multiplication</h2>
+          <p class="muted" style="font-size:13.5px;">How rebirth IDs multiply in the global tree</p>
+
+          <table>
+            <thead>
+              <tr><th>Generation</th><th>Active IDs</th><th>New Rebirths</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Original ID</td><td>1</td><td>4</td><td>1</td></tr>
+              <tr><td>1st Gen Rebirths</td><td>4</td><td>16</td><td>5</td></tr>
+              <tr><td>2nd Gen Rebirths</td><td>16</td><td>64</td><td>21</td></tr>
+              <tr><td>3rd Gen Rebirths</td><td>64</td><td>256</td><td>85</td></tr>
+              <tr style="background:#f8fafc; font-weight:700;">
+                <td>Multiplier</td><td colspan="3">4× Growth per cycle</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    const token = localStorage.getItem('jwt_token');
+
+    if (!token) {
+      window.location.href = '/bb-register.html';
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('member');
+      localStorage.removeItem('loginContext');
+      window.location.href = '/bb-register.html';
+    }
+
+    function formatINR(paise) {
+      return 'Rs.' + ((paise || 0) / 100).toFixed(2);
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    async function apiCall(endpoint) {
+      try {
+        const res = await fetch(`${API_BASE}${endpoint}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401) {
+          handleLogout();
+          return null;
+        }
+        const json = await res.json();
+        return json.data;
+      } catch (err) {
+        console.error('API call failed for ' + endpoint, err);
+        return null;
+      }
+    }
+
+    async function loadRebirthPage() {
+      const [profile, apData, wallet] = await Promise.all([
+        apiCall('/members/profile'),
+        apiCall('/members/autopool-tree'),
+        apiCall('/wallet/balance')
+      ]);
+
+      if (!profile) return;
+
+      const mainCard = (profile.idCards || []).find(c => c.type === 'MAIN') || profile.idCards?.[0];
+      const loginCtx = wallet?.loginContext || (localStorage.getItem('loginContext') ? JSON.parse(localStorage.getItem('loginContext')) : null);
+
+      // 1. Sidebar Profile & Topbar
+      const displayName = profile.name || 'Member';
+      const activeCardNum = loginCtx?.cardNumber || mainCard?.cardNumber || profile.memberCode;
+      const isSub = loginCtx?.isSubCard || false;
+
+      document.getElementById('memberAvatar').textContent = displayName.charAt(0).toUpperCase();
+      document.getElementById('memberName').textContent = displayName;
+      document.getElementById('memberCode').innerHTML = `${activeCardNum} ${isSub ? `<span style="font-size:10px; opacity:0.8;">(owner ${loginCtx.ownerMemberCode})</span>` : ''}`;
+
+      document.getElementById('topbarSubtitle').textContent = `${displayName} · ${activeCardNum} · Rebirth Cycle & Vouchers`;
+
+      // 2. SUB Login Context Banner
+      if (isSub) {
+        const subBanner = document.getElementById('subLoginBanner');
+        subBanner.innerHTML = `🔑 You are logged in via <strong>${loginCtx.cardNumber}</strong> (${loginCtx.cardType} card of ${loginCtx.ownerMemberCode}) — viewing shared member account.`;
+        subBanner.style.display = 'block';
+      }
+
+      // 3. Pool Status & Stats
+      const myStats = apData?.myStats;
+      const levelStatus = apData?.levelStatus || [];
+
+      if (myStats) {
+        document.getElementById('statPosition').textContent = '#' + myStats.position;
+        document.getElementById('statCash').textContent = formatINR(myStats.cashEarnedPaise);
+        document.getElementById('statRebirths').textContent = `${myStats.rebirthIds || 0} / 4`;
+        document.getElementById('statVouchers').textContent = formatINR(myStats.vouchersPaise);
+
+        // Calculate progress in current 8-level cycle (254 downline positions)
+        let totalFilledInCycle = 0;
+        let currentFillingLevel = 1;
+        let currentLvlFilled = 0;
+        let currentLvlSize = 2;
+
+        for (const ls of levelStatus) {
+          totalFilledInCycle += ls.filled;
+          if (!ls.complete && currentFillingLevel === 1) {
+            currentFillingLevel = ls.level;
+            currentLvlFilled = ls.filled;
+            currentLvlSize = ls.size;
+          }
+        }
+
+        const pct = Math.min(Math.round((totalFilledInCycle / 254) * 100), 100);
+        document.getElementById('poolProgressBar').style.width = `${Math.max(pct, 2)}%`;
+        document.getElementById('poolProgressText').textContent = 
+          `${totalFilledInCycle} / 254 downline positions filled · Level ${currentFillingLevel > 1 ? currentFillingLevel - 1 : 0} complete · Level ${currentFillingLevel} filling (${currentLvlFilled}/${currentLvlSize} IDs)`;
+        
+        document.getElementById('poolStatusHeading').textContent = 
+          `AutoPool Position #${myStats.position} — ${pct >= 100 ? 'CYCLE COMPLETE 🎉' : 'BUILDING UP (IN PROGRESS)'}`;
+      }
+
+      // 4. Rebirth Cards Table
+      const rebirthCards = (profile.idCards || []).filter(c => c.type === 'REBIRTH');
+      const breakdown = wallet?.breakdown || [];
+      const rebirthTableBody = document.getElementById('rebirthTableBody');
+
+      if (rebirthCards.length > 0) {
+        rebirthTableBody.innerHTML = rebirthCards.map(c => {
+          const cardBreakdown = breakdown.find(b => b.cardNumber === c.cardNumber);
+          const totalEarned = cardBreakdown ? cardBreakdown.totalPaise : 0;
+          return `
+            <tr>
+              <td><strong>${c.cardNumber}</strong></td>
+              <td><span class="badge info">REBIRTH</span></td>
+              <td>#${c.autoPoolNode?.globalPosition || '—'}</td>
+              <td style="color:var(--teal); font-weight:600;">+${formatINR(totalEarned)}</td>
+              <td><span class="badge ${mainCard?.acbStatus ? 'success' : 'pending'}">${mainCard?.acbStatus ? 'Unlocked (Main ACB)' : 'Locked'}</span></td>
+              <td><span class="badge success">${c.status || 'ACTIVE'}</span></td>
+              <td>${formatDate(c.createdAt)}</td>
+            </tr>
+          `;
+        }).join('');
+      } else {
+        rebirthTableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="empty-state">
+              🌱 <strong>No Rebirth IDs generated yet.</strong><br/>
+              Your first Rebirth ID (RB series) will be automatically created when AutoPool Level 4 (16 positions) completes!
+            </td>
+          </tr>
+        `;
+      }
+
+      // 5. Vouchers Table
+      const vouchers = profile.vouchers || [];
+      const v5 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_5');
+      const v6 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_6');
+      const v7 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_7');
+
+      if (v5) {
+        document.getElementById('v5Code').textContent = v5.id.slice(0, 10).toUpperCase();
+        document.getElementById('v5Status').innerHTML = `<span class="badge success">${v5.status}</span>`;
+        document.getElementById('v5Expiry').textContent = formatDate(v5.expiresAt);
+      }
+      if (v6) {
+        document.getElementById('v6Code').textContent = v6.id.slice(0, 10).toUpperCase();
+        document.getElementById('v6Status').innerHTML = `<span class="badge success">${v6.status}</span>`;
+        document.getElementById('v6Expiry').textContent = formatDate(v6.expiresAt);
+      }
+      if (v7) {
+        document.getElementById('v7Code').textContent = v7.id.slice(0, 10).toUpperCase();
+        document.getElementById('v7Status').innerHTML = `<span class="badge success">${v7.status}</span>`;
+        document.getElementById('v7Expiry').textContent = formatDate(v7.expiresAt);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadRebirthPage);
+  </script>
+</body>
+</html>

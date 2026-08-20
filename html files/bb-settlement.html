@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settlements & Earnings | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .topbar {
+      background: var(--navy); color: #fff; padding: 14px 22px;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; position: sticky; top: 0; z-index: 20;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
+    }
+
+    .vendor-chip { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.92); }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--teal);
+      display: grid; place-items: center; font-weight: 700; color: #fff;
+    }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head { margin-bottom: 16px; }
+    .page-head h1 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14.5px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 18px; margin-bottom: 16px; }
+    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 12px; }
+    .panel h3 { font-size: 15px; color: var(--navy); margin: 14px 0 8px; }
+
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px; margin-bottom: 18px;
+    }
+
+    .stat-card { padding: 16px; }
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 7px; }
+    .stat-card .value { font-size: 20px; font-weight: 700; color: var(--navy); }
+    .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+    .tabs { display: flex; gap: 10px; margin: 18px 0; flex-wrap: wrap; }
+    .tab-btn {
+      border: 1px solid var(--border); background: #fff; color: var(--navy);
+      padding: 10px 16px; border-radius: 999px; font-weight: 700; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 9px 10px; text-align: left; font-size: 13px; vertical-align: top; }
+    th { background: #f8fafc; color: var(--navy); }
+
+    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.info { background: #e8f6ff; color: var(--info); }
+
+    .note {
+      border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
+      padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px;
+    }
+    .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
+    .note.info { border-left-color: var(--info); background: #e8f4fd; color: #0c4a6e; }
+
+    .deduction-steps { display: grid; gap: 10px; margin-top: 12px; }
+    .deduction-step {
+      display: flex; gap: 12px; border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px; background: #fbfdff;
+    }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%; background: var(--navy);
+      color: #fff; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .preview-box {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px; background: #fbfdff; margin-top: 12px;
+    }
+    .preview-row {
+      display: flex; justify-content: space-between; gap: 10px;
+      padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 14px;
+    }
+    .preview-row:last-child { border-bottom: none; }
+    .preview-row strong { color: var(--navy); }
+
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .filters select, .filters input {
+      border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+      font-size: 13px; color: var(--navy); background: #fff; outline: none;
+    }
+
+    .hidden { display: none; }
+    .muted { color: var(--muted); }
+
+    @media (max-width: 1080px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 980px) { .grid-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-badge"></span><span>Bharatiya Bazaar · भारतीय बाज़ार · Vendor</span></div>
+    <div class="vendor-chip"><span>Ramesh Kumar Sharma · BBV10089 · ✓ VERIFIED</span><span class="avatar">RK</span></div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <h1>Settlements & Earnings</h1>
+      <p>Sharma Kirana Store · Vendor ID: BBV10089 · Corrected as per validated rules</p>
+    </section>
+
+    <section class="summary-grid">
+      <div class="card stat-card">
+        <div class="label">Total Settled</div>
+        <div class="value">Rs.1,03,847</div>
+        <div class="sub">All-time net received</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Pending This Week</div>
+        <div class="value" style="color:var(--warning);">Rs.11,311</div>
+        <div class="sub">Settlement due Monday</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Avg Weekly</div>
+        <div class="value">Rs.9,440</div>
+        <div class="sub">Last 12 settlements</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Admin Charge Saved</div>
+        <div class="value" style="color:var(--success);">Rs.1,840</div>
+        <div class="sub">Via volume discount</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">194C TDS Progress</div>
+        <div class="value">Rs.1,02,250</div>
+        <div class="sub">of Rs.1,00,000 threshold · EXCEEDED</div>
+      </div>
+    </section>
+
+    <div class="note info">
+      <strong>Section 194C TDS:</strong> Your cumulative FY settlement payout has crossed Rs.1,00,000.
+      TDS @ 1% (individual vendor with PAN) now applies to all subsequent settlement payouts.
+      Vendor referral bonus is taxed separately under Section 194H.
+    </div>
+
+    <section class="tabs">
+      <button class="tab-btn active" id="tabSettlementBtn" type="button">🗂 Settlement History</button>
+      <button class="tab-btn" id="tabEarningsBtn" type="button">📊 Earnings Breakdown</button>
+      <button class="tab-btn" id="tabReferralBtn" type="button">🤝 Vendor Referral Bonus</button>
+    </section>
+
+    <!-- ================= SETTLEMENT HISTORY TAB ================= -->
+    <section id="settlementTab">
+      <div class="card panel">
+        <h2>Settlement History</h2>
+
+        <div class="filters">
+          <select>
+            <option>All Statuses</option>
+            <option>PAID</option>
+            <option>PENDING</option>
+          </select>
+          <input type="date" />
+          <input type="date" />
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Gross Sales</th>
+              <th>Margin (7%)</th>
+              <th>Post-Margin</th>
+              <th>Admin (9%)</th>
+              <th>Payout Before TDS</th>
+              <th>194C TDS</th>
+              <th>Net Received</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Aug 4–10</td>
+              <td>Rs.13,500</td>
+              <td>Rs.945.00</td>
+              <td>Rs.12,555.00</td>
+              <td>Rs.1,129.95</td>
+              <td>Rs.11,425.05</td>
+              <td>Rs.114.25</td>
+              <td>Rs.11,310.80</td>
+              <td><span class="badge pending">PENDING</span></td>
+            </tr>
+            <tr>
+              <td>Jul 28–Aug 3</td>
+              <td>Rs.13,750</td>
+              <td>Rs.962.50</td>
+              <td>Rs.12,787.50</td>
+              <td>Rs.1,150.88</td>
+              <td>Rs.11,636.62</td>
+              <td>Rs.22.50</td>
+              <td>Rs.11,614.12</td>
+              <td><span class="badge success">✓ PAID</span></td>
+            </tr>
+            <tr>
+              <td>Jul 21–27</td>
+              <td>Rs.11,200</td>
+              <td>Rs.784.00</td>
+              <td>Rs.10,416.00</td>
+              <td>Rs.937.44</td>
+              <td>Rs.9,478.56</td>
+              <td>Rs.0</td>
+              <td>Rs.9,478.56</td>
+              <td><span class="badge success">✓ PAID</span></td>
+            </tr>
+            <tr>
+              <td>Jul 14–20</td>
+              <td>Rs.9,800</td>
+              <td>Rs.686.00</td>
+              <td>Rs.9,114.00</td>
+              <td>Rs.820.26</td>
+              <td>Rs.8,293.74</td>
+              <td>Rs.0</td>
+              <td>Rs.8,293.74</td>
+              <td><span class="badge success">✓ PAID</span></td>
+            </tr>
+            <tr>
+              <td>Jul 7–13</td>
+              <td>Rs.12,300</td>
+              <td>Rs.861.00</td>
+              <td>Rs.11,439.00</td>
+              <td>Rs.1,029.51</td>
+              <td>Rs.10,409.49</td>
+              <td>Rs.0</td>
+              <td>Rs.10,409.49</td>
+              <td><span class="badge success">✓ PAID</span></td>
+            </tr>
+            <tr>
+              <td>Jun 30–Jul 6</td>
+              <td>Rs.10,500</td>
+              <td>Rs.735.00</td>
+              <td>Rs.9,765.00</td>
+              <td>Rs.878.85</td>
+              <td>Rs.8,886.15</td>
+              <td>Rs.0</td>
+              <td>Rs.8,886.15</td>
+              <td><span class="badge success">✓ PAID</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note" style="margin-top:14px;">
+          <strong>TDS Note:</strong> Jul 28–Aug 3 settlement crossed the Rs.1,00,000 aggregate threshold.
+          TDS was applied only on the excess portion (Rs.2,249.96 × 1% = Rs.22.50) using the marginal method.
+          All subsequent settlements are fully taxable at 1%.
+        </div>
+      </div>
+
+      <div class="card panel">
+        <h2>How Your Deductions Are Calculated</h2>
+        <p class="muted" style="font-size:14px;">Example: Rs.13,750 gross (Jul 28–Aug 3)</p>
+
+        <div class="deduction-steps">
+          <div class="deduction-step">
+            <div class="step-num">1</div>
+            <div>
+              <strong>Platform Margin (7%)</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Rs.13,750 × 7% = Rs.962.50<br />
+                Remaining: Rs.12,787.50
+              </div>
+            </div>
+          </div>
+
+          <div class="deduction-step">
+            <div class="step-num">2</div>
+            <div>
+              <strong>Admin Charge (9% on post-margin amount)</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Rs.12,787.50 × 9% = Rs.1,150.88<br />
+                Volume discount: 10% off base rate (10% → 9%)<br />
+                Payout before TDS: Rs.11,636.62
+              </div>
+            </div>
+          </div>
+
+          <div class="deduction-step">
+            <div class="step-num">3</div>
+            <div>
+              <strong>Section 194C TDS (if threshold crossed)</strong>
+              <div class="muted" style="font-size:13.5px;">
+                Cumulative before: Rs.90,613.34<br />
+                New cumulative: Rs.1,02,249.96 (crosses Rs.1,00,000)<br />
+                Taxable excess: Rs.2,249.96 × 1% = Rs.22.50<br />
+                Net payable: Rs.11,614.12
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-box">
+          <div class="preview-row"><span>Gross Sales</span><strong>Rs.13,750.00</strong></div>
+          <div class="preview-row"><span>Platform Margin (7%)</span><strong>-Rs.962.50</strong></div>
+          <div class="preview-row"><span>Post-Margin Amount</span><strong>Rs.12,787.50</strong></div>
+          <div class="preview-row"><span>Admin Charge (9%)</span><strong>-Rs.1,150.88</strong></div>
+          <div class="preview-row"><span>Payout Before TDS</span><strong>Rs.11,636.62</strong></div>
+          <div class="preview-row"><span>194C TDS (1% on excess)</span><strong>-Rs.22.50</strong></div>
+          <div class="preview-row" style="border-bottom:none;"><span><strong>NET PAYABLE</strong></span><strong style="color:var(--success);">Rs.11,614.12</strong></div>
+        </div>
+
+        <div class="note info" style="margin-top:14px;">
+          <strong>Section 194C Rules:</strong><br />
+          • Single payment threshold: Rs.30,000<br />
+          • Aggregate FY threshold: Rs.1,00,000<br />
+          • Rate: 1% (individual with PAN) / 2% (company/firm with PAN) / 20% (no PAN)<br />
+          • Marginal method: TDS only on portion above threshold when crossing<br />
+          • Once above threshold: all subsequent settlements fully taxable
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= EARNINGS BREAKDOWN TAB ================= -->
+    <section id="earningsTab" class="hidden">
+      <div class="card panel">
+        <h2>Earnings Overview</h2>
+
+        <div class="grid-2">
+          <div>
+            <h3>Sales Revenue</h3>
+            <div class="preview-box">
+              <div class="preview-row"><span>Gross Sales (all time)</span><strong>Rs.1,24,320.00</strong></div>
+              <div class="preview-row"><span>Platform Margin Paid</span><strong>Rs.8,702.40</strong></div>
+              <div class="preview-row"><span>Net Sales Revenue</span><strong>Rs.1,15,617.60</strong></div>
+            </div>
+
+            <h3>Admin Charge Savings</h3>
+            <div class="preview-box">
+              <div class="preview-row"><span>Base Rate</span><strong>10%</strong></div>
+              <div class="preview-row"><span>Your Rate (Tier 1 discount)</span><strong>9%</strong></div>
+              <div class="preview-row"><span>Total Saved</span><strong>Rs.1,840.00</strong></div>
+              <div class="preview-row"><span>Next tier saving</span><strong>Rs.2,760 (at Tier 2)</strong></div>
+            </div>
+          </div>
+
+          <div>
+            <h3>194C TDS Summary</h3>
+            <div class="preview-box">
+              <div class="preview-row"><span>Cumulative FY Payout</span><strong>Rs.1,02,250.00</strong></div>
+              <div class="preview-row"><span>Aggregate Threshold</span><strong>Rs.1,00,000.00</strong></div>
+              <div class="preview-row"><span>Status</span><strong><span class="badge pending">EXCEEDED</span></strong></div>
+              <div class="preview-row"><span>TDS Rate (Individual + PAN)</span><strong>1%</strong></div>
+              <div class="preview-row"><span>TDS Deducted So Far</span><strong>Rs.136.75</strong></div>
+            </div>
+
+            <h3>Setu Kosh Commissions Funded</h3>
+            <div class="preview-box">
+              <div class="preview-row"><span>Total Commissions Funded</span><strong>Rs.875.00</strong></div>
+              <div class="preview-row"><span>Confirmed</span><strong>Rs.575.00</strong></div>
+              <div class="preview-row"><span>Pending</span><strong>Rs.300.00</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VENDOR REFERRAL BONUS TAB ================= -->
+    <section id="referralTab" class="hidden">
+      <div class="card panel">
+        <h2>Vendor Referral Bonus</h2>
+
+        <div class="note info">
+          <strong>Section 194H applies to vendor referral bonus.</strong><br />
+          Threshold: Rs.20,000 per financial year<br />
+          Rate: 3% with PAN / 20% without PAN<br />
+          This is separate from Section 194C which applies to settlement payouts.
+        </div>
+
+        <div class="preview-box" style="margin-top:14px;">
+          <div class="preview-row"><span>Vendors Referred</span><strong>1</strong></div>
+          <div class="preview-row"><span>Total Bonus Earned</span><strong>Rs.1,240.50</strong></div>
+          <div class="preview-row"><span>This Month</span><strong>Rs.320.00</strong></div>
+          <div class="preview-row"><span>Bonus Rate</span><strong>0.25% of all sales (lifetime)</strong></div>
+        </div>
+
+        <h3>How Vendor Referral Bonus Works</h3>
+        <div class="note">
+          • You earn 0.25% of ALL sales at vendors you refer — for their lifetime on the platform.<br />
+          • Bonus is credited as PENDING after each sale and becomes CONFIRMED after weekly settlement.<br />
+          • Only ONE referrer per vendor — the first recorded referral wins permanently.<br />
+          • Vendor referral bonus is taxed under Section 194H (not 194C).
+        </div>
+
+        <h3>Referred Vendors</h3>
+        <table>
+          <thead>
+            <tr><th>Vendor</th><th>Business</th><th>Joined</th><th>Total Sales</th><th>Your Bonus</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>BBV10102</td>
+              <td>Patel Medical Store</td>
+              <td>15 Jun 2026</td>
+              <td>Rs.4,96,200</td>
+              <td>Rs.1,240.50</td>
+              <td><span class="badge success">● ACTIVE</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note" style="margin-top:12px;">
+          Verify the math: Rs.1,240.50 = Rs.4,96,200 × 0.25% ✅<br />
+          496200 × 0.0025 = 1240.50
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const tabs = {
+      settlement: document.getElementById("settlementTab"),
+      earnings: document.getElementById("earningsTab"),
+      referral: document.getElementById("referralTab")
+    };
+
+    const btns = {
+      settlement: document.getElementById("tabSettlementBtn"),
+      earnings: document.getElementById("tabEarningsBtn"),
+      referral: document.getElementById("tabReferralBtn")
+    };
+
+    function switchTab(tab) {
+      Object.keys(tabs).forEach(key => {
+        tabs[key].classList.toggle("hidden", key !== tab);
+        btns[key].classList.toggle("active", key === tab);
+      });
+    }
+
+    btns.settlement.addEventListener("click", () => switchTab("settlement"));
+    btns.earnings.addEventListener("click", () => switchTab("earnings"));
+    btns.referral.addEventListener("click", () => switchTab("referral"));
+  </script>
+</body>
+</html>

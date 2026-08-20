@@ -75,5 +75,39 @@ async function debit(tx, memberId, amountPaise, source, referenceId = null, desc
 
   return { wallet: updatedWallet, ledger };
 }
+async function getWalletBalance(memberId) {
+  const prisma = require("../lib/prisma");
+  const wallet = await prisma.wallet.findUnique({
+    where: { memberId }
+  });
+  
+  if (!wallet) {
+    return { balancePaise: 0 };
+  }
+  
+  return wallet;
+}
 
-module.exports = { credit, debit };
+async function getLedgerHistory(memberId, limit = 50, offset = 0) {
+  const prisma = require("../lib/prisma");
+  
+  const wallet = await prisma.wallet.findUnique({
+    where: { memberId },
+    include: {
+      ledgerEntries: {
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset
+      }
+    }
+  });
+  
+  if (!wallet) {
+    return [];
+  }
+  
+  return wallet.ledgerEntries;
+}
+
+module.exports = { credit, debit, getWalletBalance, getLedgerHistory };
+

@@ -126,11 +126,18 @@ New member with sponsor = placed in sponsor's chosen LEFT or RIGHT
 Sponsor placement is read-only (member cannot change it)
 Later additions can be manually placed, else breadth-first
 ACB (Anant Chakra Builder):
-Achieved when ID has 1 LEFT + 1 RIGHT direct referral
+Achieved when ID has 1 LEFT + 1 RIGHT direct referral (where sponsorIdCardId == this card's id). Spillover placement children do NOT count toward ACB.
 ACB unlocks withdrawal for that ID's earnings
 ACB is earned in MY SYSTEM, NOT in AutoPool
 Each purchased ID can independently achieve ACB
 REBIRTH IDs cannot achieve ACB
+
+SUB Card Login & Wallet Bifurcation:
+- Members can authenticate using their registered mobile, Member Code (BBxxxxx), or any owned SUB card number (SBxxxxx / RBxxxxx) with their account password.
+- When logged in as a SUB card, the user accesses the owner member's unified account in SUB context.
+- Withdrawals can only be initiated when authenticated as the MAIN card. SUB card withdrawal attempts return HTTP 403 Forbidden.
+- Wallet & Commissions views provide per-card bifurcation breakdown (how much each individual MAIN/SUB ID earned, holds, and contributed).
+
 7-day validity hold:
 ALL MY SYSTEM L1, L2, L3 commissions are PENDING for 7 days after completion
 After 7 days with no reversal/dispute/fraud → becomes CONFIRMED

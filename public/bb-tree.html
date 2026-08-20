@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Network | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0d1b2a; --navy-2: #14263b; --teal: #0f9d9d; --teal-dark: #0b7c7c;
+      --amber: #f5a623; --bg: #f4f7fb; --card: #ffffff; --text: #17233a;
+      --muted: #64748b; --border: #dbe4ef; --success: #16a34a; --warning: #d97706;
+      --radius-card: 12px; --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13,27,42,0.08); --sidebar-width: 260px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Inter", "Noto Sans Devanagari", sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; }
+    h1, h2, h3 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width); background: linear-gradient(180deg, var(--navy), var(--navy-2)); color: #fff; display: flex; flex-direction: column; z-index: 50; box-shadow: 4px 0 20px rgba(13,27,42,0.15); }
+    .sidebar-brand { padding: 22px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .brand-badge { width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, #fff 55% 100%); }
+    .brand-text .title { font-weight: 700; font-size: 15px; }
+    .brand-text .subtitle { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+    .sidebar-profile { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 16px; }
+    .profile-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-code { font-size: 11.5px; color: var(--amber); font-weight: 600; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+    .nav-section-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.4); padding: 8px 12px 6px; font-weight: 700; margin-top: 12px; }
+    .nav-section-title:first-child { margin-top: 0; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500; margin-bottom: 3px; transition: all 0.2s; }
+    .nav-item .icon { font-size: 17px; width: 22px; text-align: center; }
+    .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+    .nav-item.active { background: linear-gradient(90deg, var(--teal), var(--teal-dark)); color: #fff; box-shadow: 0 4px 12px rgba(15,157,157,0.25); }
+    .sidebar-footer { padding: 14px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .nav-item.logout:hover { background: rgba(220,38,38,0.15); color: #fca5a5; }
+
+    .main { margin-left: var(--sidebar-width); min-height: 100vh; }
+    .topbar { background: #fff; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
+    .topbar h2 { color: var(--navy); font-size: 18px; }
+    .topbar p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    .topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .topbar-btn { border: 1px solid var(--border); background: #fff; color: var(--navy); padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .topbar-btn:hover { border-color: var(--teal); color: var(--teal-dark); }
+    .topbar-btn.primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+    .topbar-btn.primary:hover { background: var(--teal-dark); }
+    .topbar-btn.amber { background: var(--amber); color: #fff; border-color: var(--amber); }
+    .container { padding: 28px 32px; max-width: 1400px; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat-card { padding: 18px; }
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 22px; font-weight: 700; color: var(--navy); font-family: "Poppins", sans-serif; }
+    .stat-card .sub { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+    .stat-card.acb-yes { border-left: 4px solid var(--success); }
+    .stat-card.acb-no { border-left: 4px solid var(--warning); }
+
+    .panel { padding: 20px; }
+    .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 6px; }
+    .panel .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; font-size: 12.5px; color: var(--muted); }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .legend .dot { width: 12px; height: 12px; border-radius: 4px; }
+
+    .zoom-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; box-shadow: 0 3px 12px rgba(13,27,42,0.08); }
+    .zoom-group { display: flex; align-items: center; gap: 8px; }
+    .zoom-btn { width: 36px; height: 36px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg); color: var(--navy); font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: .2s; font-family: "Inter", sans-serif; line-height: 1; }
+    .zoom-btn:hover:not(:disabled) { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .zoom-btn:disabled { opacity: .4; cursor: default; }
+    .zoom-pct { min-width: 54px; text-align: center; font-family: "Poppins", sans-serif; font-weight: 800; font-size: .88rem; color: var(--text); }
+    .zoom-hint { font-size: .73rem; color: var(--muted); }
+
+    .tree-layout { display: block; }
+    @media(min-width:900px) { .tree-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; align-items: start; } }
+
+    .tree-wrap { overflow: auto; padding: 10px 0 20px; max-height: 70vh; border: 1px solid var(--border); border-radius: 12px; background: #fafbfc; }
+    .tree-container { display: inline-block; min-width: 100%; transition: transform 0.3s ease; transform-origin: top left; }
+    .tree ul { display: flex; justify-content: center; padding-top: 24px; position: relative; transition: all 0.25s ease; }
+    .tree > ul { padding-top: 0; }
+    .tree li { list-style-type: none; position: relative; padding: 24px 8px 0; text-align: center; }
+    .tree > ul > li { padding-top: 0; }
+    .tree > ul > li::before, .tree > ul > li::after { display: none; }
+
+    .tree li::before, .tree li::after {
+      content: ''; position: absolute; top: 0; right: 50%;
+      border-top: 2px solid #cbd5e1; width: 50%; height: 24px;
+    }
+    .tree li::after { right: auto; left: 50%; border-left: 2px solid #cbd5e1; }
+    .tree li:only-child::after, .tree li:only-child::before { display: none; }
+    .tree li:first-child::before, .tree li:last-child::after { border: 0 none; }
+    .tree li:last-child::before { border-right: 2px solid #cbd5e1; border-radius: 0 8px 0 0; }
+    .tree li:first-child::after { border-radius: 8px 0 0 0; }
+    .tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #cbd5e1; width: 0; height: 24px; }
+
+    .t-node {
+      display: inline-block; min-width: 140px; max-width: 170px;
+      border: 2px solid var(--border); border-radius: 10px;
+      padding: 10px 12px 28px; background: #fff; box-shadow: var(--shadow);
+      position: relative; vertical-align: top; cursor: pointer; transition: all 0.2s;
+    }
+    .t-node:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(15,157,157,0.2); }
+    .t-node.selected { outline: 3px solid var(--teal); outline-offset: 2px; }
+    .t-node .t-name { font-weight: 700; color: var(--navy); font-size: 13.5px; }
+    .t-node .t-code { color: var(--teal-dark); font-size: 12px; font-weight: 700; margin-top: 2px; }
+    .t-node .t-type { color: var(--muted); font-size: 11px; margin-top: 4px; }
+    .t-node .t-sponsor { color: var(--muted); font-size: 9.5px; margin-top: 2px; font-style: italic; }
+    .t-node.self { border-color: var(--amber); background: #fff8e9; }
+    .t-node.acb { border-color: var(--success); }
+    .t-node.empty { border-style: dashed; background: #f8fafc; box-shadow: none; padding-bottom: 10px; }
+    .t-node.empty .t-name { color: var(--muted); font-weight: 600; }
+
+    .side-badge {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      font-size: 9.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px;
+      letter-spacing: 0.5px;
+    }
+    .side-badge.left { background: #e8f6ff; color: #0369a1; }
+    .side-badge.right { background: #fff4e0; color: #d97706; }
+
+    .toggle-btn {
+      position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--navy); color: #fff; border: 2px solid #fff;
+      display: grid; place-items: center; cursor: pointer;
+      font-weight: 800; font-size: 14px; line-height: 1;
+      box-shadow: 0 2px 6px rgba(13,27,42,0.25);
+      transition: all 0.2s ease; z-index: 5;
+    }
+    .toggle-btn:hover { background: var(--teal); transform: translateX(-50%) scale(1.15); }
+
+    .tree li.collapsed > ul { display: none; }
+    .tree li.collapsed > .t-node { border-style: dashed; opacity: 0.85; }
+
+    .hidden-count { display: block; font-size: 10px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+    .node-detail { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(13,27,42,0.08); margin-top: 22px; }
+    @media(min-width:900px) { .node-detail { margin-top: 0; position: sticky; top: 24px; } }
+    .nd-head { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; }
+    .nd-avatar { width: 50px; height: 50px; flex: none; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-family: "Poppins", sans-serif; font-weight: 800; font-size: 1.05rem; }
+    .nd-avatar.navy { background: var(--navy); color: #fff; }
+    .nd-avatar.teal { background: rgba(15,157,157,.12); color: var(--teal); }
+    .nd-avatar.muted { background: var(--bg); color: var(--muted); border: 1px dashed var(--border); }
+    .nd-head h4 { font-size: 1.02rem; color: var(--navy); }
+    .nd-head .nd-id { font-size: .76rem; color: var(--muted); font-weight: 600; }
+    .nd-rows { border-top: 1px dashed var(--border); padding-top: 10px; margin-bottom: 16px; }
+    .nd-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; font-size: .84rem; border-bottom: 1px dashed var(--border); }
+    .nd-row:last-child { border-bottom: none; }
+    .nd-row .k { color: var(--muted); }
+    .nd-row .v { font-weight: 600; color: var(--text); text-align: right; }
+    .nd-row .v.green { color: var(--success); }
+    .nd-empty-box { border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; background: var(--bg); margin-bottom: 14px; }
+    .nd-empty-box .eb-title { font-weight: 800; color: var(--text); font-size: .95rem; }
+    .nd-empty-box .eb-sub { font-size: .78rem; color: var(--muted); margin-top: 3px; }
+    .nd-actions { display: grid; gap: 10px; }
+    .nd-note { font-size: .72rem; color: var(--muted); margin-top: 12px; text-align: center; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: "Inter", sans-serif; font-weight: 600; font-size: .9rem; padding: 11px 20px; border-radius: var(--radius-btn); border: 2px solid transparent; cursor: pointer; transition: .22s ease; line-height: 1; }
+    .btn-navy { background: var(--navy); color: #fff; }
+    .btn-navy:hover { background: var(--navy-2); }
+    .btn-teal { background: var(--teal); color: #fff; }
+    .btn-teal:hover { background: var(--teal-dark); }
+    .btn-outline-teal { background: transparent; color: var(--teal); border-color: var(--teal); }
+    .btn-outline-teal:hover { background: var(--teal); color: #fff; }
+
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(13,27,42,0.55); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(520px, 100%); background: #fff; border-radius: 14px; padding: 22px; max-height: 88vh; overflow: auto; }
+    .modal h3 { color: var(--navy); margin-bottom: 14px; }
+    .modal-actions { display: grid; gap: 10px; margin-top: 6px; }
+
+    .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .hidden { display: none; }
+
+    @media (max-width: 1080px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) {
+      :root { --sidebar-width: 0px; }
+      .sidebar { top: auto; bottom: 0; width: 100%; height: 70px; flex-direction: row; background: #fff; border-top: 1px solid var(--border); }
+      .sidebar-brand, .sidebar-profile, .sidebar-footer, .nav-section-title { display: none; }
+      .sidebar-nav { padding: 0; display: flex; flex-direction: row; justify-content: space-around; align-items: center; width: 100%; }
+      .nav-item { flex-direction: column; gap: 2px; padding: 6px 8px; font-size: 10.5px; margin: 0; color: var(--muted); }
+      .nav-item.active { background: transparent; color: var(--teal-dark); box-shadow: none; }
+      .main { margin-left: 0; margin-bottom: 70px; }
+      .container { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-badge"></span>
+      <div class="brand-text"><div class="title">Bharatiya Bazaar</div><div class="subtitle">भारतीय बाज़ार</div></div>
+    </div>
+    <div class="sidebar-profile">
+      <div class="avatar" id="memberAvatar">?</div>
+      <div style="min-width:0;">
+        <div class="profile-name" id="memberName">Loading...</div>
+        <div class="profile-code" id="memberCode">BB-----</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a href="/bb-dashboard.html" class="nav-item"><span class="icon">🏠</span><span>Dashboard</span></a>
+      <a href="/bb-tree.html" class="nav-item active"><span class="icon">🤝</span><span>My Network</span></a>
+      <a href="/bb-wallet.html" class="nav-item"><span class="icon">👛</span><span>Wallet</span></a>
+      <a href="/bb-commissions.html" class="nav-item"><span class="icon">💰</span><span>Commissions</span></a>
+      <div class="nav-section-title">Earnings</div>
+      <a href="/bb-autopool.html" class="nav-item"><span class="icon">🌀</span><span>AutoPool</span></a>
+      <a href="/bb-setu-kosh.html" class="nav-item"><span class="icon">🛒</span><span>Setu Kosh</span></a>
+      <a href="/bb-rebirth.html" class="nav-item"><span class="icon">🎭</span><span>Rebirth IDs</span></a>
+      <div class="nav-section-title">Account</div>
+      <a href="/bb-notifications.html" class="nav-item"><span class="icon">🔔</span><span>Notifications</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" class="nav-item logout" onclick="handleLogout(); return false;"><span class="icon">🚪</span><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="pageHeaderTitle">My Network · MY SYSTEM</h2>
+        <p id="pageHeaderSub">Your binary referral tree — LEFT & RIGHT legs</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-btn amber hidden" id="backToTreeBtn" onclick="backToFullTree()">⬅ Full Tree</button>
+        <button class="topbar-btn" onclick="expandAll()">➕ Expand All</button>
+        <button class="topbar-btn" onclick="collapseAll()">➖ Collapse All</button>
+        <button class="topbar-btn primary" onclick="fitToScreen()">⚡ Fit to Screen</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="loadingIndicator" class="loading">Loading your network...</div>
+
+      <div id="treeContent" class="hidden">
+        <section class="stat-grid">
+          <div class="card stat-card">
+            <div class="label">⬅ LEFT Leg</div>
+            <div class="value" id="statLeft">0</div>
+            <div class="sub" id="statLeftDirect">Direct: —</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">➡ RIGHT Leg</div>
+            <div class="value" id="statRight">0</div>
+            <div class="sub" id="statRightDirect">Direct: —</div>
+          </div>
+          <div class="card stat-card">
+            <div class="label">🌐 Total Network</div>
+            <div class="value" id="statTotal">0</div>
+            <div class="sub">All members below you</div>
+          </div>
+          <div class="card stat-card" id="acbCard">
+            <div class="label">🛡️ ACB Status</div>
+            <div class="value" id="statAcb">Pending</div>
+            <div class="sub">Needs 1 LEFT + 1 RIGHT direct</div>
+          </div>
+        </section>
+
+        <div class="card panel">
+          <h2>Your MY SYSTEM Tree</h2>
+          <p class="sub" id="treeSubText">Click nodes to view details. Use <strong>+/-</strong> buttons to expand/collapse branches.</p>
+
+          <div class="legend">
+            <span><span class="dot" style="background:#fff8e9; border:2px solid var(--amber);"></span> You / Viewing Root</span>
+            <span><span class="dot" style="background:#fff; border:2px solid var(--success);"></span> ACB Unlocked</span>
+            <span><span class="dot" style="background:#f8fafc; border:2px dashed var(--border);"></span> Empty Slot</span>
+          </div>
+
+          <div class="zoom-bar">
+            <div class="zoom-group">
+              <button class="zoom-btn" id="zoomOut" type="button" aria-label="Zoom out">−</button>
+              <span class="zoom-pct" id="zoomPct">100%</span>
+              <button class="zoom-btn" id="zoomIn" type="button" aria-label="Zoom in">+</button>
+            </div>
+            <span class="zoom-hint">Use + / − to zoom · Scroll to see all nodes</span>
+          </div>
+
+          <div class="tree-layout">
+            <div class="tree-wrap" id="treeWrap">
+              <div class="tree-container" id="treeContainer">
+                <div id="treeInner"></div>
+              </div>
+            </div>
+            <div class="node-detail" id="nodeDetail"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL PROFILE MODAL -->
+  <div class="modal-backdrop" id="profileModal">
+    <div class="modal">
+      <h3>👤 Member Profile</h3>
+      <div id="profileModalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:4000/api';
+    function getToken() { return localStorage.getItem('jwt_token'); }
+    function logout() { localStorage.removeItem('jwt_token'); localStorage.removeItem('member'); window.location.href = '/bb-register.html'; }
+    function handleLogout() { if (confirm('Logout?')) logout(); }
+    function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
+
+    async function apiCall(endpoint) {
+      const token = getToken();
+      if (!token) { logout(); return null; }
+      try {
+        const r = await fetch(`${API_BASE}${endpoint}`, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+        if (r.status === 401) { logout(); return null; }
+        const d = await r.json();
+        return d.success ? d.data : null;
+      } catch (e) { return null; }
+    }
+
+    const MAX_DEPTH = 4;
+    let treeData = null;
+    let zoom = 100;
+    let viewRootId = null;
+    let myMemberCode = null;
+
+    function countSubtree(node) {
+      if (!node) return 0;
+      return 1 + countSubtree(node.children?.LEFT) + countSubtree(node.children?.RIGHT);
+    }
+
+    function findNode(node, id) {
+      if (!node) return null;
+      if (node.id === id) return node;
+      return findNode(node.children?.LEFT, id) || findNode(node.children?.RIGHT, id);
+    }
+
+    function renderNode(node, isRoot, depth) {
+      const isYou = node.memberCode === myMemberCode;
+      const leftChild = node.children?.LEFT;
+      const rightChild = node.children?.RIGHT;
+      const hasAnyChild = (leftChild || rightChild);
+      const totalBelow = countSubtree(leftChild) + countSubtree(rightChild);
+      const shouldCollapse = depth >= 2 && hasAnyChild;
+
+      let html = `<li data-node-id="${node.id}" ${shouldCollapse ? 'class="collapsed"' : ''}>`;
+      html += `<div class="t-node ${isRoot ? 'self' : ''} ${node.acbStatus ? 'acb' : ''}" onclick="selectNode(event, '${node.id}')">`;
+      if (node.side) {
+        html += `<span class="side-badge ${node.side.toLowerCase()}">${node.side}</span>`;
+      }
+      const isSubCard = node.cardType ? node.cardType !== 'MAIN' : (node.cardNumber && node.memberCode && node.cardNumber !== node.memberCode);
+      const ownerLabel = isSubCard ? `<span class="t-owner" style="font-size:11px; opacity:0.85; display:block; margin-top:2px;">(owner ${escapeHtml(node.memberCode)})</span>` : '';
+      html += `<div class="t-name">${escapeHtml(node.memberName)}${isYou ? ' (You)' : ''}</div>`;
+      html += `<div class="t-code">${escapeHtml(node.cardNumber || node.memberCode)} ${ownerLabel}</div>`;
+      if (!isYou && node.sponsorCode) {
+        html += `<div class="t-sponsor">👤 Sponsored by: ${escapeHtml(node.sponsorCode)}</div>`;
+      }
+      html += `<div class="t-type">${escapeHtml(node.cardType)}${node.acbStatus ? ' · ✓ ACB' : ''}</div>`;
+      if (hasAnyChild && totalBelow > 0) {
+        html += `<span class="hidden-count">${totalBelow} below</span>`;
+      }
+      html += `</div>`;
+
+      if (hasAnyChild && depth < MAX_DEPTH) {
+        html += `<span class="toggle-btn" onclick="toggleNode(event, this)">${shouldCollapse ? '+' : '−'}</span>`;
+      }
+
+      if (depth < MAX_DEPTH) {
+        html += '<ul>';
+        html += leftChild
+          ? renderNode(leftChild, false, depth + 1)
+          : '<li><div class="t-node empty" onclick="selectEmpty(event)"><div class="t-name">Empty</div><div class="t-type">LEFT slot</div></div></li>';
+        html += rightChild
+          ? renderNode(rightChild, false, depth + 1)
+          : '<li><div class="t-node empty" onclick="selectEmpty(event)"><div class="t-name">Empty</div><div class="t-type">RIGHT slot</div></div></li>';
+        html += '</ul>';
+      }
+
+      html += '</li>';
+      return html;
+    }
+
+    function renderTree() {
+      if (!treeData) return;
+      const root = viewRootId ? findNode(treeData.tree, viewRootId) : treeData.tree;
+      if (!root) return;
+      document.getElementById('treeInner').innerHTML =
+        `<div class="tree"><ul>${renderNode(root, true, 0)}</ul></div>`;
+      document.getElementById('backToTreeBtn').classList.toggle('hidden', !viewRootId);
+      document.getElementById('treeSubText').innerHTML = viewRootId
+        ? `🔍 Viewing sub-tree of <strong>${escapeHtml(root.cardNumber || root.memberCode)}</strong> — click "⬅ Full Tree" to go back.`
+        : 'Click nodes to view details. Use <strong>+/-</strong> buttons to expand/collapse branches.';
+      setTimeout(fitToScreen, 150);
+    }
+
+    function toggleNode(event, btn) {
+      event.stopPropagation();
+      const li = btn.closest('li');
+      const isCollapsed = li.classList.toggle('collapsed');
+      btn.textContent = isCollapsed ? '+' : '−';
+    }
+
+    function expandAll() {
+      document.querySelectorAll('.tree li.collapsed').forEach(li => {
+        li.classList.remove('collapsed');
+        const btn = li.querySelector(':scope > .toggle-btn');
+        if (btn) btn.textContent = '−';
+      });
+      setTimeout(fitToScreen, 100);
+    }
+
+    function collapseAll() {
+      document.querySelectorAll('.tree li').forEach((li, idx) => {
+        if (idx === 0 && li.parentElement.parentElement.classList.contains('tree')) return;
+        const btn = li.querySelector(':scope > .toggle-btn');
+        if (btn) {
+          li.classList.add('collapsed');
+          btn.textContent = '+';
+        }
+      });
+      setTimeout(fitToScreen, 100);
+    }
+
+    function fitToScreen() {
+      const wrap = document.getElementById('treeWrap');
+      const container = document.getElementById('treeContainer');
+      const inner = document.getElementById('treeInner');
+      if (!wrap || !container || !inner) return;
+      const wrapWidth = wrap.clientWidth - 40;
+      const treeWidth = inner.scrollWidth;
+      if (treeWidth === 0) return;
+      zoom = Math.min(100, Math.max(30, Math.floor((wrapWidth / treeWidth) * 100)));
+      applyZoom();
+      setTimeout(() => { wrap.scrollLeft = (container.scrollWidth - wrap.clientWidth) / 2; }, 150);
+    }
+
+    function selectNode(event, nodeId) {
+      document.querySelectorAll('.t-node.selected').forEach(n => n.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      renderDetail(nodeId);
+    }
+
+    function selectEmpty(event) {
+      event.stopPropagation();
+      document.querySelectorAll('.t-node.selected').forEach(n => n.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      renderEmptyDetail();
+    }
+
+    function renderDetail(nodeId) {
+      if (!treeData) return;
+      const node = findNode(treeData.tree, nodeId);
+      if (!node) return;
+      const isYou = node.memberCode === myMemberCode;
+      const el = document.getElementById('nodeDetail');
+      const initials = (node.memberName || 'M').charAt(0).toUpperCase();
+
+      let acbBadge = '';
+      if (node.acbStatus) {
+        acbBadge = '<div style="margin-bottom:12px"><span style="background:rgba(26,107,90,.12); color:var(--teal); padding:4px 11px; border-radius:999px; font-size:11px; font-weight:600;">✓ ACB Member</span></div>';
+      }
+      let sponsorRow = '';
+      if (node.sponsorCode && !isYou) {
+        sponsorRow = `<div class="nd-row"><span class="k">Sponsored by</span><span class="v green">${escapeHtml(node.sponsorCode)}</span></div>`;
+      }
+
+      el.innerHTML = `
+        <div class="nd-head">
+          <div class="nd-avatar ${isYou ? 'navy' : 'teal'}">${initials}</div>
+          <div>
+            <h4>${escapeHtml(node.cardNumber || node.memberCode)}${isYou ? ' (You)' : ''}</h4>
+            <div class="nd-id">${escapeHtml(node.memberName)} (Owner: ${escapeHtml(node.memberCode || '-')})</div>
+          </div>
+        </div>
+        ${acbBadge}
+        <div class="nd-rows">
+          <div class="nd-row"><span class="k">Member Code</span><span class="v">${escapeHtml(node.memberCode || '-')}</span></div>
+          <div class="nd-row"><span class="k">Card Number</span><span class="v">${escapeHtml(node.cardNumber)}</span></div>
+          <div class="nd-row"><span class="k">Card Type</span><span class="v">${escapeHtml(node.cardType)}</span></div>
+          <div class="nd-row"><span class="k">Placement</span><span class="v">${node.side || 'ROOT'}</span></div>
+          ${sponsorRow}
+          <div class="nd-row"><span class="k">ACB Status</span><span class="v ${node.acbStatus ? 'green' : ''}">${node.acbStatus ? '✓ Unlocked' : 'Pending'}</span></div>
+        </div>
+        <div class="nd-actions">
+          <button class="btn btn-navy" onclick="openProfileModal('${node.id}')">View Full Profile</button>
+          <button class="btn btn-outline-teal" onclick="viewSubTree('${node.id}')">View Sub-tree</button>
+        </div>
+      `;
+    }
+
+    function renderEmptyDetail() {
+      const el = document.getElementById('nodeDetail');
+      el.innerHTML = `
+        <div class="nd-head">
+          <div class="nd-avatar muted">+</div>
+          <div><h4>Open Position</h4><div class="nd-id">Empty Slot</div></div>
+        </div>
+        <div class="nd-empty-box">
+          <div class="eb-title">Place a member here</div>
+          <div class="eb-sub">Use your referral link to invite someone</div>
+        </div>
+        <div class="nd-rows">
+          <div class="nd-row"><span class="k">Status</span><span class="v" style="color:var(--amber)">Vacant</span></div>
+        </div>
+        <div class="nd-actions">
+          <button class="btn btn-teal" onclick="alert('Copy referral link from dashboard')">Copy Referral Link</button>
+        </div>
+        <div class="nd-note">Refer a friend to fill this position</div>
+      `;
+    }
+
+    // 🆕 FULL PROFILE MODAL
+    function openProfileModal(nodeId) {
+      const node = findNode(treeData.tree, nodeId);
+      if (!node) return;
+      const leftSize = countSubtree(node.children?.LEFT);
+      const rightSize = countSubtree(node.children?.RIGHT);
+
+      document.getElementById('profileModalBody').innerHTML = `
+        <div class="nd-head">
+          <div class="nd-avatar navy">${(node.memberName || 'M').charAt(0).toUpperCase()}</div>
+          <div>
+            <h4>${escapeHtml(node.cardNumber || node.memberCode)}</h4>
+            <div class="nd-id">${escapeHtml(node.memberName)} (Owner: ${escapeHtml(node.memberCode || '-')})</div>
+          </div>
+        </div>
+        <div class="nd-rows">
+          <div class="nd-row"><span class="k">Member Code</span><span class="v">${escapeHtml(node.memberCode)}</span></div>
+          <div class="nd-row"><span class="k">Card Number</span><span class="v">${escapeHtml(node.cardNumber)}</span></div>
+          <div class="nd-row"><span class="k">Card Type</span><span class="v">${escapeHtml(node.cardType)}</span></div>
+          <div class="nd-row"><span class="k">Joined</span><span class="v">${fmtDate(node.joinedAt)}</span></div>
+          <div class="nd-row"><span class="k">Sponsored by</span><span class="v green">${escapeHtml(node.sponsorCode || '— (Root)')}</span></div>
+          <div class="nd-row"><span class="k">Placement</span><span class="v">${node.side || 'ROOT'}</span></div>
+          <div class="nd-row"><span class="k">ACB Status</span><span class="v ${node.acbStatus ? 'green' : ''}">${node.acbStatus ? '✓ Unlocked' : 'Pending'}</span></div>
+          ${node.acbUnlockedAt ? `<div class="nd-row"><span class="k">ACB Unlocked On</span><span class="v green">${fmtDate(node.acbUnlockedAt)}</span></div>` : ''}
+          <div class="nd-row"><span class="k">⬅ Their LEFT Leg</span><span class="v">${leftSize}</span></div>
+          <div class="nd-row"><span class="k">➡ Their RIGHT Leg</span><span class="v">${rightSize}</span></div>
+          <div class="nd-row"><span class="k">🌐 Their Total Network</span><span class="v">${leftSize + rightSize}</span></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline-teal" onclick="closeProfileModal(); viewSubTree('${node.id}')">🌳 View Their Sub-tree</button>
+          <button class="btn btn-navy" onclick="closeProfileModal()">Close</button>
+        </div>
+      `;
+      document.getElementById('profileModal').classList.add('open');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.remove('open');
+    }
+
+    // 🆕 SUB-TREE VIEW
+    function viewSubTree(nodeId) {
+      viewRootId = nodeId;
+      renderTree();
+      renderDetail(nodeId);
+    }
+
+    function backToFullTree() {
+      viewRootId = null;
+      renderTree();
+      renderDetail(treeData.tree.id);
+    }
+
+    function applyZoom() {
+      const sc = zoom / 100;
+      document.getElementById('treeContainer').style.transform = `scale(${sc})`;
+      document.getElementById('zoomPct').textContent = zoom + '%';
+      document.getElementById('zoomIn').disabled = zoom >= 150;
+      document.getElementById('zoomOut').disabled = zoom <= 30;
+    }
+
+    document.getElementById('zoomIn').addEventListener('click', () => { zoom = Math.min(150, zoom + 10); applyZoom(); });
+    document.getElementById('zoomOut').addEventListener('click', () => { zoom = Math.max(30, zoom - 10); applyZoom(); });
+    document.getElementById('profileModal').addEventListener('click', (e) => { if (e.target.id === 'profileModal') closeProfileModal(); });
+
+    async function loadTree() {
+      const token = getToken();
+      if (!token) { logout(); return; }
+
+      const [profile, data] = await Promise.all([
+        apiCall('/members/profile'),
+        apiCall('/members/my-system-tree')
+      ]);
+
+      document.getElementById('loadingIndicator').classList.add('hidden');
+      document.getElementById('treeContent').classList.remove('hidden');
+
+      const loginCtx = localStorage.getItem('loginContext') ? JSON.parse(localStorage.getItem('loginContext')) : null;
+      const name = profile?.name || 'Member';
+      const mainCard = (profile?.idCards || []).find(c => c.type === 'MAIN');
+      const activeCard = loginCtx?.cardNumber || mainCard?.cardNumber || profile?.memberCode;
+      const isSub = loginCtx?.isSubCard || false;
+      const ownerCode = loginCtx?.ownerMemberCode || profile?.memberCode;
+
+      if (profile) {
+        myMemberCode = profile.memberCode || null;
+        document.getElementById('memberName').textContent = name;
+        document.getElementById('memberCode').innerHTML = `${activeCard} ${isSub ? `<span style="font-size:10px; opacity:0.8;">(owner ${ownerCode})</span>` : ''}`;
+        document.getElementById('memberAvatar').textContent = name.charAt(0).toUpperCase();
+      }
+
+      if (isSub) {
+        document.getElementById('pageHeaderTitle').textContent = `My Network (${activeCard})`;
+        document.getElementById('pageHeaderSub').textContent = `Viewing binary referral subtree rooted at ${activeCard} (owner ${ownerCode})`;
+      }
+
+      if (data?.isRebirth || profile?.activeCard?.type === 'REBIRTH' || loginCtx?.cardType === 'REBIRTH') {
+        document.getElementById('treeInner').innerHTML = `
+          <div class="loading" style="padding:40px; text-align:center;">
+            <div style="font-size:36px; margin-bottom:12px;">🌀</div>
+            <h3 style="margin-bottom:8px; color:var(--navy); font-size:18px;">Rebirth IDs participate exclusively in AutoPool</h3>
+            <p style="color:var(--muted); margin-bottom:16px; font-size:14px;">Rebirth IDs do not have a binary referral tree in MY SYSTEM.</p>
+            <a href="/bb-autopool.html" class="topbar-btn primary" style="display:inline-block; text-decoration:none; padding:8px 18px; border-radius:8px;">View your AutoPool journey →</a>
+          </div>`;
+        document.getElementById('statLeft').textContent = '0';
+        document.getElementById('statRight').textContent = '0';
+        document.getElementById('statTotal').textContent = '0';
+        document.getElementById('statLeftDirect').textContent = 'Direct: —';
+        document.getElementById('statRightDirect').textContent = 'Direct: —';
+        const statAcb = document.getElementById('statAcb');
+        statAcb.textContent = 'AutoPool Only';
+        statAcb.style.color = 'var(--muted)';
+        return;
+      }
+
+      if (!data || !data.tree) {
+        document.getElementById('treeInner').innerHTML =
+          '<div class="loading">No network data yet. Refer friends to build your tree!</div>';
+        return;
+      }
+
+      treeData = data;
+      const { tree, stats } = data;
+
+      document.getElementById('statLeft').textContent = stats.leftLegSize;
+      document.getElementById('statRight').textContent = stats.rightLegSize;
+      document.getElementById('statTotal').textContent = stats.totalNetwork;
+      document.getElementById('statLeftDirect').textContent = 'Direct: ' + (stats.hasDirectLeft ? '✓ Filled' : '— Empty');
+      document.getElementById('statRightDirect').textContent = 'Direct: ' + (stats.hasDirectRight ? '✓ Filled' : '— Empty');
+
+      const acbCard = document.getElementById('acbCard');
+      const statAcb = document.getElementById('statAcb');
+      if (stats.acbStatus) {
+        statAcb.textContent = '✓ Unlocked';
+        statAcb.style.color = 'var(--success)';
+        acbCard.classList.add('acb-yes');
+      } else {
+        statAcb.textContent = 'Pending';
+        statAcb.style.color = 'var(--warning)';
+        acbCard.classList.add('acb-no');
+      }
+
+      renderTree();
+      renderDetail(tree.id);
+    }
+
+    loadTree();
+  </script>
+</body>
+</html>

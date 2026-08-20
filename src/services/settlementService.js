@@ -18,7 +18,7 @@ async function getVolumeDiscountPct(vendorId, periodEnd) {
   });
 
   const monthlySales = aggregate._sum.amountPaise || 0;
-  
+
   if (monthlySales >= 50000000) return 50;
   if (monthlySales >= 20000000) return 30;
   if (monthlySales >= 10000000) return 20;
@@ -34,6 +34,8 @@ async function processWeeklySettlement(runDate) {
   // Idempotency lock
   const runDateStr = runDate.toISOString();
   let settlementRun;
+
+  // OUTER TRY: create the settlement run (P2002 throws here on duplicate runDate)
   try {
     settlementRun = await prisma.settlementRun.create({
       data: {
@@ -43,11 +45,18 @@ async function processWeeklySettlement(runDate) {
     });
   } catch (error) {
     if (error.code === 'P2002') {
-      throw new Error(`Settlement run for ${runDateStr} is already in progress or completed.`);
+      const target = error.meta?.target;
+      let field = "a unique field";
+      if (Array.isArray(target)) field = target.join(", ");
+      else if (typeof target === "string") field = target;
+
+      console.warn(`Settlement run duplicate detected on ${field} — skipping`);
+      return; // Settlement already ran for this date, safe to skip
     }
     throw error;
   }
 
+  // INNER TRY: main settlement processing logic
   try {
     const periodStart = new Date(runDate);
     periodStart.setDate(periodStart.getDate() - 7);
@@ -79,24 +88,23 @@ async function processWeeklySettlement(runDate) {
         if (sales.length === 0) return;
 
         const grossSalesPaise = sales.reduce((sum, sale) => sum + sale.amountPaise, 0);
-        
+
         // Strict integer math
         const marginPaise = Math.floor((grossSalesPaise * vendor.marginRatePct) / 100);
         const postMarginPaise = grossSalesPaise - marginPaise;
-        
+
         const adminChargeRatePct = 10; // Defaulting to 10% bank withdrawal
         const baseAdminChargePaise = Math.floor((postMarginPaise * adminChargeRatePct) / 100);
-        
+
         const discountPct = await getVolumeDiscountPct(vendor.id, periodEnd);
         const volumeDiscountPaise = Math.floor((baseAdminChargePaise * discountPct) / 100);
-        
+
         const finalAdminChargePaise = baseAdminChargePaise - volumeDiscountPaise;
         const payoutBeforeTdsPaise = postMarginPaise - finalAdminChargePaise;
-        
+
         // TDS calculation - spec says 194C is 1% (assuming individual with PAN for simplicity in Phase 7)
-        // TDS is typically calculated on the gross amount in Indian tax law
         const tdsPaise = Math.floor((grossSalesPaise * 1) / 100);
-        
+
         const netPayablePaise = payoutBeforeTdsPaise - tdsPaise;
 
         await tx.vendorSettlement.create({
@@ -120,7 +128,7 @@ async function processWeeklySettlement(runDate) {
         if (!wallet) {
           wallet = await tx.wallet.create({ data: { memberId: vendor.memberId }});
         }
-        
+
         await tx.wallet.update({
           where: { id: wallet.id },
           data: { balancePaise: { increment: netPayablePaise } }
@@ -146,13 +154,13 @@ async function processWeeklySettlement(runDate) {
 
     // Process PENDING_SETTLEMENT commissions in batches
     const BATCH_SIZE = 500;
-    
+
     // 1. CommissionEntries (Setu Kosh)
     let hasMoreCommissions = true;
     while (hasMoreCommissions) {
       await prisma.$transaction(async (tx) => {
         const commissions = await tx.commissionEntry.findMany({
-          where: { 
+          where: {
             status: "PENDING_SETTLEMENT",
             createdAt: { lte: periodEnd }
           },
@@ -167,14 +175,14 @@ async function processWeeklySettlement(runDate) {
         for (const commission of commissions) {
           await tx.commissionEntry.update({
             where: { id: commission.id },
-            data: { 
-              status: "CONFIRMED", 
-              confirmedAt: new Date() 
+            data: {
+              status: "CONFIRMED",
+              confirmedAt: new Date()
             }
           });
 
           const idCard = await tx.memberIdCard.findUnique({ where: { id: commission.idCardId }});
-          
+
           let wallet = await tx.wallet.findUnique({ where: { memberId: idCard.memberId }});
           if (!wallet) {
             wallet = await tx.wallet.create({ data: { memberId: idCard.memberId }});
@@ -197,7 +205,7 @@ async function processWeeklySettlement(runDate) {
               balanceAfterPaise: wallet.balancePaise + commission.amountPaise
             }
           });
-          
+
           totalEntries++;
           totalPaise += commission.amountPaise;
         }
@@ -209,7 +217,7 @@ async function processWeeklySettlement(runDate) {
     while (hasMoreBonuses) {
       await prisma.$transaction(async (tx) => {
         const bonuses = await tx.vendorReferralBonus.findMany({
-          where: { 
+          where: {
             status: "PENDING_SETTLEMENT",
             createdAt: { lte: periodEnd }
           },
@@ -249,7 +257,7 @@ async function processWeeklySettlement(runDate) {
               balanceAfterPaise: wallet.balancePaise + bonus.bonusPaise
             }
           });
-          
+
           totalEntries++;
           totalPaise += bonus.bonusPaise;
         }
@@ -258,8 +266,8 @@ async function processWeeklySettlement(runDate) {
 
     await prisma.settlementRun.update({
       where: { id: settlementRun.id },
-      data: { 
-        status: "COMPLETED", 
+      data: {
+        status: "COMPLETED",
         completedAt: new Date(),
         totalEntries,
         totalPaise
@@ -269,10 +277,13 @@ async function processWeeklySettlement(runDate) {
     return { totalEntries, totalPaise };
 
   } catch (error) {
+    // Mark run as failed first
     await prisma.settlementRun.update({
       where: { id: settlementRun.id },
       data: { status: "FAILED" }
     });
+
+    // Re-throw error (P2002 is already handled in the outer try)
     throw error;
   }
 }

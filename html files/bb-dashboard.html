@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --white: #ffffff;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 70px;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .topbar {
+      background: var(--navy); color: var(--white);
+      padding: 14px 22px; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; position: sticky; top: 0; z-index: 20;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+
+    .brand-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
+    }
+
+    .member-chip { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.92); }
+
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%; background: var(--teal);
+      display: grid; place-items: center; font-weight: 700; color: #fff;
+    }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head { margin-bottom: 16px; }
+    .page-head h1 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14.5px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .banner {
+      border-left: 4px solid var(--success); background: #e8f8ee; color: #14532d;
+      padding: 12px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 16px;
+    }
+
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px; margin-bottom: 16px;
+    }
+
+    .stat-card { padding: 16px; }
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 7px; }
+    .stat-card .value { font-size: 22px; font-weight: 700; color: var(--navy); }
+    .stat-card .sub { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+
+    .streams { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+
+    .stream-card { padding: 16px; position: relative; overflow: hidden; }
+    .stream-card::before {
+      content: ""; position: absolute; inset: 0 0 auto 0; height: 4px;
+      background: linear-gradient(90deg, var(--teal), var(--amber));
+    }
+    .stream-card h3 { color: var(--navy); font-size: 16px; margin-bottom: 4px; }
+    .stream-card .stream-sub { color: var(--muted); font-size: 12.5px; margin-bottom: 12px; }
+
+    .stream-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric {
+      border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; background: #fbfdff;
+    }
+    .metric .m-label { font-size: 11.5px; color: var(--muted); }
+    .metric .m-value { font-size: 15px; font-weight: 700; color: var(--navy); }
+
+    .stream-link {
+      display: inline-block; margin-top: 12px; color: var(--teal-dark);
+      font-weight: 700; font-size: 13.5px; text-decoration: none;
+    }
+
+    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.blocked { background: #f1f5f9; color: #475569; }
+    .badge.info { background: #e8f6ff; color: var(--info); }
+
+    .grid-2 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 16px; align-items: start; }
+
+    .panel { padding: 18px; }
+    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 12px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 13.5px; vertical-align: top; }
+    th { background: #f8fafc; color: var(--navy); }
+
+    .wallet-row {
+      display: flex; justify-content: space-between; gap: 10px;
+      border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px;
+      margin-top: 8px; background: #fbfdff;
+    }
+    .wallet-row .name { font-weight: 700; color: var(--navy); font-size: 14px; }
+    .wallet-row .desc { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .wallet-row .amt { font-weight: 700; color: var(--navy); white-space: nowrap; }
+
+    .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .qa-btn {
+      border: 1px solid var(--border); background: #fff; border-radius: 10px;
+      padding: 12px; text-align: left; cursor: pointer;
+    }
+    .qa-btn strong { display: block; color: var(--navy); font-size: 14px; margin-bottom: 3px; }
+    .qa-btn span { color: var(--muted); font-size: 12.5px; }
+    .qa-btn:hover { border-color: var(--teal); }
+
+    .note {
+      border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
+      padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px;
+    }
+    .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
+
+    .field-label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin: 12px 0 6px; }
+
+    .amount-input-wrap {
+      display: flex; align-items: center; gap: 8px; border: 1px solid var(--border);
+      border-radius: 10px; padding: 0 12px; background: #fff;
+    }
+    .amount-input-wrap span { font-weight: 700; color: var(--muted); }
+    input[type="number"], input[type="text"] {
+      width: 100%; border: none; outline: none; padding: 12px 0;
+      font-size: 17px; font-weight: 700; color: var(--navy); background: transparent;
+    }
+    input[type="text"] { font-size: 15px; }
+
+    .method-list { display: grid; gap: 10px; margin-top: 8px; }
+    .method-item {
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+      display: flex; gap: 10px; align-items: flex-start; cursor: pointer; background: #fff;
+    }
+    .method-item input { margin-top: 3px; accent-color: var(--teal); width: auto; }
+    .method-item.selected { border-color: var(--teal); background: #f3fbfb; }
+    .method-title { font-weight: 700; color: var(--navy); }
+    .method-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+    .breakdown { display: grid; gap: 8px; margin-top: 10px; }
+    .breakdown-row { border: 1px solid var(--border); background: #fbfdff; border-radius: 10px; padding: 10px 12px; }
+    .breakdown-row .row-top { display: flex; justify-content: space-between; font-weight: 700; color: var(--navy); font-size: 14px; }
+    .breakdown-row .row-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .breakdown-row.net { background: linear-gradient(135deg, var(--navy), var(--navy-2)); border-color: transparent; }
+    .breakdown-row.net .row-top, .breakdown-row.net .row-sub { color: #fff; }
+
+    .btn-primary {
+      width: 100%; margin-top: 14px; background: var(--teal); color: #fff; border: none;
+      padding: 13px 16px; border-radius: var(--radius-btn); font-size: 15px; font-weight: 700; cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(13,27,42,0.55);
+      display: none; align-items: center; justify-content: center; padding: 16px; z-index: 60;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(560px, 100%); background: #fff; border-radius: 14px; padding: 20px; max-height: 90vh; overflow: auto; }
+    .modal h3 { color: var(--navy); margin-bottom: 12px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .btn-ghost { flex: 1; border: 1px solid var(--border); background: #fff; color: var(--navy); padding: 12px; border-radius: var(--radius-btn); font-weight: 700; cursor: pointer; }
+    .btn-confirm { flex: 1; border: none; background: var(--teal); color: #fff; padding: 12px; border-radius: var(--radius-btn); font-weight: 700; cursor: pointer; }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+      border-top: 1px solid var(--border); display: flex; z-index: 30;
+    }
+    .bottom-nav a {
+      flex: 1; text-align: center; padding: 10px 0 8px; font-size: 11.5px;
+      color: var(--muted); text-decoration: none; font-weight: 600;
+    }
+    .bottom-nav a.active { color: var(--teal-dark); }
+    .bottom-nav a .ico { display: block; font-size: 17px; margin-bottom: 2px; }
+
+    .hidden { display: none; }
+    .muted { color: var(--muted); }
+
+    @media (max-width: 1080px) { .streams { grid-template-columns: 1fr; } .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 980px) { .grid-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .stat-grid { grid-template-columns: 1fr 1fr; } .quick-actions { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-badge"></span><span>Bharatiya Bazaar · भारतीय बाज़ार</span></div>
+    <div class="member-chip"><span>Rajesh Kumar · BB10042 · ✓ ACB Member</span><span class="avatar">RK</span></div>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <h1>Good morning, Rajesh Kumar 🙏</h1>
+      <p>Member since Aug 2026 · Corrected dashboard as per validated platform rules</p>
+    </section>
+
+    <div class="banner">
+      ✓ <strong>ACB achieved.</strong> Earnings from ACB-enabled IDs and confirmed Setu Kosh commissions are
+      withdrawable. Withdrawal is possible only from the MAIN ID.
+    </div>
+
+    <section class="stat-grid">
+      <div class="card stat-card">
+        <div class="label">Total Earnings</div>
+        <div class="value">Rs.875.00</div>
+        <div class="sub">Across all 3 streams · ▲ +Rs.200 this week</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Withdrawable Balance</div>
+        <div class="value" style="color:var(--success);">Rs.225.00</div>
+        <div class="sub">Confirmed Rs.225 · Pending Rs.75 · Locked Rs.0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">AutoPool Level</div>
+        <div class="value">Level 4</div>
+        <div class="sub">0/16 filled · rebirth ID unlocks at L4</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label">Rebirth IDs</div>
+        <div class="value">0</div>
+        <div class="sub">Generated from pool cycles · unlocks at Level 4</div>
+      </div>
+    </section>
+
+    <section class="streams">
+      <div class="card stream-card">
+        <h3>Anant Samriddhi Chakra</h3>
+        <div class="stream-sub">AutoPool · 8-level global binary pool</div>
+        <div class="stream-metrics">
+          <div class="metric"><div class="m-label">Current Level</div><div class="m-value">L4 filling · 0/16</div></div>
+          <div class="metric"><div class="m-label">Cash Earned</div><div class="m-value">Rs.800</div></div>
+          <div class="metric"><div class="m-label">Rebirth IDs</div><div class="m-value">0</div></div>
+          <div class="metric"><div class="m-label">Vouchers</div><div class="m-value">0</div></div>
+        </div>
+        <div style="margin-top:10px;"><span class="badge success">ACTIVE</span></div>
+        <a class="stream-link" href="bb-autopool.html">View Pool Tree →</a>
+      </div>
+
+      <div class="card stream-card">
+        <h3>MY SYSTEM</h3>
+        <div class="stream-sub">Referral network · Levels 1–3 pay cash</div>
+        <div class="stream-metrics">
+          <div class="metric"><div class="m-label">Level 1</div><div class="m-value">2/2 ✓</div></div>
+          <div class="metric"><div class="m-label">Level 2</div><div class="m-value">2/4</div></div>
+          <div class="metric"><div class="m-label">Level 3</div><div class="m-value">0/8</div></div>
+          <div class="metric"><div class="m-label">Cash Earned</div><div class="m-value">Rs.0</div></div>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
+          <span class="badge success">✓ ACB ACHIEVED</span>
+          <span class="badge blocked">L1 PAY-ONCE BLOCKED</span>
+        </div>
+        <div class="note" style="margin-top:10px;">
+          Level 1 cash was already paid via AutoPool on 26 Jul — no duplicate payment.
+          MY SYSTEM Level 1, 2 and 3 bonuses remain PENDING for 7 days after completion.
+        </div>
+        <a class="stream-link" href="bb-tree.html">View My Network →</a>
+      </div>
+
+      <div class="card stream-card">
+        <h3>Setu Kosh</h3>
+        <div class="stream-sub">Shopping rewards · 10-level binary tree</div>
+        <div class="stream-metrics">
+          <div class="metric"><div class="m-label">Shopping Counter</div><div class="m-value">Rs.650 / Rs.1,000</div></div>
+          <div class="metric"><div class="m-label">Setu Kosh IDs</div><div class="m-value">0</div></div>
+          <div class="metric"><div class="m-label">Commission</div><div class="m-value">Rs.75 pending</div></div>
+          <div class="metric"><div class="m-label">Referral Bonus</div><div class="m-value">Rs.2.50 pending</div></div>
+        </div>
+        <div style="margin-top:10px;"><span class="badge pending">IN PROGRESS</span></div>
+        <a class="stream-link" href="bb-setu-kosh.html">View Shopping History →</a>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card panel">
+        <h2>Recent Earnings</h2>
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Stream</th><th>Description</th><th>Amount</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>05 Aug 2026</td><td>MY SYSTEM</td>
+              <td>Level 1 completion — Pay-Once blocked (paid via AutoPool 26 Jul). ACB unlocked.</td>
+              <td>Rs.0.00</td><td><span class="badge blocked">PAY-ONCE BLOCKED</span></td>
+            </tr>
+            <tr>
+              <td>04 Aug 2026</td><td>AutoPool</td><td>Level 2 — 4 IDs filled</td>
+              <td>+Rs.300.00</td><td><span class="badge success">CONFIRMED</span></td>
+            </tr>
+            <tr>
+              <td>03 Aug 2026</td><td>AutoPool</td><td>Level 3 — 8 IDs filled</td>
+              <td>+Rs.200.00</td><td><span class="badge success">CONFIRMED</span></td>
+            </tr>
+            <tr>
+              <td>01 Aug 2026</td><td>Setu Kosh</td><td>Commission — awaiting Monday settlement</td>
+              <td>+Rs.75.00</td><td><span class="badge pending">PENDING</span></td>
+            </tr>
+            <tr>
+              <td>26 Jul 2026</td><td>AutoPool</td><td>Level 1 — 2 IDs filled · Pay-Once via AutoPool</td>
+              <td>+Rs.300.00</td><td><span class="badge success">CONFIRMED</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="quick-actions">
+          <button class="qa-btn" type="button"><strong>Refer a Friend</strong><span>Copy your referral link</span></button>
+          <button class="qa-btn" type="button"><strong>Shop & Earn</strong><span>Find partner vendors near you</span></button>
+          <button class="qa-btn" type="button" id="openWithdrawBtn"><strong>Withdraw Earnings</strong><span>Transfer to bank / member wallet / voucher wallet</span></button>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <h2>Wallet Summary</h2>
+
+        <div class="wallet-row">
+          <div><div class="name">Cash Wallet</div><div class="desc">Confirmed Rs.225 withdrawable · Pending Rs.75 · Locked Rs.0</div></div>
+          <div class="amt">Rs.300.00</div>
+        </div>
+
+        <div class="wallet-row">
+          <div><div class="name">Voucher Wallet</div><div class="desc">Vouchers appear at AutoPool Levels 5, 6 and 7</div></div>
+          <div class="amt">Rs.0.00</div>
+        </div>
+
+        <h2 style="margin-top:16px;">Withdrawable Breakdown</h2>
+
+        <div class="wallet-row">
+          <div><div class="name">AutoPool — MAIN ID</div><div class="desc">ACB achieved — unlocked</div></div>
+          <div class="amt">Rs.225.00</div>
+        </div>
+        <div class="wallet-row">
+          <div><div class="name">MY SYSTEM</div><div class="desc">L1 Pay-Once blocked · L2/L3 pending 7-day hold when completed</div></div>
+          <div class="amt">Rs.0.00</div>
+        </div>
+        <div class="wallet-row">
+          <div><div class="name">Setu Kosh</div><div class="desc">Rs.75 pending — withdrawable after Monday settlement (no ACB needed)</div></div>
+          <div class="amt">Rs.0.00</div>
+        </div>
+
+        <div class="note">
+          Withdrawals are processed from the MAIN ID only. Earnings from SUB IDs and REBIRTH IDs are
+          auto-swept here when they become withdrawable. Rebirth ID earnings require MAIN ID ACB.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Withdraw modal -->
+  <div class="modal-backdrop" id="withdrawModal">
+    <div class="modal">
+      <h3>Withdraw Funds</h3>
+      <p class="muted" style="font-size:13.5px;">Transfer your confirmed, eligible earnings. Minimum Rs.50 · Maximum Rs.225.00.</p>
+
+      <label class="field-label" for="amount">Amount (Rs.)</label>
+      <div class="amount-input-wrap"><span>Rs.</span><input id="amount" type="number" min="50" max="225" value="225" /></div>
+
+      <div class="method-list">
+        <label class="method-item selected" id="mBank">
+          <input type="radio" name="method" value="bank" checked />
+          <span><span class="method-title">Bank Transfer</span><span class="method-sub">HDFC Bank ····4217 · 1–2 working days · Admin 10% on post-TDS</span></span>
+        </label>
+        <label class="method-item" id="mMember">
+          <input type="radio" name="method" value="member" />
+          <span><span class="method-title">Member Wallet Transfer</span><span class="method-sub">To another BB member cash wallet · Instant · Admin 5%</span></span>
+        </label>
+        <label class="method-item" id="mVoucher">
+          <input type="radio" name="method" value="voucher" />
+          <span><span class="method-title">Voucher Wallet Conversion</span><span class="method-sub">Convert to voucher balance · Instant · Admin 5%</span></span>
+        </label>
+      </div>
+
+      <div class="hidden" id="recipientWrap" style="margin-top:10px;">
+        <label class="field-label" for="recipient">Recipient Member ID</label>
+        <div class="amount-input-wrap"><input id="recipient" type="text" placeholder="e.g. BB10055" /></div>
+      </div>
+
+      <div class="breakdown">
+        <div class="breakdown-row"><div class="row-top"><span>Gross amount</span><span id="gross">Rs.225.00</span></div></div>
+        <div class="breakdown-row"><div class="row-top"><span>Step 0 — 194R recovery</span><span id="rec">-Rs.0.00</span></div></div>
+        <div class="breakdown-row"><div class="row-top"><span>Step 1 — TDS (194H)</span><span id="tds">-Rs.0.00</span></div><div class="row-sub" id="tdsSub">No TDS — annual aggregate below Rs.20,000.</div></div>
+        <div class="breakdown-row"><div class="row-top"><span>Post-TDS amount</span><span id="post">Rs.225.00</span></div></div>
+        <div class="breakdown-row"><div class="row-top"><span>Step 2 — Admin charge</span><span id="admin">-Rs.22.50</span></div></div>
+        <div class="breakdown-row net"><div class="row-top"><span>NET AMOUNT</span><span id="net">Rs.202.50</span></div></div>
+      </div>
+
+      <div class="note warning">
+        TDS is calculated first on the gross amount; admin charge second on post-TDS amount.
+        Admin charge applies every day — no Sunday waiver. TDS is deposited with the IT Department
+        only on COMPLETED withdrawals and reversed if rejected.
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelBtn" type="button">Cancel</button>
+        <button class="btn-confirm" id="confirmBtn" type="button">Confirm Withdrawal</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="#" class="active"><span class="ico">🏠</span>Dashboard</a>
+    <a href="bb-tree.html"><span class="ico">🤝</span>Network</a>
+    <a href="bb-wallet.html"><span class="ico">👛</span>Wallet</a>
+    <a href="bb-setu-kosh.html"><span class="ico">🛒</span>Shop</a>
+    <a href="#"><span class="ico">👤</span>Profile</a>
+  </nav>
+
+  <script>
+    const state = {
+      withdrawablePaise: 22500,
+      minPaise: 5000,
+      cumulativeConfirmedPaise: 80000,
+      thresholdPaise: 2000000,
+      panVerified: true,
+      pending194RPaise: 0,
+      rates: { bank: 10, member: 5, voucher: 5 }
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function formatINR(paise) {
+      return "Rs." + (Number(paise) / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function method() {
+      return document.querySelector('input[name="method"]:checked').value;
+    }
+
+    function calc(grossPaise) {
+      const m = method();
+      const rate = state.panVerified ? 3 : 20;
+      const agg = state.cumulativeConfirmedPaise + grossPaise;
+
+      let taxable = 0, sub = "No TDS — annual aggregate below Rs.20,000.";
+      if (agg <= state.thresholdPaise) { taxable = 0; }
+      else if (state.cumulativeConfirmedPaise >= state.thresholdPaise) { taxable = grossPaise; sub = "Already above threshold — full amount taxable."; }
+      else { taxable = agg - state.thresholdPaise; sub = "Crosses threshold — TDS only on excess above Rs.20,000."; }
+
+      const tds = Math.round(taxable * rate / 100);
+      const post = grossPaise - tds;
+      const adminPct = state.rates[m];
+      const admin = Math.round(post * adminPct / 100);
+      const rec = Math.min(state.pending194RPaise, Math.max(0, grossPaise - tds - admin));
+      const net = grossPaise - rec - tds - admin;
+
+      return { grossPaise, rec, tds, post, admin, net, sub };
+    }
+
+    function render() {
+      let p = Math.round(Number($("amount").value || 0) * 100);
+      if (p < 0) p = 0;
+      if (p > state.withdrawablePaise) { p = state.withdrawablePaise; $("amount").value = p / 100; }
+
+      const r = calc(p);
+      $("gross").textContent = formatINR(r.grossPaise);
+      $("rec").textContent = "-" + formatINR(r.rec);
+      $("tds").textContent = "-" + formatINR(r.tds);
+      $("tdsSub").textContent = r.sub;
+      $("post").textContent = formatINR(r.post);
+      $("admin").textContent = "-" + formatINR(r.admin);
+      $("net").textContent = formatINR(r.net);
+
+      $("recipientWrap").classList.toggle("hidden", method() !== "member");
+      $("mBank").classList.toggle("selected", method() === "bank");
+      $("mMember").classList.toggle("selected", method() === "member");
+      $("mVoucher").classList.toggle("selected", method() === "voucher");
+    }
+
+    $("amount").addEventListener("input", render);
+    document.querySelectorAll('input[name="method"]').forEach(i => i.addEventListener("change", render));
+
+    $("openWithdrawBtn").addEventListener("click", () => { render(); $("withdrawModal").classList.add("open"); });
+    $("cancelBtn").addEventListener("click", () => $("withdrawModal").classList.remove("open"));
+
+    $("confirmBtn").addEventListener("click", () => {
+      const p = Math.round(Number($("amount").value || 0) * 100);
+      if (p < state.minPaise) { alert("Minimum withdrawal is Rs.50.00"); return; }
+      if (method() === "member" && !$("recipient").value.trim()) { alert("Enter recipient Member ID."); return; }
+      $("withdrawModal").classList.remove("open");
+      alert("Withdrawal submitted. Reference: BB-WD-2026-00001. TDS held now; deposited only on COMPLETED.");
+    });
+
+    render();
+  </script>
+</body>
+</html>

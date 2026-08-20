@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Component Library | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+      --focus: 0 0 0 3px rgba(15, 157, 157, 0.22);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    button, input, select, textarea { font: inherit; }
+
+    :focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+      border-radius: 6px;
+    }
+
+    .topbar {
+      background: var(--navy); color: #fff; padding: 14px 22px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      position: sticky; top: 0; z-index: 20;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
+    }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head { margin-bottom: 18px; }
+    .page-head h1 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14.5px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 18px; margin-bottom: 16px; }
+    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 12px; }
+    .panel h3 { font-size: 15px; color: var(--navy); margin: 14px 0 8px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+
+    .muted { color: var(--muted); }
+    .small { font-size: 12.5px; }
+
+    /* ===== BUTTONS ===== */
+    .bb-btn {
+      border: 1px solid transparent;
+      border-radius: var(--radius-btn);
+      padding: 11px 16px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.16s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .bb-btn-primary { background: var(--teal); color: #fff; }
+    .bb-btn-primary:hover { background: var(--teal-dark); }
+
+    .bb-btn-navy { background: var(--navy); color: #fff; }
+    .bb-btn-navy:hover { background: var(--navy-2); }
+
+    .bb-btn-ghost { background: #fff; color: var(--navy); border-color: var(--border); }
+    .bb-btn-ghost:hover { border-color: var(--teal); color: var(--teal-dark); }
+
+    .bb-btn-danger { background: var(--danger); color: #fff; }
+    .bb-btn-danger:hover { filter: brightness(0.95); }
+
+    .bb-btn-sm { padding: 8px 12px; font-size: 13px; }
+    .bb-btn-block { width: 100%; }
+
+    /* ===== BADGES ===== */
+    .bb-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 700; white-space: nowrap;
+    }
+
+    .bb-badge-success { background: #e8f8ee; color: var(--success); }
+    .bb-badge-warning { background: #fff4e0; color: var(--warning); }
+    .bb-badge-danger { background: #fee2e2; color: var(--danger); }
+    .bb-badge-info { background: #e8f6ff; color: var(--info); }
+    .bb-badge-muted { background: #f1f5f9; color: #475569; }
+    .bb-badge-navy { background: #e2e8f0; color: var(--navy); }
+
+    /* ===== ID TYPE CHIPS ===== */
+    .bb-id-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--border); background: #fff;
+      padding: 5px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; color: var(--navy);
+    }
+
+    .bb-id-chip.main { border-color: var(--teal); background: #f3fbfb; color: var(--teal-dark); }
+    .bb-id-chip.sub { border-color: var(--navy); background: #f8fafc; color: var(--navy); }
+    .bb-id-chip.rebirth { border-color: var(--info); background: #f0f9ff; color: var(--info); }
+
+    /* ===== WALLET CARDS ===== */
+    .wallet-card {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px; background: #fbfdff;
+    }
+
+    .wallet-card .label { color: var(--muted); font-size: 12.5px; margin-bottom: 6px; }
+    .wallet-card .value { font-size: 20px; font-weight: 700; color: var(--navy); }
+    .wallet-card .sub { color: var(--muted); font-size: 12px; margin-top: 5px; }
+
+    .wallet-card.withdrawable { border-color: rgba(22, 163, 74, 0.35); background: #f4fef7; }
+    .wallet-card.pending { border-color: rgba(217, 119, 6, 0.35); background: #fffdf4; }
+    .wallet-card.locked { border-color: rgba(220, 38, 38, 0.35); background: #fff7f7; }
+
+    /* ===== SOURCE ROW ===== */
+    .source-row {
+      display: flex; justify-content: space-between; gap: 10px;
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 11px 12px; margin-top: 8px; background: #fbfdff;
+    }
+
+    .source-row .name { font-weight: 700; color: var(--navy); font-size: 14px; }
+    .source-row .desc { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .source-row .amt { font-weight: 700; color: var(--navy); white-space: nowrap; }
+
+    /* ===== STEPPER ===== */
+    .bb-stepper {
+      list-style: none; display: grid; gap: 8px; margin-top: 10px;
+      counter-reset: step;
+    }
+
+    .bb-stepper li {
+      counter-increment: step;
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 11px 12px 11px 44px; background: #fbfdff;
+      position: relative; font-size: 14px;
+    }
+
+    .bb-stepper li::before {
+      content: counter(step);
+      position: absolute; left: 12px; top: 12px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--navy); color: #fff;
+      display: grid; place-items: center;
+      font-size: 12px; font-weight: 700;
+    }
+
+    .bb-stepper li.net {
+      background: linear-gradient(135deg, var(--navy), var(--navy-2));
+      color: #fff; border-color: transparent;
+    }
+
+    .bb-stepper li.net::before { background: var(--teal); }
+
+    .bb-stepper .sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .bb-stepper li.net .sub { color: rgba(255,255,255,0.75); }
+
+    /* ===== METHOD SELECTOR ===== */
+    .method-item {
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+      display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+      background: #fff; margin-top: 8px;
+    }
+
+    .method-item input { margin-top: 3px; accent-color: var(--teal); }
+    .method-item.selected { border-color: var(--teal); background: #f3fbfb; }
+    .method-title { font-weight: 700; color: var(--navy); }
+    .method-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+    /* ===== NOTES ===== */
+    .bb-note {
+      border-left: 4px solid var(--teal);
+      background: #f3fbfb; color: #155e5e;
+      padding: 11px 12px; border-radius: 8px;
+      font-size: 13px; margin-top: 10px;
+    }
+
+    .bb-note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
+    .bb-note.danger { border-left-color: var(--danger); background: #fef2f2; color: #7f1d1d; }
+    .bb-note.info { border-left-color: var(--info); background: #e8f4fd; color: #0c4a6e; }
+
+    /* ===== TABS ===== */
+    .bb-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+
+    .bb-tab-btn {
+      border: 1px solid var(--border); background: #fff; color: var(--navy);
+      padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; cursor: pointer;
+    }
+
+    .bb-tab-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+    /* ===== TABLE ===== */
+    .bb-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .bb-table th, .bb-table td {
+      border: 1px solid var(--border); padding: 10px 12px;
+      text-align: left; font-size: 13.5px; vertical-align: top;
+    }
+    .bb-table th { background: #f8fafc; color: var(--navy); }
+
+    /* ===== FORMS ===== */
+    .bb-label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin: 12px 0 6px; }
+
+    .bb-input, .bb-select, .bb-textarea {
+      width: 100%; border: 1px solid var(--border); border-radius: 10px;
+      padding: 11px 12px; font-size: 14.5px; color: var(--navy); background: #fff;
+    }
+
+    .bb-input:focus, .bb-select:focus, .bb-textarea:focus {
+      outline: none; border-color: var(--teal); box-shadow: var(--focus);
+    }
+
+    .bb-help { font-size: 12.5px; color: var(--muted); margin-top: 5px; }
+
+    /* ===== PROGRESS ===== */
+    .bb-progress {
+      width: 100%; height: 12px; border-radius: 999px;
+      background: #e5edf6; overflow: hidden; margin: 8px 0;
+    }
+
+    .bb-progress-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--teal), var(--amber));
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .bb-empty {
+      border: 2px dashed var(--border); border-radius: 12px;
+      padding: 26px 18px; text-align: center; color: var(--muted);
+      margin-top: 10px;
+    }
+
+    .bb-empty strong { color: var(--navy); display: block; margin-bottom: 6px; font-size: 16px; }
+
+    /* ===== MODAL ===== */
+    .bb-modal-backdrop {
+      position: fixed; inset: 0; background: rgba(13, 27, 42, 0.55);
+      display: none; align-items: center; justify-content: center; padding: 16px; z-index: 80;
+    }
+
+    .bb-modal-backdrop.open { display: flex; }
+
+    .bb-modal {
+      width: min(560px, 100%); background: #fff; border-radius: 14px;
+      padding: 20px; max-height: 90vh; overflow: auto;
+    }
+
+    .bb-modal h3 { color: var(--navy); margin-bottom: 12px; }
+    .bb-modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+
+    /* ===== TOAST ===== */
+    .bb-toast-wrap {
+      position: fixed; right: 16px; bottom: 16px;
+      display: grid; gap: 10px; z-index: 90;
+    }
+
+    .bb-toast {
+      min-width: 260px; max-width: 360px;
+      background: var(--navy); color: #fff;
+      border-radius: 10px; padding: 12px 14px;
+      box-shadow: var(--shadow); font-size: 13.5px;
+      opacity: 0; transform: translateY(8px);
+      transition: 0.2s ease;
+    }
+
+    .bb-toast.show { opacity: 1; transform: translateY(0); }
+    .bb-toast.success { border-left: 4px solid var(--success); }
+    .bb-toast.warning { border-left: 4px solid var(--warning); }
+    .bb-toast.danger { border-left: 4px solid var(--danger); }
+    .bb-toast.info { border-left: 4px solid var(--info); }
+
+    /* ===== NOTIFICATION ITEM ===== */
+    .notif-item {
+      display: flex; gap: 12px; border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px; background: #fff; margin-top: 10px;
+    }
+
+    .notif-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 18px; color: #fff; flex: 0 0 auto;
+    }
+
+    .notif-icon.teal { background: var(--teal); }
+    .notif-icon.navy { background: var(--navy); }
+    .notif-icon.amber { background: var(--amber); }
+    .notif-icon.info { background: var(--info); }
+
+    .notif-title { font-weight: 700; color: var(--navy); font-size: 14.5px; }
+    .notif-desc { font-size: 13.5px; color: var(--text); margin-top: 4px; }
+    .notif-meta { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+
+    /* ===== SWATCHES ===== */
+    .swatch {
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px; text-align: center; font-size: 12.5px; color: var(--navy);
+    }
+
+    .swatch-block { height: 44px; border-radius: 8px; margin-bottom: 8px; }
+
+    @media (max-width: 980px) {
+      .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-badge"></span><span>Bharatiya Bazaar · Component Library</span></div>
+    <span>v2 · Corrected Status System</span>
+  </header>
+
+  <main class="container">
+    <section class="page-head">
+      <h1>Component Library</h1>
+      <p>
+        Canonical UI components for Bharatiya Bazaar. Use these patterns across all pages.
+        Since pages are single-file HTML, copy the relevant CSS and HTML blocks into each screen.
+      </p>
+    </section>
+
+    <!-- COLOR TOKENS -->
+    <section class="card panel">
+      <h2>Color Tokens</h2>
+      <div class="grid-5">
+        <div class="swatch"><div class="swatch-block" style="background:var(--navy);"></div>Navy<br />#0D1B2A</div>
+        <div class="swatch"><div class="swatch-block" style="background:var(--teal);"></div>Teal<br />#0F9D9D</div>
+        <div class="swatch"><div class="swatch-block" style="background:var(--amber);"></div>Amber<br />#F5A623</div>
+        <div class="swatch"><div class="swatch-block" style="background:var(--success);"></div>Success<br />#16A34A</div>
+        <div class="swatch"><div class="swatch-block" style="background:var(--danger);"></div>Danger<br />#DC2626</div>
+      </div>
+    </section>
+
+    <!-- BUTTONS -->
+    <section class="card panel">
+      <h2>Buttons</h2>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="bb-btn bb-btn-primary">Primary Action</button>
+        <button class="bb-btn bb-btn-navy">Navy Action</button>
+        <button class="bb-btn bb-btn-ghost">Ghost Action</button>
+        <button class="bb-btn bb-btn-danger">Danger Action</button>
+        <button class="bb-btn bb-btn-primary bb-btn-sm">Small Button</button>
+      </div>
+
+      <div class="bb-note info" style="margin-top:12px;">
+        Use Primary for the main screen action. Use Danger only for irreversible admin actions.
+        Disabled buttons should show the reason in helper text.
+      </div>
+    </section>
+
+    <!-- STATUS BADGES -->
+    <section class="card panel">
+      <h2>Status Badges</h2>
+
+      <h3>Commission / Wallet Statuses</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="bb-badge bb-badge-warning">PENDING — 7-DAY HOLD</span>
+        <span class="bb-badge bb-badge-danger">LOCKED — AWAITING ACB</span>
+        <span class="bb-badge bb-badge-success">CONFIRMED</span>
+        <span class="bb-badge bb-badge-info">WITHDRAWABLE</span>
+        <span class="bb-badge bb-badge-muted">PAY-ONCE BLOCKED</span>
+        <span class="bb-badge bb-badge-danger">REVERSED</span>
+        <span class="bb-badge bb-badge-navy">PLATFORM INHERITED</span>
+      </div>
+
+      <h3>ACB Status</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="bb-badge bb-badge-success">✓ ACB ACHIEVED</span>
+        <span class="bb-badge bb-badge-muted">ACB NOT ACHIEVED</span>
+        <span class="bb-badge bb-badge-info">ACB UNLOCKED</span>
+      </div>
+
+      <h3>ID Types</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="bb-id-chip main">MAIN ID</span>
+        <span class="bb-id-chip sub">SUB ID</span>
+        <span class="bb-id-chip rebirth">REBIRTH ID</span>
+      </div>
+
+      <h3>Vendor Statuses</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="bb-badge bb-badge-muted">PROVISIONAL</span>
+        <span class="bb-badge bb-badge-warning">UNDER REVIEW</span>
+        <span class="bb-badge bb-badge-info">TRAINING</span>
+        <span class="bb-badge bb-badge-success">VERIFIED</span>
+        <span class="bb-badge bb-badge-danger">FROZEN</span>
+        <span class="bb-badge bb-badge-danger">DEACTIVATED — FRAUD</span>
+      </div>
+
+      <h3>PIN Code Status</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="bb-badge bb-badge-success">PIN ACTIVE</span>
+        <span class="bb-badge bb-badge-muted">PIN INACTIVE</span>
+      </div>
+
+      <h3>TDS Sections</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="bb-badge bb-badge-info">194H — Member Cash</span>
+        <span class="bb-badge bb-badge-info">194R — Vouchers</span>
+        <span class="bb-badge bb-badge-info">194C — Vendor Settlement</span>
+        <span class="bb-badge bb-badge-info">194H — Vendor Referral Bonus</span>
+      </div>
+    </section>
+
+    <!-- WALLET SUMMARY -->
+    <section class="card panel">
+      <h2>Wallet Summary Component</h2>
+
+      <div class="grid-5">
+        <div class="wallet-card">
+          <div class="label">Total Balance</div>
+          <div class="value">Rs.300.00</div>
+          <div class="sub">Confirmed + pending + locked</div>
+        </div>
+
+        <div class="wallet-card withdrawable">
+          <div class="label">Withdrawable</div>
+          <div class="value">Rs.225.00</div>
+          <div class="sub">Eligible now</div>
+        </div>
+
+        <div class="wallet-card">
+          <div class="label">Confirmed</div>
+          <div class="value">Rs.225.00</div>
+          <div class="sub">Finalised earnings</div>
+        </div>
+
+        <div class="wallet-card pending">
+          <div class="label">Pending</div>
+          <div class="value">Rs.75.00</div>
+          <div class="sub">7-day hold / settlement</div>
+        </div>
+
+        <div class="wallet-card locked">
+          <div class="label">Locked</div>
+          <div class="value">Rs.0.00</div>
+          <div class="sub">Awaiting ACB</div>
+        </div>
+      </div>
+
+      <h3>Source-Based Withdrawable Breakdown</h3>
+
+      <div class="source-row">
+        <div>
+          <div class="name">AutoPool — MAIN ID BB10042</div>
+          <div class="desc">ACB achieved — earnings unlocked</div>
+        </div>
+        <div class="amt">Rs.225.00</div>
+      </div>
+
+      <div class="source-row">
+        <div>
+          <div class="name">MY SYSTEM — MAIN ID BB10042</div>
+          <div class="desc">Level 1 Pay-Once blocked · Levels 2-3 pending when complete</div>
+        </div>
+        <div class="amt">Rs.0.00</div>
+      </div>
+
+      <div class="source-row">
+        <div>
+          <div class="name">Setu Kosh</div>
+          <div class="desc">Rs.75.00 pending settlement · no ACB required</div>
+        </div>
+        <div class="amt">Rs.0.00</div>
+      </div>
+
+      <div class="source-row">
+        <div>
+          <div class="name">Rebirth IDs</div>
+          <div class="desc">Withdrawable only if MAIN ID is ACB</div>
+        </div>
+        <div class="amt">Rs.0.00</div>
+      </div>
+    </section>
+
+    <!-- DEDUCTION STEPPER -->
+    <section class="card panel">
+      <h2>Deduction Stepper Component</h2>
+      <p class="muted small">Use this for withdrawals, vendor settlements, and early settlement previews.</p>
+
+      <ol class="bb-stepper">
+        <li>
+          Gross Amount
+          <div class="sub">Rs.575.00</div>
+        </li>
+        <li>
+          Step 0 — 194R Liability Recovery
+          <div class="sub">Separate debit line, if pending voucher TDS liability exists</div>
+        </li>
+        <li>
+          Step 1 — TDS under Section 194H
+          <div class="sub">No TDS if annual aggregate remains below Rs.20,000 threshold</div>
+        </li>
+        <li>
+          Post-TDS Amount
+          <div class="sub">Base for admin charge</div>
+        </li>
+        <li>
+          Step 2 — Admin Charge
+          <div class="sub">Bank 10% · Member wallet 5% · Voucher conversion 5%</div>
+        </li>
+        <li class="net">
+          Net Amount
+          <div class="sub">Final payout to bank / wallet / voucher</div>
+        </li>
+      </ol>
+
+      <div class="bb-note warning">
+        Mandatory order: TDS first, admin charge second on post-TDS amount.
+        Admin charge applies every day. There is no Sunday waiver.
+      </div>
+    </section>
+
+    <!-- WITHDRAWAL METHOD SELECTOR -->
+    <section class="card panel">
+      <h2>Withdrawal Method Selector</h2>
+
+      <label class="method-item selected">
+        <input type="radio" name="demoMethod" checked />
+        <span>
+          <span class="method-title">Bank Transfer</span>
+          <span class="method-sub">1–2 working days · Admin charge 10% on post-TDS amount</span>
+        </span>
+      </label>
+
+      <label class="method-item">
+        <input type="radio" name="demoMethod" />
+        <span>
+          <span class="method-title">Member Wallet Transfer</span>
+          <span class="method-sub">Transfer to another BB member’s cash wallet · Instant · Admin charge 5%</span>
+        </span>
+      </label>
+
+      <label class="method-item">
+        <input type="radio" name="demoMethod" />
+        <span>
+          <span class="method-title">Voucher Wallet Conversion</span>
+          <span class="method-sub">Convert cash to voucher balance · Instant · Admin charge 5% · Not cash-withdrawable after conversion</span>
+        </span>
+      </label>
+    </section>
+
+    <!-- NOTES -->
+    <section class="card panel">
+      <h2>Notes & Alerts</h2>
+
+      <div class="bb-note">
+        Standard note: MY SYSTEM Level 1, 2 and 3 commissions remain PENDING for 7 days after level completion.
+      </div>
+
+      <div class="bb-note info">
+        Info note: Setu Kosh earnings do not require ACB. They become withdrawable after vendor settlement.
+      </div>
+
+      <div class="bb-note warning">
+        Warning: Your aggregate voucher value is approaching the Rs.20,000 194R threshold.
+      </div>
+
+      <div class="bb-note danger">
+        Danger: Vendor deactivated for fraud. Pending member commissions covered from security deposit.
+      </div>
+    </section>
+
+    <!-- TABS -->
+    <section class="card panel">
+      <h2>Tabs</h2>
+
+      <div class="bb-tabs">
+        <button class="bb-tab-btn active" type="button">Cash Wallet</button>
+        <button class="bb-tab-btn" type="button">Voucher Wallet</button>
+        <button class="bb-tab-btn" type="button">Transaction History</button>
+      </div>
+
+      <div class="bb-note">
+        Tabs should preserve scroll position and filters where possible.
+      </div>
+    </section>
+
+    <!-- TABLE -->
+    <section class="card panel">
+      <h2>Table Component</h2>
+
+      <table class="bb-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Stream</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>04 Aug 2026</td>
+            <td>AutoPool</td>
+            <td>Level 2 bonus</td>
+            <td>+Rs.300.00</td>
+            <td><span class="bb-badge bb-badge-success">CONFIRMED</span></td>
+          </tr>
+          <tr>
+            <td>05 Aug 2026</td>
+            <td>MY SYSTEM</td>
+            <td>Level 1 completion</td>
+            <td>Rs.0.00</td>
+            <td><span class="bb-badge bb-badge-muted">PAY-ONCE BLOCKED</span></td>
+          </tr>
+          <tr>
+            <td>01 Aug 2026</td>
+            <td>Setu Kosh</td>
+            <td>Commission pending settlement</td>
+            <td>+Rs.75.00</td>
+            <td><span class="bb-badge bb-badge-warning">PENDING</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- FORMS -->
+    <section class="card panel">
+      <h2>Form Fields</h2>
+
+      <div class="grid-2">
+        <div>
+          <label class="bb-label" for="demoAmount">Amount</label>
+          <input class="bb-input" id="demoAmount" type="number" placeholder="Enter amount" />
+          <div class="bb-help">Minimum Rs.50 · Maximum withdrawable balance.</div>
+        </div>
+
+        <div>
+          <label class="bb-label" for="demoMember">Recipient Member ID</label>
+          <input class="bb-input" id="demoMember" type="text" placeholder="e.g. BB10055" />
+          <div class="bb-help">Required for member wallet transfer.</div>
+        </div>
+      </div>
+
+      <label class="bb-label" for="demoSelect">Transfer Method</label>
+      <select class="bb-select" id="demoSelect">
+        <option>Bank Transfer — 10%</option>
+        <option>Member Wallet Transfer — 5%</option>
+        <option>Voucher Wallet Conversion — 5%</option>
+      </select>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="card panel">
+      <h2>Progress Bars</h2>
+
+      <h3>Setu Kosh Counter</h3>
+      <div class="bb-progress"><div class="bb-progress-fill" style="width:65%;"></div></div>
+      <div class="small muted">Rs.650 of Rs.1,000 · 65%</div>
+
+      <h3>TDS Threshold</h3>
+      <div class="bb-progress"><div class="bb-progress-fill" style="width:6%;"></div></div>
+      <div class="small muted">Rs.1,175 of Rs.20,000 · 5.9%</div>
+
+      <h3>AutoPool Level 4</h3>
+      <div class="bb-progress"><div class="bb-progress-fill" style="width:0%;"></div></div>
+      <div class="small muted">0 of 16 positions filled</div>
+    </section>
+
+    <!-- EMPTY STATES -->
+    <section class="card panel">
+      <h2>Empty States</h2>
+
+      <div class="bb-empty">
+        <strong>No vouchers yet</strong>
+        Vouchers are issued when your AutoPool reaches Levels 5, 6 and 7.
+      </div>
+
+      <div class="bb-empty">
+        <strong>No rebirth IDs yet</strong>
+        Your first rebirth ID will be generated when your AutoPool reaches Level 4.
+      </div>
+
+      <div class="bb-empty">
+        <strong>No Setu Kosh IDs yet</strong>
+        Shop Rs.350 more at partner vendors to create your first Setu Kosh ID.
+      </div>
+    </section>
+
+    <!-- MODAL -->
+    <section class="card panel">
+      <h2>Modal Component</h2>
+
+      <button class="bb-btn bb-btn-primary" id="openModalBtn" type="button">Open Demo Modal</button>
+
+      <div class="bb-modal-backdrop" id="demoModal">
+        <div class="bb-modal">
+          <h3>Confirm Withdrawal</h3>
+          <p class="muted small">
+            Use modals for confirmation, destructive actions, and final payout previews.
+          </p>
+
+          <ol class="bb-stepper">
+            <li>Gross amount<div class="sub">Rs.225.00</div></li>
+            <li>TDS<div class="sub">Rs.0.00</div></li>
+            <li>Admin charge<div class="sub">Rs.22.50</div></li>
+            <li class="net">Net amount<div class="sub">Rs.202.50</div></li>
+          </ol>
+
+          <div class="bb-modal-actions">
+            <button class="bb-btn bb-btn-ghost bb-btn-block" id="closeModalBtn" type="button">Cancel</button>
+            <button class="bb-btn bb-btn-primary bb-btn-block" id="confirmModalBtn" type="button">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOAST -->
+    <section class="card panel">
+      <h2>Toast Component</h2>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="bb-btn bb-btn-primary bb-btn-sm" data-toast="success" type="button">Success Toast</button>
+        <button class="bb-btn bb-btn-ghost bb-btn-sm" data-toast="info" type="button">Info Toast</button>
+        <button class="bb-btn bb-btn-ghost bb-btn-sm" data-toast="warning" type="button">Warning Toast</button>
+        <button class="bb-btn bb-btn-danger bb-btn-sm" data-toast="danger" type="button">Danger Toast</button>
+      </div>
+
+      <div class="bb-toast-wrap" id="toastWrap"></div>
+    </section>
+
+    <!-- NOTIFICATION ITEM -->
+    <section class="card panel">
+      <h2>Notification Item</h2>
+
+      <div class="notif-item">
+        <div class="notif-icon teal">🎯</div>
+        <div>
+          <div class="notif-title">
+            MY SYSTEM Level 1 Completed — ACB Unlocked
+            <span class="bb-badge bb-badge-muted">PAY-ONCE BLOCKED</span>
+          </div>
+          <div class="notif-desc">
+            Level 1 cash was already paid via AutoPool, so no duplicate Rs.300 was credited.
+            ACB status unlocked and locked AutoPool earnings became withdrawable.
+          </div>
+          <div class="notif-meta">ID: BB10042 · MAIN · 05 Aug 2026</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- UI/UX RULES -->
+    <section class="card panel">
+      <h2>UI/UX Rules</h2>
+
+      <div class="grid-2">
+        <div>
+          <h3>Do</h3>
+          <ul style="padding-left:18px; font-size:14px; color:var(--text);">
+            <li>Show exact deduction breakdown before every payout.</li>
+            <li>Show why an amount is locked or pending.</li>
+            <li>Use Indian number formatting: Rs.1,00,000.</li>
+            <li>Use empty states to guide the next action.</li>
+            <li>Show ID type on every earning row: MAIN / SUB / REBIRTH.</li>
+            <li>Use confirmation modals for withdrawals and admin changes.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3>Do Not</h3>
+          <ul style="padding-left:18px; font-size:14px; color:var(--text);">
+            <li>Do not show pending amounts as withdrawable.</li>
+            <li>Do not imply rebirth IDs have MY SYSTEM or ACB.</li>
+            <li>Do not say “all earnings withdrawable” without source checks.</li>
+            <li>Do not show Sunday waiver.</li>
+            <li>Do not hardcode TDS without threshold logic.</li>
+            <li>Do not mix vendor settlement 194C with member 194H.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Modal demo
+    const modal = document.getElementById("demoModal");
+    document.getElementById("openModalBtn").addEventListener("click", () => modal.classList.add("open"));
+    document.getElementById("closeModalBtn").addEventListener("click", () => modal.classList.remove("open"));
+    document.getElementById("confirmModalBtn").addEventListener("click", () => {
+      modal.classList.remove("open");
+      showToast("Withdrawal submitted successfully.", "success");
+    });
+
+    // Toast demo
+    const toastWrap = document.getElementById("toastWrap");
+
+    function showToast(message, type = "info") {
+      const toast = document.createElement("div");
+      toast.className = `bb-toast ${type}`;
+      toast.textContent = message;
+      toastWrap.appendChild(toast);
+
+      requestAnimationFrame(() => toast.classList.add("show"));
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 250);
+      }, 3500);
+    }
+
+    document.querySelectorAll("[data-toast]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const type = btn.dataset.toast;
+        const messages = {
+          success: "Action completed successfully.",
+          info: "This is an informational message.",
+          warning: "Please review before continuing.",
+          danger: "Action failed or was blocked."
+        };
+        showToast(messages[type], type);
+      });
+    });
+
+    // Method selector demo
+    document.querySelectorAll(".method-item input").forEach(input => {
+      input.addEventListener("change", () => {
+        document.querySelectorAll(".method-item").forEach(item => item.classList.remove("selected"));
+        input.closest(".method-item").classList.add("selected");
+      });
+    });
+
+    // Tabs demo
+    document.querySelectorAll(".bb-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".bb-tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+  </script>
+</body>
+</html>

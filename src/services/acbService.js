@@ -2,20 +2,17 @@ const prisma = require("../lib/prisma");
 const walletService = require("./walletService");
 
 async function checkAcbStatus(tx, idCardId) {
-  const mySystemNode = await tx.mySystemNode.findUnique({
-    where: { idCardId }
+  // Query nodes directly sponsored by this ID card (direct referrals)
+  const sponsoredNodes = await tx.mySystemNode.findMany({
+    where: { sponsorIdCardId: idCardId }
   });
 
-  if (!mySystemNode) {
+  if (sponsoredNodes.length === 0) {
     return false;
   }
 
-  const children = await tx.mySystemNode.findMany({
-    where: { parentNodeId: mySystemNode.id }
-  });
-
-  const hasLeft = children.some(c => c.side === "LEFT");
-  const hasRight = children.some(c => c.side === "RIGHT");
+  const hasLeft = sponsoredNodes.some(n => n.side === "LEFT");
+  const hasRight = sponsoredNodes.some(n => n.side === "RIGHT");
 
   return hasLeft && hasRight;
 }

@@ -7,13 +7,15 @@ const registerSchema = z.object({
     email: z.string().email("Invalid email format").optional(),
     address: z.string().optional(),
     pinCode: z.string().optional(),
-    password: z.string().min(6, "Password must be at least 6 characters")
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    referralCode: z.string().optional(), // NEW
+    side: z.enum(["LEFT", "RIGHT"]).optional() // NEW
   })
 });
 
 const loginSchema = z.object({
   body: z.object({
-    mobile: z.string().length(10, "Mobile must be 10 digits").regex(/^\d+$/),
+    mobile: z.string().min(3, "Enter Member ID or Mobile"),
     password: z.string().min(1, "Password is required")
   })
 });

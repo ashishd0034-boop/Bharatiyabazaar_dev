@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bharatiya Bazaar — Admin Dispute Resolution. Active disputes, resolved cases and escalated tickets.">
+<title>Dispute Resolution | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B3A6B;
+    --navy-dark:#12294c;
+    --teal:#1A6B5A;
+    --teal-dark:#135241;
+    --amber:#B8860B;
+    --red:#d64545;
+    --red-dark:#b33636;
+    --purple:#6f42c1;
+    --bg:#F5F7FA;
+    --white:#ffffff;
+    --ink:#1f2a3a;
+    --muted:#5b6b7f;
+    --border:#e4e9f0;
+    --success:#1e8e5a;
+    --shadow:0 10px 30px rgba(27,58,107,.10);
+    --shadow-sm:0 3px 12px rgba(27,58,107,.08);
+    --radius-card:12px;
+    --radius-btn:8px;
+    --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-display:'Poppins',var(--font);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2}
+  a{text-decoration:none;color:inherit}
+  img{max-width:100%;display:block}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--font);font-weight:600;font-size:.86rem;
+    padding:11px 18px;border-radius:var(--radius-btn);
+    border:2px solid transparent;cursor:pointer;transition:.22s ease;line-height:1;white-space:nowrap;
+  }
+  .btn-sm{padding:9px 14px;font-size:.78rem}
+  .btn-navy{background:var(--navy);color:#fff}
+  .btn-navy:hover{background:var(--navy-dark)}
+  .btn-teal{background:var(--teal);color:#fff}
+  .btn-teal:hover{background:var(--teal-dark)}
+  .btn-outline-navy{background:transparent;color:var(--navy);border-color:var(--navy)}
+  .btn-outline-navy:hover{background:var(--navy);color:#fff}
+  .btn-outline-teal{background:transparent;color:var(--teal);border-color:var(--teal)}
+  .btn-outline-teal:hover{background:var(--teal);color:#fff}
+  .btn-outline-amber{background:transparent;color:#8a6508;border-color:var(--amber)}
+  .btn-outline-amber:hover{background:var(--amber);color:#fff}
+  .btn-outline-red{background:transparent;color:var(--red);border-color:var(--red)}
+  .btn-outline-red:hover{background:var(--red);color:#fff}
+  .btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;width:280px;z-index:120;
+    background:var(--navy);color:#fff;
+    display:flex;flex-direction:column;
+  }
+  .sb-logo{
+    display:flex;align-items:center;gap:12px;
+    padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .sb-logo .logo-mark{
+    width:42px;height:42px;flex:none;border-radius:12px;
+    background:#fff;border:1px solid rgba(255,255,255,.6);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .sb-logo .logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
+  .sb-logo .lt{display:flex;flex-direction:column;line-height:1.15}
+  .sb-logo .lt-name{font-family:var(--font-display);font-weight:700;font-size:1rem}
+  .sb-logo .lt-sub{font-size:.7rem;color:rgba(255,255,255,.72);letter-spacing:.04em}
+  .admin-info{background:rgba(255,255,255,.07);margin:16px;border-radius:12px;padding:14px}
+  .a-head{display:flex;align-items:center;gap:11px}
+  .avatar{
+    width:44px;height:44px;flex:none;border-radius:50%;
+    background:var(--red);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.95rem;
+  }
+  .a-name{font-weight:700;font-size:.9rem;line-height:1.2}
+  .a-id{font-size:.7rem;color:rgba(255,255,255,.72);margin-top:1px}
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:.68rem;font-weight:800;letter-spacing:.03em;
+    padding:4px 10px;border-radius:999px;margin-top:8px;
+  }
+  .badge-red{background:var(--red);color:#fff}
+  .badge-teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .badge-amber{background:rgba(184,134,11,.14);color:#8a6508}
+  .badge-navy{background:rgba(27,58,107,.1);color:var(--navy)}
+  .sb-nav{flex:1;overflow-y:auto;padding:10px 12px}
+  .sb-nav a{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:10px;margin-bottom:3px;
+    color:rgba(255,255,255,.84);font-weight:500;font-size:.88rem;
+    transition:.2s;
+  }
+  .sb-nav a .ic{font-size:1rem;width:20px;text-align:center;flex:none}
+  .sb-nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+  .sb-nav a.active{background:var(--navy-dark);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--teal)}
+  .sb-nav a.logout{color:#ff9a9a;margin-top:6px}
+  .sb-nav a.logout:hover{background:rgba(214,69,69,.22);color:#fff}
+  .sb-foot{
+    padding:14px 20px;border-top:1px solid rgba(255,255,255,.12);
+    font-size:.68rem;color:rgba(255,255,255,.5);
+  }
+
+  /* ---------- MAIN LAYOUT ---------- */
+  .main{margin-left:280px;min-height:100vh;background:var(--bg)}
+  .main .container{max-width:1180px;margin:0 auto;padding:26px 26px 70px}
+  .page-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .page-head h1{font-size:1.45rem;font-weight:800;color:var(--navy)}
+  .page-sub{font-size:.84rem;color:var(--muted);margin-top:2px}
+
+  /* ---------- MOBILE TOP HEADER ---------- */
+  .mobile-top{
+    position:sticky;top:0;z-index:150;
+    background:var(--navy);color:#fff;
+    display:none;align-items:center;justify-content:space-between;
+    padding:10px 14px;box-shadow:0 2px 14px rgba(18,41,76,.35);gap:10px;
+  }
+  .mt-logo{width:38px;height:38px;flex:none;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .mt-logo img{width:100%;height:100%;object-fit:cover}
+  .mt-center{flex:1;text-align:center;font-family:var(--font-display);font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mt-right{display:flex;align-items:center;gap:14px;flex:none}
+  .bell-wrap{position:relative}
+  .bell{position:relative;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;line-height:1}
+  .bell-badge{
+    position:absolute;top:-5px;right:-8px;
+    background:var(--red);color:#fff;font-size:.6rem;font-weight:800;
+    min-width:16px;height:16px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;padding:0 3px;
+  }
+  .bell-drop{
+    position:absolute;right:0;top:44px;width:300px;z-index:260;
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow);display:none;overflow:hidden;
+  }
+  .bell-drop.show{display:block;animation:fadeUp .25s ease}
+  .bd-head{padding:12px 16px;font-family:var(--font-display);font-weight:700;font-size:.9rem;color:var(--navy);border-bottom:1px solid var(--border)}
+  .bd-item{display:flex;gap:11px;align-items:flex-start;padding:12px 16px;border-bottom:1px dashed var(--border);font-size:.82rem;cursor:pointer;transition:.2s}
+  .bd-item:last-child{border-bottom:none}
+  .bd-item:hover{background:#F7F9FF}
+  .bd-ico{width:28px;height:28px;flex:none;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+  .bd-ico.red{background:rgba(214,69,69,.12);color:var(--red)}
+  .bd-ico.amber{background:rgba(184,134,11,.14);color:var(--amber)}
+  .bd-ico.teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .bd-ico.blue{background:rgba(27,58,107,.1);color:var(--navy)}
+  .bd-ico.purple{background:rgba(111,66,193,.12);color:var(--purple)}
+  .bd-item b{display:block;font-size:.82rem;color:var(--ink)}
+  .bd-item span{font-size:.7rem;color:var(--muted)}
+  .mt-avatar{
+    width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.78rem;
+  }
+
+  /* ---------- SUMMARY CHIPS ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  .stat{
+    border-radius:var(--radius-card);padding:18px 18px;
+    box-shadow:var(--shadow-sm);transition:.2s;border:1px solid transparent;
+  }
+  .stat:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  .stat.navy{background:var(--navy);color:#fff}
+  .stat.teal{background:var(--teal);color:#fff}
+  .stat.amber{background:var(--amber);color:#fff}
+  .stat.purple{background:var(--purple);color:#fff}
+  .s-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;opacity:.85}
+  .s-value{font-family:var(--font-display);font-weight:800;font-size:1.32rem;margin:7px 0 2px;letter-spacing:.01em}
+  .s-sub{font-size:.74rem;opacity:.92;line-height:1.45}
+  .s-trend{
+    display:inline-flex;align-items:center;gap:5px;
+    margin-top:10px;font-size:.7rem;font-weight:800;
+    background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px;
+  }
+
+  /* ---------- VIEW TABS ---------- */
+  .view-tabs{
+    display:flex;gap:6px;background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:6px;box-shadow:var(--shadow-sm);margin-bottom:16px;
+  }
+  .vt{
+    flex:1;min-width:150px;border:none;cursor:pointer;font-family:var(--font);font-weight:600;font-size:.86rem;
+    padding:11px 12px;border-radius:9px;background:transparent;color:var(--muted);transition:.2s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .vt:hover{color:var(--navy)}
+  .vt.active{background:var(--navy);color:#fff;box-shadow:0 4px 12px rgba(27,58,107,.25)}
+  .vt-badge{
+    background:var(--amber);color:#fff;font-size:.64rem;font-weight:800;
+    padding:2px 8px;border-radius:999px;letter-spacing:.02em;
+  }
+  .vt.active .vt-badge{background:#fff;color:var(--navy)}
+  .view{display:none}
+  .view.active{display:block;animation:fadeUp .35s ease}
+
+  /* ---------- FILTER BAR ---------- */
+  .filter-bar{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    padding:16px;box-shadow:var(--shadow-sm);margin-bottom:16px;
+  }
+  .search-row{position:relative}
+  .search-row .s-ico{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    color:var(--muted);font-size:.9rem;pointer-events:none;
+  }
+  .input{
+    width:100%;font-family:var(--font);font-size:.86rem;
+    padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-btn);
+    background:var(--white);color:var(--ink);outline:none;transition:.2s;
+  }
+  .input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,90,.12)}
+  .input.search{padding-left:38px}
+  .filter-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:13px}
+  .fb-group{display:flex;flex-direction:column;gap:5px}
+  .fb-group label{font-size:.66rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .fb-group .input{width:168px;max-width:100%}
+  .filter-actions{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+
+  /* ---------- DISPUTE CARD ---------- */
+  .disp{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);box-shadow:var(--shadow-sm);
+    margin-bottom:16px;overflow:hidden;transition:.25s ease;
+  }
+  .disp.high{border-left:5px solid var(--red)}
+  .disp.normal{border-left:5px solid var(--amber)}
+  .disp.low{border-left:5px solid #9aa8b8}
+  .disp.is-resolved{background:#fbfcfd;border-left:5px solid var(--teal)}
+  .disp-head{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:16px 20px;cursor:pointer;flex-wrap:wrap;
+  }
+  .disp-head:hover{background:#F7F9FF}
+  .dh-left{display:flex;flex-direction:column;gap:6px}
+  .dh-ticket{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .dh-ticket .t-id{font-family:var(--font-display);font-weight:800;font-size:1.02rem;color:var(--navy)}
+  .dh-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+  .dh-right{display:flex;flex-direction:column;gap:3px;align-items:flex-end;font-size:.76rem;color:var(--muted)}
+  .dh-right b{color:var(--ink);font-weight:700}
+  .caret{font-size:.9rem;color:var(--muted);transition:transform .3s ease;margin-left:6px}
+  .disp.collapsed .caret{transform:rotate(180deg)}
+  .disp-body{padding:0 20px 18px;overflow:hidden}
+  .disp.collapsed .disp-body{display:none}
+
+  /* ---------- STATUS BADGES ---------- */
+  .st-badge{display:inline-flex;align-items:center;gap:5px;font-size:.66rem;font-weight:800;letter-spacing:.03em;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .st-open{background:rgba(184,134,11,.14);color:#8a6508}
+  .st-review{background:rgba(27,58,107,.1);color:var(--navy)}
+  .st-await{background:rgba(210,168,50,.16);color:#8a7000}
+  .st-resolved{background:rgba(26,107,90,.12);color:var(--teal)}
+  .st-esc{background:rgba(111,66,193,.12);color:var(--purple)}
+  .st-esc-red{background:rgba(214,69,69,.12);color:var(--red)}
+  .st-high{background:rgba(214,69,69,.12);color:var(--red)}
+  .st-norm{background:rgba(184,134,11,.12);color:#8a6508}
+  .st-low{background:rgba(91,107,127,.12);color:var(--muted)}
+
+  /* ---------- PARTIES ---------- */
+  .disp-parties{
+    display:flex;gap:12px;flex-wrap:wrap;
+    background:var(--bg);border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;margin-bottom:14px;
+  }
+  .dp{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--ink)}
+  .dp-label{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--white);border:1px solid var(--border);border-radius:6px;padding:3px 8px}
+  .dp b{color:var(--navy);font-family:var(--font-display);font-weight:700}
+
+  /* ---------- ISSUE SUMMARY ---------- */
+  .disp-issue{margin-bottom:14px}
+  .di-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:5px}
+  .disp-issue p{
+    font-size:.86rem;color:var(--ink);line-height:1.65;
+    background:#fffdf7;border:1px solid #f0e3bd;border-left:4px solid var(--amber);
+    border-radius:8px;padding:12px 14px;
+  }
+
+  /* ---------- EVIDENCE CHIPS ---------- */
+  .disp-ev{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:14px}
+  .ev-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .ev-chip{
+    display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+    background:var(--white);border:1.5px solid var(--border);border-radius:999px;
+    padding:6px 13px;font-size:.76rem;font-weight:600;color:var(--navy);transition:.2s;
+  }
+  .ev-chip:hover{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* ---------- TIMELINE ---------- */
+  .timeline{list-style:none;margin-bottom:14px}
+  .timeline li{position:relative;padding:0 0 14px 26px;font-size:.8rem}
+  .timeline li:last-child{padding-bottom:0}
+  .timeline li:before{
+    content:'';position:absolute;left:6px;top:12px;bottom:-2px;width:2px;background:var(--border);
+  }
+  .timeline li:last-child:before{display:none}
+  .timeline .tl-dot{
+    position:absolute;left:0;top:2px;width:14px;height:14px;border-radius:50%;
+    background:var(--teal);border:3px solid #d7ece4;flex:none;
+  }
+  .timeline .tl-dot.gray{background:var(--muted);border-color:#e6ebf1}
+  .timeline .tl-dot.blue{background:var(--navy);border-color:#d6e0f0}
+  .timeline .tl-dot.amber{background:var(--amber);border-color:#f2e4c2}
+  .timeline li .tl-when{font-weight:800;color:var(--navy);font-size:.72rem}
+  .timeline li .tl-text{color:var(--ink);font-weight:500}
+  .timeline li.tl-pending .tl-text{color:#8a6508;font-weight:600}
+  .timeline li.tl-pending .tl-dot{background:var(--amber);border-color:#f2e4c2;animation:pulseDot 1.6s infinite}
+  @keyframes pulseDot{0%{box-shadow:0 0 0 0 rgba(184,134,11,.4)}70%{box-shadow:0 0 0 8px rgba(184,134,11,0)}100%{box-shadow:0 0 0 0 rgba(184,134,11,0)}}
+
+  /* ---------- OVERDUE WARNING ---------- */
+  .ovd-warn{
+    display:flex;align-items:center;gap:9px;
+    background:#fdf0f0;border:1px solid #f0c9c9;border-left:4px solid var(--red);
+    color:#b33636;font-size:.8rem;font-weight:600;
+    border-radius:8px;padding:11px 14px;margin-bottom:14px;
+  }
+
+  /* ---------- ACTION PANEL ---------- */
+  .disp-actions{
+    background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;
+  }
+  .notes{
+    width:100%;font-family:var(--font);font-size:.84rem;
+    border:1.5px solid var(--border);border-radius:var(--radius-btn);
+    padding:10px 12px;resize:vertical;min-height:70px;outline:none;transition:.2s;
+    background:var(--white);color:var(--ink);
+  }
+  .notes:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,90,.12)}
+  .da-btns{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+  .da-btns .btn{flex:1;min-width:150px}
+  .disp.is-resolved .disp-actions{display:none}
+
+  /* ---------- TABLE ---------- */
+  .card{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);box-shadow:var(--shadow-sm);padding:20px;
+  }
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;min-width:840px;font-size:.82rem}
+  thead th{
+    text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--muted);font-weight:700;padding:11px 12px;background:var(--bg);
+    border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  tbody td{padding:11px 12px;border-bottom:1px dashed var(--border);white-space:nowrap;vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#F7F9FF}
+  td.id-cell{font-family:var(--font-display);font-weight:700;color:var(--navy)}
+  td.name-cell{font-weight:600;color:var(--ink)}
+  td.sub-cell{color:var(--muted)}
+  .action-link{
+    background:none;border:none;cursor:pointer;font-weight:700;font-size:.76rem;padding:5px 13px;
+    border-radius:7px;transition:.2s;
+  }
+  .action-link.view{color:var(--teal);background:rgba(26,107,90,.1)}
+  .action-link.view:hover{background:var(--teal);color:#fff}
+  .empty-state{text-align:center;padding:44px 20px;color:var(--muted)}
+  .empty-state .es-ic{font-size:2.2rem;margin-bottom:8px}
+  .empty-state p{font-size:.88rem;font-weight:600}
+
+  /* ---------- ESCALATED CASES ---------- */
+  .esc{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow-sm);padding:20px;margin-bottom:16px;position:relative;
+  }
+  .esc.grievance{border-left:5px solid var(--purple)}
+  .esc.legal{border-left:5px solid var(--red)}
+  .esc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .esc-ticket{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .esc-ticket .t-id{font-family:var(--font-display);font-weight:800;font-size:1.02rem;color:var(--navy)}
+  .esc-to{font-size:.78rem;color:var(--muted);margin-bottom:12px}
+  .esc-to b{color:var(--ink)}
+  .esc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 18px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+  .esc-row{display:flex;justify-content:space-between;gap:10px;font-size:.8rem;padding:3px 0}
+  .esc-row .k{color:var(--muted)}
+  .esc-row .v{font-weight:700;color:var(--ink);text-align:right}
+  .esc-row .v.due-over{color:var(--red)}
+  .esc-summary{font-size:.86rem;color:var(--ink);line-height:1.65;background:#fffdf7;border:1px solid #f0e3bd;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;margin-bottom:12px}
+  .esc-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+  .esc-actions .btn{flex:1;min-width:160px}
+
+  /* ---------- DRAWER ---------- */
+  .drawer-overlay{
+    position:fixed;inset:0;z-index:300;background:rgba(18,41,76,.45);
+    opacity:0;pointer-events:none;transition:opacity .28s ease;
+  }
+  .drawer-overlay.show{opacity:1;pointer-events:auto}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100vw;z-index:310;
+    background:var(--white);box-shadow:-10px 0 40px rgba(18,41,76,.25);
+    transform:translateX(100%);transition:transform .32s ease;
+    display:flex;flex-direction:column;
+  }
+  .drawer.show{transform:translateX(0)}
+  .drawer-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:18px 20px;background:var(--navy);color:#fff;
+  }
+  .drawer-head .dh-title{font-family:var(--font-display);font-weight:700;font-size:1rem}
+  .drawer-head .dh-sub{font-size:.72rem;color:rgba(255,255,255,.75)}
+  .drawer-close{
+    flex:none;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+    background:rgba(255,255,255,.14);color:#fff;font-size:1.05rem;transition:.2s;
+  }
+  .drawer-close:hover{background:var(--red)}
+  .drawer-body{flex:1;overflow-y:auto;padding:20px}
+  .dr-section{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-card);padding:16px;margin-bottom:16px}
+  .dr-sec-title{font-family:var(--font-display);font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:12px}
+  .dr-detail{font-size:.84rem;color:var(--ink);line-height:1.65}
+  .dr-detail p{margin-bottom:8px}
+  .dr-detail p:last-child{margin-bottom:0}
+  .dr-row{display:flex;justify-content:space-between;gap:12px;font-size:.8rem;padding:6px 0;border-bottom:1px dashed var(--border)}
+  .dr-row:last-child{border-bottom:none}
+  .dr-row .k{color:var(--muted);flex:none}
+  .dr-row .v{font-weight:600;color:var(--ink);text-align:right}
+  .res-box{
+    background:rgba(26,107,90,.07);border:1px solid rgba(26,107,90,.25);border-radius:8px;
+    padding:12px 14px;font-size:.84rem;color:var(--teal-dark);line-height:1.6;font-weight:500;
+  }
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:360;background:rgba(18,41,76,.5);
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.show{display:flex}
+  .modal-card{
+    width:100%;max-width:440px;background:var(--white);border-radius:var(--radius-card);
+    box-shadow:var(--shadow);overflow:hidden;animation:fadeUp .25s ease;
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+  .modal-head h3{font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--navy)}
+  .modal-x{background:none;border:none;font-size:1.15rem;cursor:pointer;color:var(--muted);line-height:1}
+  .modal-x:hover{color:var(--red)}
+  .modal-body{padding:18px 20px;font-size:.86rem}
+  .modal-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border)}
+  .modal-foot .btn{flex:1}
+  .m-msg{color:var(--ink);line-height:1.6}
+  .m-msg b{color:var(--navy)}
+  .m-act{
+    background:var(--bg);border:1px solid var(--border);border-left:4px solid var(--teal);
+    border-radius:8px;padding:11px 14px;margin-top:12px;font-size:.82rem;color:var(--teal-dark);
+  }
+  .modal-body label.ml{display:block;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px}
+
+  /* ---------- BOTTOM TABS (MOBILE) ---------- */
+  .bottom-tabs{
+    position:fixed;bottom:0;left:0;right:0;z-index:200;
+    background:var(--white);border-top:1px solid var(--border);
+    display:none;justify-content:space-around;align-items:stretch;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    box-shadow:0 -4px 16px rgba(27,58,107,.08);
+  }
+  .tab{
+    flex:1;background:none;border:none;cursor:pointer;font-family:var(--font);
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:.64rem;font-weight:600;color:var(--muted);padding:4px 2px;border-radius:10px;
+  }
+  .tab .ti{font-size:1.15rem;line-height:1}
+  .tab.active{color:var(--teal)}
+  .tab.active .ti{transform:translateY(-1px)}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(80px);
+    background:var(--navy);color:#fff;font-size:.84rem;font-weight:600;
+    padding:12px 22px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+    opacity:0;transition:.3s ease;z-index:400;pointer-events:none;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:900px){
+    .sidebar{display:none}
+    .main{margin-left:0}
+    .mobile-top{display:flex}
+    .bottom-tabs{display:flex}
+    .main .container{padding:18px 14px 96px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .esc-grid{grid-template-columns:1fr}
+    .da-btns .btn{flex:1 1 100%}
+    .esc-actions .btn{flex:1 1 100%}
+    .toast{bottom:86px}
+  }
+  @media(max-width:520px){
+    .stats{grid-template-columns:repeat(2,1fr);gap:10px}
+    .stat{padding:14px}
+    .dh-right{align-items:flex-start}
+    .fb-group .input{width:100%}
+    .filter-actions{width:100%;margin-left:0}
+    .filter-actions .btn{flex:1}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR (DESKTOP) ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="logo-mark"><img src="BB-8.png" alt="Bharatiya Bazaar logo"></div>
+      <div class="lt">
+        <span class="lt-name">Bharatiya Bazaar</span>
+        <span class="lt-sub">भारतीय बाज़ार · Admin</span>
+      </div>
+    </div>
+
+    <div class="admin-info">
+      <div class="a-head">
+        <div class="avatar">SA</div>
+        <div>
+          <div class="a-name">Super Admin</div>
+          <div class="a-id">Platform Administrator</div>
+        </div>
+      </div>
+      <span class="badge badge-red">SUPER ADMIN</span>
+    </div>
+
+    <nav class="sb-nav">
+      <a href="bb-admin.html"><span class="ic">🏠</span>Dashboard</a>
+      <a href="bb-admin-members.html"><span class="ic">👥</span>Member Management</a>
+      <a href="#"><span class="ic">🏪</span>Vendor Management</a>
+      <a href="bb-admin-kyc.html"><span class="ic">📄</span>KYC Verification</a>
+      <a href="bb-admin-payouts.html"><span class="ic">💸</span>Payout Management</a>
+      <a href="bb-admin-disputes.html" class="active"><span class="ic">⚖️</span>Dispute Resolution</a>
+      <a href="#"><span class="ic">⚙️</span>Commission Engine</a>
+      <a href="bb-admin-reports.html"><span class="ic">📊</span>Reports &amp; Export</a>
+      <a href="bb-admin-settings.html"><span class="ic">🔐</span>System Settings</a>
+      <a href="bb-bharatiya-bazaar-v2.html" class="logout"><span class="ic">🚪</span>Logout</a>
+    </nav>
+
+    <div class="sb-foot">© 2026 Bharatiya Bazaar<br>Admin Portal v1.0</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+
+    <!-- MOBILE TOP HEADER -->
+    <header class="mobile-top">
+      <div class="mt-logo"><img src="BB-8.png" alt="Bharatiya Bazaar"></div>
+      <div class="mt-center">Admin Panel</div>
+      <div class="mt-right">
+        <div class="bell-wrap">
+          <button class="bell" id="bell" aria-label="Notifications">🔔</button>
+          <span class="bell-badge">5</span>
+          <div class="bell-drop" id="bellDrop">
+            <div class="bd-head">Notifications</div>
+            <div class="bd-item">
+              <div class="bd-ico red">⚖️</div>
+              <div><b>DIS-2026-0892 — awaiting investigation</b><span>Assigned to Admin-01</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico amber">⏳</div>
+              <div><b>DIS-2026-0879 — member response overdue</b><span>Auto-escalation in 24 hours</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico purple">📢</div>
+              <div><b>DIS-2026-0801 — with Grievance Officer</b><span>Overdue by 8 days</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico blue">📄</div>
+              <div><b>3 KYC verifications pending</b><span>Oldest: 48 hours</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico teal">✅</div>
+              <div><b>4 disputes resolved today</b><span>Avg resolution 5.2 days</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-avatar">SA</div>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <div class="page-head">
+        <div>
+          <h1>Dispute Resolution</h1>
+          <p class="page-sub">Support → Grievance → Legal · Super Admin · 08 Aug 2026</p>
+        </div>
+      </div>
+
+      <!-- TOP SUMMARY BAR -->
+      <div class="stats">
+        <div class="stat navy">
+          <div class="s-label">Open Disputes</div>
+          <div class="s-value">2</div>
+          <div class="s-sub">Awaiting first response</div>
+          <div class="s-trend">Needs attention ⚠️</div>
+        </div>
+        <div class="stat amber">
+          <div class="s-label">Under Review</div>
+          <div class="s-value">3</div>
+          <div class="s-sub">Investigation in progress</div>
+          <div class="s-trend">Across 2 admins</div>
+        </div>
+        <div class="stat teal">
+          <div class="s-label">Resolved Today</div>
+          <div class="s-value">4</div>
+          <div class="s-sub">Closed to member / vendor satisfaction</div>
+          <div class="s-trend">+1 vs yesterday ↑</div>
+        </div>
+        <div class="stat purple">
+          <div class="s-label">Avg Resolution Time</div>
+          <div class="s-value">5.2 days</div>
+          <div class="s-sub">Across all ticket types</div>
+          <div class="s-trend">On target ✓</div>
+        </div>
+      </div>
+
+      <!-- VIEW TABS -->
+      <div class="view-tabs" role="tablist">
+        <button class="vt active" data-view="active" type="button">⚖️ Active Disputes <span class="vt-badge" id="activeBadge">5</span></button>
+        <button class="vt" data-view="resolved" type="button">✅ Resolved Disputes</button>
+        <button class="vt" data-view="escalated" type="button">📢 Escalated Cases</button>
+      </div>
+
+      <!-- ===== TAB 1 : ACTIVE DISPUTES ===== -->
+      <div class="view active" id="viewActive">
+
+        <div class="filter-bar">
+          <div class="search-row">
+            <span class="s-ico">🔎</span>
+            <input class="input search" id="fSearch" type="text" placeholder="Search ticket ID or member ID...">
+          </div>
+          <div class="filter-row">
+            <div class="fb-group">
+              <label for="fStatus">Status</label>
+              <select class="input" id="fStatus">
+                <option value="all">All</option>
+                <option value="open">Open</option>
+                <option value="review">Under Review</option>
+                <option value="await">Awaiting Information</option>
+              </select>
+            </div>
+            <div class="fb-group">
+              <label for="fType">Type</label>
+              <select class="input" id="fType">
+                <option value="all">All</option>
+                <option value="transaction">Transaction</option>
+                <option value="commission">Commission</option>
+                <option value="vendor">Vendor</option>
+                <option value="technical">Technical</option>
+                <option value="kyc">KYC</option>
+              </select>
+            </div>
+            <div class="fb-group">
+              <label for="fPriority">Priority</label>
+              <select class="input" id="fPriority">
+                <option value="all">All</option>
+                <option value="high">High</option>
+                <option value="normal">Normal</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-navy btn-sm" id="fApply" type="button">Filter</button>
+              <button class="btn btn-outline-navy btn-sm" id="fClear" type="button">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" id="activeEmpty" style="display:none">
+          <div class="es-ic">🔍</div>
+          <p>No active disputes match your filters.</p>
+        </div>
+
+        <!-- CARD 1 : DIS-2026-0892 -->
+        <article class="disp high" data-id="DIS-2026-0892" data-status="open" data-priority="high" data-type="transaction">
+          <header class="disp-head">
+            <div class="dh-left">
+              <div class="dh-ticket">
+                <span class="t-id">DIS-2026-0892</span>
+                <span class="st-badge st-high">HIGH</span>
+                <span class="st-badge st-open" data-st-badge>OPEN</span>
+              </div>
+              <div class="dh-meta">Transaction Dispute · BB10201 vs BBV10034</div>
+            </div>
+            <div class="dh-right">
+              <div>Opened: <b>07 Aug 2026, 10:15 AM</b> · Age: <b>22 hours</b></div>
+              <div>Assigned to: <b>Admin-01</b></div>
+              <span class="caret">▾</span>
+            </div>
+          </header>
+          <div class="disp-body">
+            <div class="disp-parties">
+              <div class="dp"><span class="dp-label">Member</span><b>BB10201</b> — Vikash Pandey</div>
+              <div class="dp"><span class="dp-label">Against</span><b>BBV10034</b> — Sharma Electronics</div>
+            </div>
+            <div class="disp-issue">
+              <span class="di-label">Issue Summary</span>
+              <p>"Member claims transaction of Rs.2,100 on 06 Aug 2026 at Sharma Electronics was not recorded in their shopping ledger despite vendor confirming payment."</p>
+            </div>
+            <div class="disp-ev">
+              <span class="ev-label">Evidence:</span>
+              <button class="ev-chip" data-file="UPI Receipt" type="button">📄 UPI Receipt</button>
+              <button class="ev-chip" data-file="Vendor Confirmation" type="button">📄 Vendor Confirmation</button>
+              <button class="ev-chip" data-file="Transaction Log" type="button">📄 Transaction Log</button>
+            </div>
+            <ol class="timeline">
+              <li><span class="tl-dot"></span><div><span class="tl-when">10:15 AM</span> · <span class="tl-text">Dispute submitted by member</span></div></li>
+              <li><span class="tl-dot gray"></span><div><span class="tl-when">10:45 AM</span> · <span class="tl-text">Auto-acknowledged, ticket created</span></div></li>
+              <li><span class="tl-dot blue"></span><div><span class="tl-when">11:30 AM</span> · <span class="tl-text">Assigned to Admin-01</span></div></li>
+              <li class="tl-pending"><span class="tl-dot"></span><div><span class="tl-when">Awaiting</span> · <span class="tl-text">Investigation</span></div></li>
+            </ol>
+            <div class="disp-actions">
+              <textarea class="notes" data-notes="DIS-2026-0892" placeholder="Admin notes / resolution"></textarea>
+              <div class="da-btns">
+                <button class="btn btn-navy btn-sm" data-act="review" type="button">Mark Under Review</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infom" type="button">Request Info from Member</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infov" type="button">Request Info from Vendor</button>
+                <button class="btn btn-teal btn-sm" data-act="resolve" data-side="member" type="button">Resolve — Favour Member</button>
+                <button class="btn btn-outline-navy btn-sm" data-act="resolve" data-side="vendor" type="button">Resolve — Favour Vendor</button>
+                <button class="btn btn-outline-red btn-sm" data-act="escalate" type="button">Escalate to Grievance Officer</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 2 : DIS-2026-0885 -->
+        <article class="disp normal" data-id="DIS-2026-0885" data-status="review" data-priority="normal" data-type="commission">
+          <header class="disp-head">
+            <div class="dh-left">
+              <div class="dh-ticket">
+                <span class="t-id">DIS-2026-0885</span>
+                <span class="st-badge st-norm">NORMAL</span>
+                <span class="st-badge st-review" data-st-badge>UNDER REVIEW</span>
+              </div>
+              <div class="dh-meta">Commission Dispute · BB10042</div>
+            </div>
+            <div class="dh-right">
+              <div>Opened: <b>05 Aug 2026</b> · Age: <b>3 days</b></div>
+              <div>Assigned to: <b>Admin-02</b></div>
+              <span class="caret">▾</span>
+            </div>
+          </header>
+          <div class="disp-body">
+            <div class="disp-parties">
+              <div class="dp"><span class="dp-label">Member</span><b>BB10042</b> — Rajesh Kumar</div>
+              <div class="dp"><span class="dp-label">Issue</span>Self-reported commission discrepancy</div>
+            </div>
+            <div class="disp-issue">
+              <span class="di-label">Issue Summary</span>
+              <p>"Member reports Setu Kosh commission of Rs.40 not credited after vendor BB10089 transaction on 03 Aug 2026. Vendor settlement still pending."</p>
+            </div>
+            <div class="disp-ev">
+              <span class="ev-label">Evidence:</span>
+              <button class="ev-chip" data-file="Commission Ledger" type="button">📄 Commission Ledger</button>
+              <button class="ev-chip" data-file="Vendor Ledger" type="button">📄 Vendor Ledger</button>
+            </div>
+            <ol class="timeline">
+              <li><span class="tl-dot"></span><div><span class="tl-when">05 Aug</span> · <span class="tl-text">Submitted by member</span></div></li>
+              <li><span class="tl-dot blue"></span><div><span class="tl-when">05 Aug</span> · <span class="tl-text">Under review by Admin-02</span></div></li>
+              <li class="tl-pending"><span class="tl-dot"></span><div><span class="tl-when">Awaiting</span> · <span class="tl-text">Vendor settlement confirmation</span></div></li>
+            </ol>
+            <div class="disp-actions">
+              <textarea class="notes" data-notes="DIS-2026-0885" placeholder="Admin notes / resolution"></textarea>
+              <div class="da-btns">
+                <button class="btn btn-navy btn-sm" data-act="review" type="button">Mark Under Review</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infom" type="button">Request Info from Member</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infov" type="button">Request Info from Vendor</button>
+                <button class="btn btn-teal btn-sm" data-act="resolve" data-side="member" type="button">Resolve — Favour Member</button>
+                <button class="btn btn-outline-navy btn-sm" data-act="resolve" data-side="vendor" type="button">Resolve — Favour Vendor</button>
+                <button class="btn btn-outline-red btn-sm" data-act="escalate" type="button">Escalate to Grievance Officer</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 3 : DIS-2026-0879 -->
+        <article class="disp normal" data-id="DIS-2026-0879" data-status="await" data-priority="normal" data-type="vendor">
+          <header class="disp-head">
+            <div class="dh-left">
+              <div class="dh-ticket">
+                <span class="t-id">DIS-2026-0879</span>
+                <span class="st-badge st-norm">NORMAL</span>
+                <span class="st-badge st-await" data-st-badge>AWAITING INFO</span>
+              </div>
+              <div class="dh-meta">Vendor Dispute · BBV10089 vs BB10055</div>
+            </div>
+            <div class="dh-right">
+              <div>Opened: <b>03 Aug 2026</b> · Age: <b>5 days</b></div>
+              <div>Assigned to: <b>Admin-01</b></div>
+              <span class="caret">▾</span>
+            </div>
+          </header>
+          <div class="disp-body">
+            <div class="disp-parties">
+              <div class="dp"><span class="dp-label">Vendor</span><b>BBV10089</b> — Sharma Kirana Store</div>
+              <div class="dp"><span class="dp-label">Against</span><b>BB10055</b> — Amit Shah</div>
+            </div>
+            <div class="disp-issue">
+              <span class="di-label">Issue Summary</span>
+              <p>"Vendor reports member scanned QR code but entered incorrect amount (Rs.500 instead of actual Rs.850 purchase). Vendor requests correction of margin calculation."</p>
+            </div>
+            <div class="disp-ev">
+              <span class="ev-label">Evidence:</span>
+              <button class="ev-chip" data-file="QR Scan Log" type="button">📄 QR Scan Log</button>
+              <button class="ev-chip" data-file="Vendor Receipt" type="button">📄 Vendor Receipt</button>
+            </div>
+            <ol class="timeline">
+              <li><span class="tl-dot"></span><div><span class="tl-when">03 Aug</span> · <span class="tl-text">Submitted by vendor</span></div></li>
+              <li><span class="tl-dot gray"></span><div><span class="tl-when">03 Aug</span> · <span class="tl-text">Acknowledged</span></div></li>
+              <li><span class="tl-dot amber"></span><div><span class="tl-when">04 Aug</span> · <span class="tl-text">Info requested from member</span></div></li>
+              <li class="tl-pending"><span class="tl-dot"></span><div><span class="tl-when">Awaiting</span> · <span class="tl-text">Member response (2 days overdue)</span></div></li>
+            </ol>
+            <div class="ovd-warn">⚠️ Member response overdue by 2 days. Auto-escalation in 24 hours if no response.</div>
+            <div class="disp-actions">
+              <textarea class="notes" data-notes="DIS-2026-0879" placeholder="Admin notes / resolution"></textarea>
+              <div class="da-btns">
+                <button class="btn btn-navy btn-sm" data-act="review" type="button">Mark Under Review</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infom" type="button">Request Info from Member</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infov" type="button">Request Info from Vendor</button>
+                <button class="btn btn-teal btn-sm" data-act="resolve" data-side="member" type="button">Resolve — Favour Member</button>
+                <button class="btn btn-outline-navy btn-sm" data-act="resolve" data-side="vendor" type="button">Resolve — Favour Vendor</button>
+                <button class="btn btn-outline-red btn-sm" data-act="escalate" type="button">Escalate to Grievance Officer</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 4 : DIS-2026-0871 -->
+        <article class="disp low" data-id="DIS-2026-0871" data-status="review" data-priority="low" data-type="technical">
+          <header class="disp-head">
+            <div class="dh-left">
+              <div class="dh-ticket">
+                <span class="t-id">DIS-2026-0871</span>
+                <span class="st-badge st-low">LOW</span>
+                <span class="st-badge st-review" data-st-badge>UNDER REVIEW</span>
+              </div>
+              <div class="dh-meta">Technical Error · BB10115</div>
+            </div>
+            <div class="dh-right">
+              <div>Opened: <b>01 Aug 2026</b> · Age: <b>7 days</b></div>
+              <div>Assigned to: <b>Admin-02</b></div>
+              <span class="caret">▾</span>
+            </div>
+          </header>
+          <div class="disp-body">
+            <div class="disp-parties">
+              <div class="dp"><span class="dp-label">Member</span><b>BB10115</b> — Ravi Kumar</div>
+            </div>
+            <div class="disp-issue">
+              <span class="di-label">Issue Summary</span>
+              <p>"Member reports MY SYSTEM tree showing incorrect leg placement. Left referral BB10078 appears on right leg in dashboard. May be display bug."</p>
+            </div>
+            <div class="disp-ev">
+              <span class="ev-label">Evidence:</span>
+              <button class="ev-chip" data-file="Screenshot" type="button">🖼️ Screenshot</button>
+              <button class="ev-chip" data-file="System Log" type="button">📄 System Log</button>
+            </div>
+            <ol class="timeline">
+              <li><span class="tl-dot"></span><div><span class="tl-when">01 Aug</span> · <span class="tl-text">Submitted</span></div></li>
+              <li><span class="tl-dot blue"></span><div><span class="tl-when">01 Aug</span> · <span class="tl-text">Triaged as Technical</span></div></li>
+              <li><span class="tl-dot gray"></span><div><span class="tl-when">02 Aug</span> · <span class="tl-text">Under investigation by dev team</span></div></li>
+              <li class="tl-pending"><span class="tl-dot"></span><div><span class="tl-when">Awaiting</span> · <span class="tl-text">Dev team response</span></div></li>
+            </ol>
+            <div class="disp-actions">
+              <textarea class="notes" data-notes="DIS-2026-0871" placeholder="Admin notes / resolution"></textarea>
+              <div class="da-btns">
+                <button class="btn btn-navy btn-sm" data-act="review" type="button">Mark Under Review</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infom" type="button">Request Info from Member</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infov" type="button">Request Info from Vendor</button>
+                <button class="btn btn-teal btn-sm" data-act="resolve" data-side="member" type="button">Resolve — Favour Member</button>
+                <button class="btn btn-outline-navy btn-sm" data-act="resolve" data-side="vendor" type="button">Resolve — Favour Vendor</button>
+                <button class="btn btn-outline-red btn-sm" data-act="escalate" type="button">Escalate to Grievance Officer</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 5 : DIS-2026-0868 -->
+        <article class="disp low" data-id="DIS-2026-0868" data-status="await" data-priority="low" data-type="kyc">
+          <header class="disp-head">
+            <div class="dh-left">
+              <div class="dh-ticket">
+                <span class="t-id">DIS-2026-0868</span>
+                <span class="st-badge st-low">LOW</span>
+                <span class="st-badge st-await" data-st-badge>AWAITING INFO</span>
+              </div>
+              <div class="dh-meta">KYC Dispute · BB10175</div>
+            </div>
+            <div class="dh-right">
+              <div>Opened: <b>31 Jul 2026</b> · Age: <b>8 days</b></div>
+              <div>Assigned to: <b>Admin-01</b></div>
+              <span class="caret">▾</span>
+            </div>
+          </header>
+          <div class="disp-body">
+            <div class="disp-parties">
+              <div class="dp"><span class="dp-label">Member</span><b>BB10175</b> — Suresh Nair</div>
+            </div>
+            <div class="disp-issue">
+              <span class="di-label">Issue Summary</span>
+              <p>"Member disputes KYC rejection. Claims PAN card image was clear and requests manual review of original submission."</p>
+            </div>
+            <div class="disp-ev">
+              <span class="ev-label">Evidence:</span>
+              <button class="ev-chip" data-file="Original KYC Submission" type="button">📄 Original KYC Submission</button>
+            </div>
+            <ol class="timeline">
+              <li><span class="tl-dot"></span><div><span class="tl-when">31 Jul</span> · <span class="tl-text">Submitted</span></div></li>
+              <li><span class="tl-dot gray"></span><div><span class="tl-when">31 Jul</span> · <span class="tl-text">Linked to KYC rejection record</span></div></li>
+              <li><span class="tl-dot amber"></span><div><span class="tl-when">01 Aug</span> · <span class="tl-text">Info requested from member</span></div></li>
+              <li class="tl-pending"><span class="tl-dot"></span><div><span class="tl-when">Awaiting</span> · <span class="tl-text">Member resubmission</span></div></li>
+            </ol>
+            <div class="ovd-warn">⚠️ Member resubmission overdue by 3 days. Auto-escalation in 24 hours if no response.</div>
+            <div class="disp-actions">
+              <textarea class="notes" data-notes="DIS-2026-0868" placeholder="Admin notes / resolution"></textarea>
+              <div class="da-btns">
+                <button class="btn btn-navy btn-sm" data-act="review" type="button">Mark Under Review</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infom" type="button">Request Info from Member</button>
+                <button class="btn btn-outline-amber btn-sm" data-act="infov" type="button">Request Info from Vendor</button>
+                <button class="btn btn-teal btn-sm" data-act="resolve" data-side="member" type="button">Resolve — Favour Member</button>
+                <button class="btn btn-outline-navy btn-sm" data-act="resolve" data-side="vendor" type="button">Resolve — Favour Vendor</button>
+                <button class="btn btn-outline-red btn-sm" data-act="escalate" type="button">Escalate to Grievance Officer</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- ===== TAB 2 : RESOLVED DISPUTES ===== -->
+      <div class="view" id="viewResolved">
+
+        <div class="filter-bar">
+          <div class="search-row">
+            <span class="s-ico">🔎</span>
+            <input class="input search" id="rSearch" type="text" placeholder="Search ticket ID or member ID...">
+          </div>
+          <div class="filter-row">
+            <div class="fb-group">
+              <label for="rType">Type</label>
+              <select class="input" id="rType">
+                <option value="all">All</option>
+                <option value="Transaction">Transaction</option>
+                <option value="Commission">Commission</option>
+                <option value="Vendor">Vendor</option>
+                <option value="Technical">Technical</option>
+                <option value="KYC">KYC</option>
+              </select>
+            </div>
+            <div class="fb-group">
+              <label for="rDecision">Decision</label>
+              <select class="input" id="rDecision">
+                <option value="all">All</option>
+                <option value="Favour Member">Favour Member</option>
+                <option value="Favour Vendor">Favour Vendor</option>
+                <option value="Resolved-Bug Fixed">Resolved-Bug Fixed</option>
+              </select>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-navy btn-sm" id="rApply" type="button">Filter</button>
+              <button class="btn btn-outline-navy btn-sm" id="rClear" type="button">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ticket</th>
+                  <th>Type</th>
+                  <th>Member</th>
+                  <th>Resolved</th>
+                  <th>Decision</th>
+                  <th>Admin</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="rBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="rEmpty" style="display:none">
+            <div class="es-ic">🗂️</div>
+            <p>No resolved disputes match your filters.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== TAB 3 : ESCALATED CASES ===== -->
+      <div class="view" id="viewEscalated">
+
+        <!-- CASE 1 : DIS-2026-0801 -->
+        <article class="esc grievance">
+          <div class="esc-head">
+            <div class="esc-ticket">
+              <span class="t-id">DIS-2026-0801</span>
+              <span class="st-badge st-esc">WITH GRIEVANCE OFFICER</span>
+            </div>
+            <span class="st-badge st-high">OVERDUE</span>
+          </div>
+          <div class="esc-to">Escalated to: <b>Grievance Officer</b> · Grievance Officer: <b>GO-2026-001</b></div>
+          <div class="esc-grid">
+            <div class="esc-row"><span class="k">Member</span><span class="v">BB10201 — Vikash Pandey</span></div>
+            <div class="esc-row"><span class="k">Original Type</span><span class="v">Account Suspension Dispute</span></div>
+            <div class="esc-row"><span class="k">Escalated</span><span class="v">15 Jul 2026</span></div>
+            <div class="esc-row"><span class="k">Expected Response</span><span class="v">15 days from escalation</span></div>
+            <div class="esc-row"><span class="k">Due</span><span class="v due-over">30 Jul 2026 (OVERDUE — 8 days)</span></div>
+          </div>
+          <div class="esc-summary">"Member disputes account suspension citing fraudulent referral allegation is unsubstantiated."</div>
+          <div class="ovd-warn">⚠️ Case overdue by 8 days. Follow up with Grievance Officer GO-2026-001.</div>
+          <div class="esc-actions">
+            <button class="btn btn-navy btn-sm" data-escact="follow" type="button">Follow Up</button>
+            <button class="btn btn-outline-teal btn-sm" data-escact="viewcase" type="button">View Full Case</button>
+          </div>
+        </article>
+
+        <!-- CASE 2 : DIS-2026-0788 -->
+        <article class="esc legal">
+          <div class="esc-head">
+            <div class="esc-ticket">
+              <span class="t-id">DIS-2026-0788</span>
+              <span class="st-badge st-esc-red" data-escbadge>LEGAL REVIEW</span>
+            </div>
+          </div>
+          <div class="esc-to">Escalated to: <b>Legal/Regulatory</b></div>
+          <div class="esc-grid">
+            <div class="esc-row"><span class="k">Vendor</span><span class="v">BBV10034 — Sharma Electronics</span></div>
+            <div class="esc-row"><span class="k">Type</span><span class="v">Fraud Investigation</span></div>
+            <div class="esc-row"><span class="k">Escalated</span><span class="v">08 Jul 2026</span></div>
+            <div class="esc-row"><span class="k">Expected Resolution</span><span class="v">Per legal timeline</span></div>
+          </div>
+          <div class="esc-summary">"Vendor suspected of systematic transaction underreporting. Case referred to legal team."</div>
+          <div class="esc-actions">
+            <button class="btn btn-navy btn-sm" data-escact="upd" type="button">Update Status</button>
+            <button class="btn btn-outline-teal btn-sm" data-escact="file" type="button">View Case File</button>
+          </div>
+        </article>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== DRAWER : RESOLVED DETAIL ===== -->
+  <div class="drawer-overlay" id="drwOv"></div>
+  <aside class="drawer" id="drwRes" aria-label="Resolved dispute details">
+    <div class="drawer-head">
+      <div>
+        <div class="dh-title" id="drwTitle">DIS-2026-0860</div>
+        <div class="dh-sub" id="drwSub">Transaction Dispute</div>
+      </div>
+      <button class="drawer-close" data-drawerclose type="button">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="dr-section">
+        <div class="dr-sec-title">Case Summary</div>
+        <div class="dr-detail" id="drwSummary"></div>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-title">Timeline &amp; Resolution</div>
+        <ol class="timeline" id="drwTimeline"></ol>
+      </div>
+      <div class="dr-section">
+        <div class="dr-sec-title">Resolution Decision</div>
+        <div class="res-box" id="drwResolution"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MODAL : RESOLVE ===== -->
+  <div class="modal-overlay" id="resModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Confirm Resolution</h3>
+        <button class="modal-x" data-close="resModal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="m-msg">Resolve <b id="resTicket">DIS-2026-0892</b> in favour of <b id="resSide">Member</b>?</div>
+        <div class="m-act" id="resAction">Action will be recorded.</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline-navy" data-close="resModal" type="button">Cancel</button>
+        <button class="btn btn-teal" id="resConfirm" type="button">Confirm Resolution</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL : ESCALATE ===== -->
+  <div class="modal-overlay" id="escModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Escalate Dispute</h3>
+        <button class="modal-x" data-close="escModal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="m-msg">Escalate <b id="escTicket">DIS-2026-0892</b> to the Grievance Officer?<br>The case will move to the <b>Grievance</b> level of the BB-SPEC-003 resolution flow.</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline-navy" data-close="escModal" type="button">Cancel</button>
+        <button class="btn btn-outline-red" id="escConfirm" type="button">Escalate Case</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL : UPDATE STATUS ===== -->
+  <div class="modal-overlay" id="updModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Update Case Status</h3>
+        <button class="modal-x" data-close="updModal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="m-msg">Update status for <b>DIS-2026-0788</b> (Legal/Regulatory).</div>
+        <label class="ml" for="updStatus">Status</label>
+        <select class="input" id="updStatus">
+          <option>LEGAL REVIEW</option>
+          <option>UNDER INVESTIGATION</option>
+          <option>AWAITING EVIDENCE</option>
+          <option>CLOSED</option>
+        </select>
+        <label class="ml" for="updNotes">Notes</label>
+        <textarea class="notes" id="updNotes" placeholder="Add case notes..."></textarea>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline-navy" data-close="updModal" type="button">Cancel</button>
+        <button class="btn btn-teal" id="updConfirm" type="button">Save Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MOBILE BOTTOM TABS ===== -->
+  <nav class="bottom-tabs" id="bottomTabs">
+    <button class="tab active" data-name="Disputes"><span class="ti">⚖️</span>Disputes</button>
+    <button class="tab" data-name="Members"><span class="ti">👥</span>Members</button>
+    <button class="tab" data-name="Vendors"><span class="ti">🏪</span>Vendors</button>
+    <button class="tab" data-name="KYC"><span class="ti">📄</span>KYC</button>
+    <button class="tab" data-name="More"><span class="ti">☰</span>More</button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  function $(s){ return document.querySelector(s); }
+  function $$(s){ return Array.from(document.querySelectorAll(s)); }
+
+  var toastTimer = null;
+  function showToast(msg){
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+  }
+
+  function cardById(id){
+    var found = null;
+    $$('.disp').forEach(function(c){ if(c.dataset.id === id) found = c; });
+    return found;
+  }
+
+  /* ---------- VIEW TABS ---------- */
+  $$('.vt').forEach(function(t){
+    t.addEventListener('click', function(){
+      $$('.vt').forEach(function(x){ x.classList.toggle('active', x === t); });
+      var v = t.dataset.view;
+      $('#viewActive').classList.toggle('active', v === 'active');
+      $('#viewResolved').classList.toggle('active', v === 'resolved');
+      $('#viewEscalated').classList.toggle('active', v === 'escalated');
+    });
+  });
+
+  /* ---------- STATUS BADGES ---------- */
+  var STATUS = {
+    open:     { label:'OPEN',           cls:'st-open' },
+    review:   { label:'UNDER REVIEW',   cls:'st-review' },
+    await:    { label:'AWAITING INFO',  cls:'st-await' },
+    resolved: { label:'RESOLVED',       cls:'st-resolved' },
+    escalated:{ label:'ESCALATED',      cls:'st-esc' }
+  };
+  function setStatus(card, st){
+    var badge = card.querySelector('[data-st-badge]');
+    var s = STATUS[st];
+    badge.className = 'st-badge ' + s.cls;
+    badge.textContent = s.label;
+    card.dataset.status = st;
+  }
+  function collapseCard(card){
+    var body = card.querySelector('.disp-body');
+    body.style.height = body.offsetHeight + 'px';
+    requestAnimationFrame(function(){
+      body.style.height = '0px';
+      body.style.opacity = '0';
+    });
+    setTimeout(function(){
+      body.style.height = '';
+      body.style.opacity = '';
+      card.classList.add('collapsed');
+    }, 380);
+  }
+  function decActiveBadge(){
+    var b = $('#activeBadge');
+    var n = parseInt(b.textContent, 10) || 0;
+    n = Math.max(0, n - 1);
+    b.textContent = n;
+    b.style.display = n ? '' : 'none';
+  }
+
+  /* ---------- CARD COLLAPSE ---------- */
+  $$('.disp-head').forEach(function(h){
+    h.addEventListener('click', function(){
+      h.closest('.disp').classList.toggle('collapsed');
+    });
+  });
+
+  /* ---------- ACTION DELEGATION ---------- */
+  var RESOLVE_ACTION = {
+    'DIS-2026-0892':{ member:'Transaction will be manually recorded in member\u2019s shopping ledger.', vendor:'Vendor transaction log will be reconciled against member ledger.' },
+    'DIS-2026-0885':{ member:'Commission of Rs.40 will be credited once vendor settlement is confirmed.', vendor:'Vendor settlement will be marked complete and the pending commission released.' },
+    'DIS-2026-0879':{ member:'Purchase amount will be corrected to Rs.850 on member confirmation.', vendor:'Margin calculation will be corrected to the Rs.850 purchase amount.' },
+    'DIS-2026-0871':{ member:'Dev fix will be applied and the member tree will be re-synced.', vendor:'Dev team will validate the tree and apply the fix.' },
+    'DIS-2026-0868':{ member:'Original KYC submission will be manually reviewed and approved.', vendor:'Original KYC submission will be manually reviewed.' }
+  };
+
+  var resId = null;
+  var resSide = 'member';
+  var escId = null;
+
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-act]');
+    if(btn){
+      var card = btn.closest('.disp');
+      var id = card.dataset.id;
+      var act = btn.dataset.act;
+      if(act === 'review'){
+        setStatus(card, 'review');
+        showToast(id + ' marked Under Review');
+      } else if(act === 'infom'){
+        showToast('Info requested from member — ' + id);
+      } else if(act === 'infov'){
+        showToast('Info requested from vendor — ' + id);
+      } else if(act === 'resolve'){
+        resId = id;
+        resSide = btn.dataset.side;
+        $('#resTicket').textContent = id;
+        $('#resSide').textContent = resSide === 'member' ? 'Member' : 'Vendor';
+        $('#resAction').textContent = (RESOLVE_ACTION[id] || { member:'', vendor:'' })[resSide];
+        $('#resModal').classList.add('show');
+      } else if(act === 'escalate'){
+        escId = id;
+        $('#escTicket').textContent = id;
+        $('#escModal').classList.add('show');
+      }
+      return;
+    }
+    var ec = e.target.closest('[data-escact]');
+    if(ec){
+      var ea = ec.dataset.escact;
+      if(ea === 'follow') showToast('Follow-up sent to Grievance Officer GO-2026-001');
+      else if(ea === 'viewcase') showToast('Opening full case DIS-2026-0801...');
+      else if(ea === 'upd') $('#updModal').classList.add('show');
+      else if(ea === 'file') showToast('Opening case file DIS-2026-0788...');
+      return;
+    }
+    var ecv = e.target.closest('.ev-chip');
+    if(ecv){
+      showToast('Opening ' + ecv.dataset.file + '...');
+      return;
+    }
+    var vr = e.target.closest('[data-viewres]');
+    if(vr){
+      openDrawer(vr.dataset.viewres);
+    }
+  });
+
+  /* ---------- RESOLVE CONFIRM ---------- */
+  $('#resConfirm').addEventListener('click', function(){
+    var card = cardById(resId);
+    if(card){
+      setStatus(card, 'resolved');
+      card.classList.add('is-resolved');
+      collapseCard(card);
+    }
+    decActiveBadge();
+    $('#resModal').classList.remove('show');
+    showToast(resId + ' resolved in favour of ' + (resSide === 'member' ? 'Member' : 'Vendor') + ' ✓');
+  });
+
+  /* ---------- ESCALATE CONFIRM ---------- */
+  $('#escConfirm').addEventListener('click', function(){
+    var card = cardById(escId);
+    if(card){
+      setStatus(card, 'escalated');
+      collapseCard(card);
+    }
+    decActiveBadge();
+    $('#escModal').classList.remove('show');
+    showToast(escId + ' escalated to Grievance Officer');
+  });
+
+  /* ---------- UPDATE STATUS (ESCALATED CASE 2) ---------- */
+  $('#updConfirm').addEventListener('click', function(){
+    var st = $('#updStatus').value;
+    var badge = $('[data-escbadge]');
+    badge.textContent = st;
+    var cls = st === 'CLOSED' ? 'st-resolved' : (st === 'LEGAL REVIEW' ? 'st-esc-red' : 'st-esc');
+    badge.className = 'st-badge ' + cls;
+    $('#updModal').classList.remove('show');
+    showToast('DIS-2026-0788 status updated to ' + st);
+  });
+
+  /* ---------- FILTER : ACTIVE DISPUTES ---------- */
+  function applyActiveFilter(){
+    var q = $('#fSearch').value.trim().toLowerCase();
+    var st = $('#fStatus').value;
+    var ty = $('#fType').value;
+    var pr = $('#fPriority').value;
+    var visible = 0;
+    $$('.disp').forEach(function(c){
+      var ok = true;
+      if(st !== 'all' && c.dataset.status !== st) ok = false;
+      if(ok && ty !== 'all' && c.dataset.type !== ty) ok = false;
+      if(ok && pr !== 'all' && c.dataset.priority !== pr) ok = false;
+      if(ok && q && c.textContent.toLowerCase().indexOf(q) === -1) ok = false;
+      c.style.display = ok ? '' : 'none';
+      if(ok) visible++;
+    });
+    $('#activeEmpty').style.display = visible ? 'none' : '';
+  }
+  $('#fApply').addEventListener('click', applyActiveFilter);
+  $('#fClear').addEventListener('click', function(){
+    $('#fSearch').value = '';
+    $('#fStatus').value = 'all';
+    $('#fType').value = 'all';
+    $('#fPriority').value = 'all';
+    applyActiveFilter();
+  });
+  $('#fSearch').addEventListener('input', applyActiveFilter);
+
+  /* ---------- RESOLVED DISPUTES ---------- */
+  var RESOLVED = [
+    { t:'DIS-2026-0860', type:'Transaction', member:'BB10042', on:'31 Jul 2026', decision:'Favour Member', admin:'Admin-01' },
+    { t:'DIS-2026-0854', type:'Commission', member:'BB10099', on:'30 Jul 2026', decision:'Favour Member', admin:'Admin-02' },
+    { t:'DIS-2026-0847', type:'Vendor', member:'BBV10089', on:'28 Jul 2026', decision:'Favour Vendor', admin:'Admin-01' },
+    { t:'DIS-2026-0841', type:'Technical', member:'BB10128', on:'27 Jul 2026', decision:'Resolved-Bug Fixed', admin:'Admin-02' },
+    { t:'DIS-2026-0835', type:'KYC', member:'BB10175', on:'25 Jul 2026', decision:'Favour Member', admin:'Admin-01' },
+    { t:'DIS-2026-0829', type:'Transaction', member:'BB10055', on:'24 Jul 2026', decision:'Favour Vendor', admin:'Admin-02' },
+    { t:'DIS-2026-0821', type:'Commission', member:'BB10141', on:'22 Jul 2026', decision:'Favour Member', admin:'Admin-01' },
+    { t:'DIS-2026-0814', type:'Vendor', member:'BBV10102', on:'20 Jul 2026', decision:'Favour Vendor', admin:'Admin-02' }
+  ];
+
+  function decisionBadge(d){
+    if(d === 'Favour Member') return '<span class="st-badge st-resolved">' + d + '</span>';
+    if(d === 'Favour Vendor') return '<span class="st-badge st-review">' + d + '</span>';
+    return '<span class="st-badge st-await">' + d + '</span>';
+  }
+
+  function renderResolved(){
+    var q = $('#rSearch').value.trim().toLowerCase();
+    var ty = $('#rType').value;
+    var dc = $('#rDecision').value;
+    var rows = RESOLVED.filter(function(r){
+      var ok = true;
+      if(ty !== 'all' && r.type !== ty) ok = false;
+      if(ok && dc !== 'all' && r.decision !== dc) ok = false;
+      if(ok && q && (r.t + ' ' + r.type + ' ' + r.member).toLowerCase().indexOf(q) === -1) ok = false;
+      return ok;
+    });
+    $('#rBody').innerHTML = rows.map(function(r){
+      return '<tr>' +
+        '<td class="id-cell">' + r.t + '</td>' +
+        '<td class="name-cell">' + r.type + '</td>' +
+        '<td class="id-cell">' + r.member + '</td>' +
+        '<td class="sub-cell">' + r.on + '</td>' +
+        '<td>' + decisionBadge(r.decision) + '</td>' +
+        '<td class="name-cell">' + r.admin + '</td>' +
+        '<td><button class="action-link view" data-viewres="' + r.t + '" type="button">View</button></td>' +
+      '</tr>';
+    }).join('');
+    $('#rEmpty').style.display = rows.length ? 'none' : '';
+  }
+  $('#rApply').addEventListener('click', renderResolved);
+  $('#rClear').addEventListener('click', function(){
+    $('#rSearch').value = '';
+    $('#rType').value = 'all';
+    $('#rDecision').value = 'all';
+    renderResolved();
+  });
+  $('#rSearch').addEventListener('input', renderResolved);
+
+  /* ---------- RESOLVED DRAWER ---------- */
+  var RES_DETAIL = {
+    'DIS-2026-0860':{
+      type:'Transaction Dispute',
+      summary:'BB10042 reported a Rs.1,540 purchase at BBV10089 not reflecting in the shopping ledger. Cross-verified with vendor transaction records.',
+      timeline:[
+        '01:24 Jul 2026 · <span class="tl-text">Dispute submitted by member</span>',
+        '01:25 Jul 2026 · <span class="tl-text">Assigned to Admin-01</span>',
+        '01:29 Jul 2026 · <span class="tl-text">Vendor confirmation received</span>',
+        '01:31 Jul 2026 · <span class="tl-text">Ledger manually updated and confirmed</span>'
+      ],
+      resolution:'Favour Member — transaction manually recorded in the member\u2019s shopping ledger. Member notified via SMS.'
+    },
+    'DIS-2026-0854':{
+      type:'Commission Dispute',
+      summary:'BB10099 reported missing Level 2 commission of Rs.80 after tree placement on 28 Jul 2026.',
+      timeline:[
+        '01:28 Jul 2026 · <span class="tl-text">Dispute submitted by member</span>',
+        '01:29 Jul 2026 · <span class="tl-text">Under review by Admin-02</span>',
+        '01:30 Jul 2026 · <span class="tl-text">Commission engine recalculated</span>',
+        '01:30 Jul 2026 · <span class="tl-text">Rs.80 credited to wallet</span>'
+      ],
+      resolution:'Favour Member — commission credited to wallet after recalculation. Root cause logged for engine review.'
+    },
+    'DIS-2026-0847':{
+      type:'Vendor Dispute',
+      summary:'BBV10089 claimed a QR payment of Rs.2,300 was recorded at Rs.230 by the member.',
+      timeline:[
+        '01:26 Jul 2026 · <span class="tl-text">Dispute submitted by vendor</span>',
+        '01:27 Jul 2026 · <span class="tl-text">QR scan log reviewed</span>',
+        '01:28 Jul 2026 · <span class="tl-text">Member accepted the correction</span>',
+        '01:28 Jul 2026 · <span class="tl-text">Margin recalculated</span>'
+      ],
+      resolution:'Favour Vendor — amount corrected to Rs.2,300 and vendor margin recalculated in settlement.'
+    },
+    'DIS-2026-0841':{
+      type:'Technical Error',
+      summary:'BB10128 reported pool progress showing 63/64 instead of the actual 64/64 after rebirth.',
+      timeline:[
+        '01:25 Jul 2026 · <span class="tl-text">Dispute submitted by member</span>',
+        '01:25 Jul 2026 · <span class="tl-text">Triaged to dev team</span>',
+        '01:26 Jul 2026 · <span class="tl-text">Bug identified and patched</span>',
+        '01:27 Jul 2026 · <span class="tl-text">Display corrected</span>'
+      ],
+      resolution:'Resolved-Bug Fixed — counter display bug patched. Member\u2019s pool position verified correct.'
+    },
+    'DIS-2026-0835':{
+      type:'KYC Dispute',
+      summary:'BB10175\u2019s PAN was auto-rejected due to image compression; member requested manual review.',
+      timeline:[
+        '01:23 Jul 2026 · <span class="tl-text">Dispute submitted by member</span>',
+        '01:23 Jul 2026 · <span class="tl-text">Linked to KYC rejection record</span>',
+        '01:24 Jul 2026 · <span class="tl-text">Manual document review</span>',
+        '01:25 Jul 2026 · <span class="tl-text">KYC approved</span>'
+      ],
+      resolution:'Favour Member — PAN verified manually, KYC approved and document flag cleared.'
+    },
+    'DIS-2026-0829':{
+      type:'Transaction Dispute',
+      summary:'BB10055 claimed refund of Rs.1,100 for a cancelled order at BBV10089.',
+      timeline:[
+        '01:22 Jul 2026 · <span class="tl-text">Dispute submitted by member</span>',
+        '01:23 Jul 2026 · <span class="tl-text">Vendor refund policy checked</span>',
+        '01:24 Jul 2026 · <span class="tl-text">Refund not applicable per policy</span>',
+        '01:24 Jul 2026 · <span class="tl-text">Decision communicated</span>'
+      ],
+      resolution:'Favour Vendor — cancellation was past the 48-hour refund window per vendor policy.'
+    },
+    'DIS-2026-0821':{
+      type:'Commission Dispute',
+      summary:'BB10141 reported missing referral bonus for a referral who activated on 21 Jul 2026.',
+      timeline:[
+        '01:20 Jul 2026 · <span class="tl-text">Dispute submitted by member</span>',
+        '01:21 Jul 2026 · <span class="tl-text">Referral link validated</span>',
+        '01:21 Jul 2026 · <span class="tl-text">Bonus triggered manually</span>',
+        '01:22 Jul 2026 · <span class="tl-text">Rs.50 credited</span>'
+      ],
+      resolution:'Favour Member — referral activation verified and Rs.50 bonus credited to wallet.'
+    },
+    'DIS-2026-0814':{
+      type:'Vendor Dispute',
+      summary:'BBV10102 reported a member abusing the cashback QR flow with repeated zero-amount scans.',
+      timeline:[
+        '01:18 Jul 2026 · <span class="tl-text">Dispute submitted by vendor</span>',
+        '01:19 Jul 2026 · <span class="tl-text">Scan log analysed</span>',
+        '01:20 Jul 2026 · <span class="tl-text">Flagged account; policy applied</span>',
+        '01:20 Jul 2026 · <span class="tl-text">Case closed</span>'
+      ],
+      resolution:'Favour Vendor — member flagged for misuse; zero-amount scans voided.'
+    }
+  };
+
+  function openDrawer(ticket){
+    var d = RES_DETAIL[ticket] || { type:'Dispute', summary:'', timeline:[], resolution:'' };
+    $('#drwTitle').textContent = ticket;
+    $('#drwSub').textContent = d.type;
+    $('#drwSummary').innerHTML = '<p><b>Ticket:</b> ' + ticket + '</p><p>' + d.summary + '</p>';
+    $('#drwTimeline').innerHTML = d.timeline.map(function(item, i){
+      var last = i === d.timeline.length - 1;
+      var dot = last ? 'amber' : '';
+      return '<li class="' + (last ? 'tl-pending' : '') + '"><span class="tl-dot ' + dot + '"></span><div>' + item + '</div></li>';
+    }).join('');
+    $('#drwResolution').textContent = d.resolution;
+    $('#drwOv').classList.add('show');
+    $('#drwRes').classList.add('show');
+  }
+
+  /* ---------- DRAWER CLOSE ---------- */
+  function closeDrawer(){
+    $('#drwOv').classList.remove('show');
+    $('#drwRes').classList.remove('show');
+  }
+  $('[data-drawerclose]').addEventListener('click', closeDrawer);
+  $('#drwOv').addEventListener('click', closeDrawer);
+
+  /* ---------- MODAL CLOSE ---------- */
+  $$('[data-close]').forEach(function(b){
+    b.addEventListener('click', function(){ $('#' + b.dataset.close).classList.remove('show'); });
+  });
+  $$('.modal-overlay').forEach(function(o){
+    o.addEventListener('click', function(e){ if(e.target === o) o.classList.remove('show'); });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      $$('.modal-overlay').forEach(function(x){ x.classList.remove('show'); });
+      closeDrawer();
+    }
+  });
+
+  /* ---------- NOTES LOCAL SAVE ---------- */
+  $$('.disp textarea').forEach(function(t){
+    var key = 'bb-notes-' + t.dataset.notes;
+    t.value = localStorage.getItem(key) || '';
+    t.addEventListener('input', function(){ localStorage.setItem(key, t.value); });
+  });
+
+  /* ---------- SIDEBAR NAV ---------- */
+  $$('.sb-nav a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      if(a.classList.contains('active')) return;
+      if(a.getAttribute('href') && a.getAttribute('href') !== '#') return;
+      e.preventDefault();
+      if(a.classList.contains('logout')){ showToast('Logging out (demo)'); return; }
+      showToast('Coming soon: ' + a.textContent.trim());
+    });
+  });
+
+  /* ---------- BELL DROPDOWN ---------- */
+  var bell = $('#bell');
+  var drop = $('#bellDrop');
+  bell.addEventListener('click', function(e){
+    e.stopPropagation();
+    drop.classList.toggle('show');
+  });
+  $$('.bd-item').forEach(function(item){
+    item.addEventListener('click', function(e){
+      e.stopPropagation();
+      drop.classList.remove('show');
+      showToast('Opening notification...');
+    });
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.bell-wrap')) drop.classList.remove('show');
+  });
+
+  /* ---------- MOBILE BOTTOM TABS ---------- */
+  var ADMIN_TABS = { 'Dashboard':'bb-admin.html', 'Members':'bb-admin-members.html', 'KYC':'bb-admin-kyc.html' };
+  $$('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      if(t.classList.contains('active')) return;
+      var name = t.getAttribute('data-name');
+      if(ADMIN_TABS[name]) location.href = ADMIN_TABS[name]; else showToast('Coming soon: ' + name);
+    });
+  });
+
+  /* ---------- INIT ---------- */
+  renderResolved();
+})();
+</script>
+</body>
+</html>

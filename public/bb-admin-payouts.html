@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Bharatiya Bazaar — Admin Payout Management. Pending withdrawals, processed payouts and TDS deductions report.">
+<title>Payout Management | Bharatiya Bazaar Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B3A6B;
+    --navy-dark:#12294c;
+    --teal:#1A6B5A;
+    --teal-dark:#135241;
+    --amber:#B8860B;
+    --red:#d64545;
+    --red-dark:#b33636;
+    --orange:#d97a1a;
+    --blue:#2e5fa8;
+    --gray:#7b8798;
+    --bg:#F5F7FA;
+    --white:#ffffff;
+    --ink:#1f2a3a;
+    --muted:#5b6b7f;
+    --border:#e4e9f0;
+    --success:#1e8e5a;
+    --shadow:0 10px 30px rgba(27,58,107,.10);
+    --shadow-sm:0 3px 12px rgba(27,58,107,.08);
+    --radius-card:12px;
+    --radius-btn:8px;
+    --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font-display:'Poppins',var(--font);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2}
+  a{text-decoration:none;color:inherit}
+  img{max-width:100%;display:block}
+  button{font-family:var(--font)}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--font);font-weight:600;font-size:.88rem;
+    padding:11px 18px;border-radius:var(--radius-btn);
+    border:2px solid transparent;cursor:pointer;transition:.22s ease;line-height:1;
+  }
+  .btn-sm{padding:8px 13px;font-size:.78rem}
+  .btn-navy{background:var(--navy);color:#fff}
+  .btn-navy:hover{background:var(--navy-dark)}
+  .btn-teal{background:var(--teal);color:#fff}
+  .btn-teal:hover{background:var(--teal-dark)}
+  .btn-red{background:var(--red);color:#fff}
+  .btn-red:hover{background:var(--red-dark)}
+  .btn-outline-navy{background:transparent;color:var(--navy);border-color:var(--navy)}
+  .btn-outline-navy:hover{background:var(--navy);color:#fff}
+  .btn-outline-teal{background:transparent;color:var(--teal);border-color:var(--teal)}
+  .btn-outline-teal:hover{background:var(--teal);color:#fff}
+  .btn-outline-red{background:transparent;color:var(--red);border-color:var(--red)}
+  .btn-outline-red:hover{background:var(--red);color:#fff}
+  .btn-outline-gray{background:transparent;color:var(--muted);border-color:var(--border)}
+  .btn-outline-gray:hover{background:var(--muted);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;width:280px;z-index:120;
+    background:var(--navy);color:#fff;
+    display:flex;flex-direction:column;
+  }
+  .sb-logo{
+    display:flex;align-items:center;gap:12px;
+    padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.12);
+  }
+  .sb-logo .logo-mark{
+    width:42px;height:42px;flex:none;border-radius:12px;
+    background:#fff;border:1px solid rgba(255,255,255,.6);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .sb-logo .logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
+  .sb-logo .lt{display:flex;flex-direction:column;line-height:1.15}
+  .sb-logo .lt-name{font-family:var(--font-display);font-weight:700;font-size:1rem}
+  .sb-logo .lt-sub{font-size:.7rem;color:rgba(255,255,255,.72);letter-spacing:.04em}
+  .admin-info{background:rgba(255,255,255,.07);margin:16px;border-radius:12px;padding:14px}
+  .a-head{display:flex;align-items:center;gap:11px}
+  .avatar{
+    width:44px;height:44px;flex:none;border-radius:50%;
+    background:var(--red);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.95rem;
+  }
+  .a-name{font-weight:700;font-size:.9rem;line-height:1.2}
+  .a-id{font-size:.7rem;color:rgba(255,255,255,.72);margin-top:1px}
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:.68rem;font-weight:800;letter-spacing:.03em;
+    padding:4px 10px;border-radius:999px;margin-top:8px;
+  }
+  .badge-red{background:var(--red);color:#fff}
+  .badge-teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .badge-amber{background:rgba(184,134,11,.14);color:#8a6508}
+  .badge-navy{background:rgba(27,58,107,.1);color:var(--navy)}
+  .sb-nav{flex:1;overflow-y:auto;padding:10px 12px}
+  .sb-nav a{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:10px;margin-bottom:3px;
+    color:rgba(255,255,255,.84);font-weight:500;font-size:.88rem;
+    transition:.2s;
+  }
+  .sb-nav a .ic{font-size:1rem;width:20px;text-align:center;flex:none}
+  .sb-nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+  .sb-nav a.active{background:var(--navy-dark);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--teal)}
+  .sb-nav a.logout{color:#ff9a9a;margin-top:6px}
+  .sb-nav a.logout:hover{background:rgba(214,69,69,.22);color:#fff}
+  .sb-foot{
+    padding:14px 20px;border-top:1px solid rgba(255,255,255,.12);
+    font-size:.68rem;color:rgba(255,255,255,.5);
+  }
+
+  /* ---------- MAIN LAYOUT ---------- */
+  .main{margin-left:280px;min-height:100vh;background:var(--bg)}
+  .main .container{max-width:1180px;margin:0 auto;padding:26px 26px 70px}
+  .page-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  .page-head h1{font-size:1.45rem;font-weight:800;color:var(--navy)}
+  .page-sub{font-size:.84rem;color:var(--muted);margin-top:2px}
+
+  /* ---------- MOBILE TOP HEADER ---------- */
+  .mobile-top{
+    position:sticky;top:0;z-index:150;
+    background:var(--navy);color:#fff;
+    display:none;align-items:center;justify-content:space-between;
+    padding:10px 14px;box-shadow:0 2px 14px rgba(18,41,76,.35);gap:10px;
+  }
+  .mt-logo{width:38px;height:38px;flex:none;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .mt-logo img{width:100%;height:100%;object-fit:cover}
+  .mt-center{flex:1;text-align:center;font-family:var(--font-display);font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mt-right{display:flex;align-items:center;gap:14px;flex:none}
+  .bell-wrap{position:relative}
+  .bell{position:relative;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;line-height:1}
+  .bell-badge{
+    position:absolute;top:-5px;right:-8px;
+    background:var(--red);color:#fff;font-size:.6rem;font-weight:800;
+    min-width:16px;height:16px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;padding:0 3px;
+  }
+  .bell-drop{
+    position:absolute;right:0;top:44px;width:300px;z-index:260;
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    box-shadow:var(--shadow);display:none;overflow:hidden;
+  }
+  .bell-drop.show{display:block;animation:fadeUp .25s ease}
+  .bd-head{padding:12px 16px;font-family:var(--font-display);font-weight:700;font-size:.9rem;color:var(--navy);border-bottom:1px solid var(--border)}
+  .bd-item{display:flex;gap:11px;align-items:flex-start;padding:12px 16px;border-bottom:1px dashed var(--border);font-size:.82rem}
+  .bd-item:last-child{border-bottom:none}
+  .bd-ico{width:28px;height:28px;flex:none;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+  .bd-ico.red{background:rgba(214,69,69,.12);color:var(--red)}
+  .bd-ico.amber{background:rgba(184,134,11,.14);color:var(--amber)}
+  .bd-ico.teal{background:rgba(26,107,90,.12);color:var(--teal)}
+  .bd-ico.blue{background:rgba(27,58,107,.1);color:var(--navy)}
+  .bd-item b{display:block;font-size:.82rem;color:var(--ink)}
+  .bd-item span{font-size:.7rem;color:var(--muted)}
+  .mt-avatar{
+    width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);font-weight:800;font-size:.78rem;
+  }
+
+  /* ---------- SUMMARY CHIPS ---------- */
+  .chips-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+  .chip{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:13px 16px;box-shadow:var(--shadow-sm);
+    display:flex;flex-direction:column;gap:3px;
+  }
+  .chip-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .chip-val{font-family:var(--font-display);font-weight:800;font-size:1.12rem;color:var(--navy)}
+  .chip-sub{font-size:.68rem;color:var(--muted)}
+  .chip .c-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px}
+
+  /* ---------- VIEW TABS ---------- */
+  .view-tabs{
+    display:flex;background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);padding:5px;gap:5px;margin-bottom:20px;
+    box-shadow:var(--shadow-sm);flex-wrap:wrap;
+  }
+  .vt{
+    flex:1;min-width:150px;border:none;cursor:pointer;font-family:var(--font);font-weight:600;font-size:.86rem;
+    padding:11px 12px;border-radius:9px;background:transparent;color:var(--muted);transition:.2s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .vt:hover{color:var(--navy)}
+  .vt.active{background:var(--navy);color:#fff;box-shadow:0 4px 12px rgba(27,58,107,.25)}
+  .vt-badge{
+    background:var(--amber);color:#fff;font-size:.64rem;font-weight:800;
+    padding:2px 8px;border-radius:999px;letter-spacing:.02em;
+  }
+  .vt.active .vt-badge{background:#fff;color:var(--navy)}
+  .view{display:none}
+  .view.active{display:block;animation:fadeUp .35s ease}
+
+  /* ---------- BATCH BAR ---------- */
+  .batch-bar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    background:var(--navy);color:#fff;border-radius:var(--radius-card);
+    padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow-sm);
+  }
+  .batch-count{font-size:.86rem;font-weight:700}
+  .batch-count b{color:#ffd98a}
+  .batch-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+  /* ---------- FILTER BAR ---------- */
+  .filter-bar{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);
+    padding:16px;box-shadow:var(--shadow-sm);margin-bottom:16px;
+  }
+  .search-row{position:relative}
+  .search-row .s-ico{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    color:var(--muted);font-size:.9rem;pointer-events:none;
+  }
+  .input{
+    width:100%;font-family:var(--font);font-size:.86rem;
+    padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-btn);
+    background:var(--white);color:var(--ink);outline:none;transition:.2s;
+  }
+  .input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,90,.12)}
+  .input.search{padding-left:38px}
+  .input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(214,69,69,.12)}
+  .input[readonly]{background:var(--bg);color:var(--muted);cursor:not-allowed}
+  .filter-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:13px}
+  .fb-group{display:flex;flex-direction:column;gap:5px}
+  .fb-group label{font-size:.66rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .fb-group .input{width:168px;max-width:100%}
+  .filter-actions{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+
+  /* ---------- TABLE ---------- */
+  .card{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-card);box-shadow:var(--shadow-sm);padding:20px;
+  }
+  .card-title{
+    font-family:var(--font-display);font-weight:700;font-size:1.03rem;color:var(--navy);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+  }
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;min-width:940px;font-size:.82rem}
+  thead th{
+    text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--muted);font-weight:700;padding:11px 12px;background:var(--bg);
+    border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  tbody td{padding:11px 12px;border-bottom:1px dashed var(--border);white-space:nowrap;vertical-align:middle}
+  tbody tr.pt-row{cursor:pointer}
+  tbody tr.pt-row:hover{background:#F5F7FF}
+  tbody tr:last-child td{border-bottom:none}
+  td.id-cell{font-family:var(--font-display);font-weight:700;color:var(--navy)}
+  td.name-cell{font-weight:600;color:var(--ink)}
+  td.sub-cell{color:var(--muted)}
+  td.amt-cell{font-weight:700;color:var(--ink)}
+  td.net-cell{font-family:var(--font-display);font-weight:800;color:var(--navy)}
+  td.tds-cell{color:var(--muted)}
+  .kyc-ok{color:var(--success);font-weight:800}
+  .st-badge{display:inline-flex;align-items:center;gap:5px;font-size:.66rem;font-weight:800;letter-spacing:.03em;padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .st-paid{background:rgba(26,107,90,.12);color:var(--teal)}
+  .st-bank{background:rgba(27,58,107,.1);color:var(--navy);font-size:.64rem}
+  .st-wallet{background:rgba(123,135,152,.14);color:var(--gray);font-size:.64rem}
+  .action-link{
+    background:none;border:none;cursor:pointer;font-weight:700;font-size:.76rem;padding:4px 10px;
+    border-radius:7px;transition:.2s;
+  }
+  .action-link.process{color:var(--teal);background:rgba(26,107,90,.1)}
+  .action-link.process:hover{background:var(--teal);color:#fff}
+  .action-link.reject{color:var(--red);background:rgba(214,69,69,.09)}
+  .action-link.reject:hover{background:var(--red);color:#fff}
+  tr.pt-detail{cursor:default}
+  tr.pt-detail:hover{background:#EEF4FF}
+  tr.pt-detail td{background:#EEF4FF;padding:12px 14px;border-bottom:1px solid var(--border)}
+  .tx-detail{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+  .tx-block{display:flex;flex-direction:column;gap:2px;min-width:150px;flex:1}
+  .tx-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .tx-value{font-size:.82rem;font-weight:600;color:var(--ink)}
+  .empty-state{text-align:center;padding:44px 20px;color:var(--muted)}
+  .empty-state .es-ic{font-size:2.2rem;margin-bottom:8px}
+  .empty-state p{font-size:.88rem;font-weight:600}
+
+  /* ---------- PAGINATION ---------- */
+  .pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .pg-info{font-size:.8rem;color:var(--muted);font-weight:600}
+  .pg-controls{display:flex;gap:10px;align-items:center}
+
+  /* ---------- PROCESS MODAL BREAKDOWN ---------- */
+  .pm-member{font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--navy);margin-bottom:14px}
+  .breakdown{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+  .bd-row{display:flex;justify-content:space-between;gap:12px;font-size:.84rem;padding:5px 0}
+  .bd-row .k{color:var(--muted)}
+  .bd-row .v{font-weight:700;color:var(--ink)}
+  .bd-row.small{font-size:.78rem}
+  .bd-row.small .k{color:var(--muted)}
+  .bd-row.small .v{color:var(--red)}
+  .bd-row.net{margin-top:4px}
+  .bd-row.net .k{font-family:var(--font-display);font-weight:800;color:var(--teal);text-transform:uppercase;font-size:.8rem;letter-spacing:.03em}
+  .bd-row.net .v{font-family:var(--font-display);font-weight:800;color:var(--teal);font-size:1.1rem}
+  .bd-sep{border-top:1px dashed var(--border);margin:5px 0}
+  .bd-note{
+    background:#fffdf7;border:1px solid #f0dfb6;border-left:5px solid var(--amber);
+    border-radius:8px;padding:10px 13px;font-size:.74rem;color:#7a5c08;line-height:1.6;margin-bottom:12px;
+  }
+  .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .form-group label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .pm-method{font-size:.84rem;font-weight:700;color:var(--ink);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-btn);padding:9px 12px}
+  .err-msg{font-size:.74rem;color:var(--red);font-weight:600;margin-top:6px;display:none}
+  .err-msg.show{display:block}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:360;background:rgba(18,41,76,.5);
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.show{display:flex}
+  .modal-card{
+    width:100%;max-width:440px;background:var(--white);border-radius:var(--radius-card);
+    box-shadow:var(--shadow);overflow:hidden;animation:fadeUp .25s ease;
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)}
+  .modal-head h3{font-family:var(--font-display);font-weight:800;font-size:1rem;color:var(--navy)}
+  .modal-x{background:none;border:none;font-size:1.15rem;cursor:pointer;color:var(--muted);line-height:1}
+  .modal-x:hover{color:var(--red)}
+  .modal-body{padding:18px 20px;font-size:.86rem}
+  .modal-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border)}
+  .modal-foot .btn{flex:1}
+  .m-msg{color:var(--ink);line-height:1.6}
+  .m-msg b{color:var(--navy)}
+
+  /* ---------- TAB 3 : TDS REPORT ---------- */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .tds-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-sm);padding:20px}
+  .thr-stack{display:flex;height:16px;border-radius:8px;overflow:hidden;margin:14px 0 10px}
+  .thr-stack .seg{height:100%}
+  .seg.below{background:var(--navy)}
+  .seg.near{background:var(--amber)}
+  .seg.above{background:var(--red)}
+  .thr-legend{display:flex;flex-direction:column;gap:7px;font-size:.8rem}
+  .lg-row{display:flex;align-items:center;gap:9px}
+  .lg-sq{width:12px;height:12px;border-radius:3px;flex:none}
+  .lg-row .lg-txt{color:var(--muted);flex:1}
+  .lg-row .lg-val{font-weight:800;color:var(--ink)}
+  .sbar{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:14px 0 6px}
+  .sbar .sb-bank{background:var(--navy);width:78.4%}
+  .sbar .sb-wallet{background:var(--teal);width:21.6%}
+  .sbar-labels{display:flex;justify-content:space-between;font-size:.72rem;font-weight:700}
+  .sbar-labels .lb-bank{color:var(--navy)}
+  .sbar-labels .lb-wallet{color:var(--teal)}
+  .stat-mini{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--border);font-size:.82rem}
+  .stat-mini:last-child{border-bottom:none}
+  .stat-mini .sm-ico{width:36px;height:36px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+  .stat-mini .sm-ico.navy{background:rgba(27,58,107,.1);color:var(--navy)}
+  .stat-mini .sm-ico.amber{background:rgba(184,134,11,.12);color:var(--amber)}
+  .stat-mini .sm-ico.teal{background:rgba(26,107,90,.1);color:var(--teal)}
+  .stat-mini b{display:block;font-size:.86rem;color:var(--ink)}
+  .stat-mini span{font-size:.7rem;color:var(--muted)}
+  tbody tr.total-row td{
+    background:var(--navy);color:#fff;font-weight:800;border-bottom:none;border-top:2px solid var(--navy);
+  }
+  tbody tr.total-row td.id-cell{color:#fff}
+
+  /* ---------- BOTTOM TABS (MOBILE) ---------- */
+  .bottom-tabs{
+    position:fixed;bottom:0;left:0;right:0;z-index:200;
+    background:var(--white);border-top:1px solid var(--border);
+    display:none;justify-content:space-around;align-items:stretch;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    box-shadow:0 -4px 16px rgba(27,58,107,.08);
+  }
+  .tab{
+    flex:1;background:none;border:none;cursor:pointer;font-family:var(--font);
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:.64rem;font-weight:600;color:var(--muted);padding:4px 2px;border-radius:10px;
+  }
+  .tab .ti{font-size:1.15rem;line-height:1}
+  .tab.active{color:var(--teal)}
+  .tab.active .ti{transform:translateY(-1px)}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(80px);
+    background:var(--navy);color:#fff;font-size:.84rem;font-weight:600;
+    padding:12px 22px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);
+    opacity:0;transition:.3s ease;z-index:400;pointer-events:none;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:1100px){
+    .chips-grid{grid-template-columns:repeat(3,1fr)}
+    .two-col{grid-template-columns:1fr}
+  }
+  @media(max-width:900px){
+    .sidebar{display:none}
+    .main{margin-left:0}
+    .mobile-top{display:flex}
+    .bottom-tabs{display:flex}
+    .main .container{padding:18px 14px 96px}
+    .filter-actions{width:100%;margin-left:0}
+    .filter-actions .btn{flex:1}
+    .toast{bottom:86px}
+  }
+  @media(max-width:560px){
+    .chips-grid{grid-template-columns:repeat(2,1fr)}
+    .batch-bar{flex-direction:column;align-items:flex-start}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR (DESKTOP) ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="logo-mark"><img src="BB-8.png" alt="Bharatiya Bazaar logo"></div>
+      <div class="lt">
+        <span class="lt-name">Bharatiya Bazaar</span>
+        <span class="lt-sub">भारतीय बाज़ार · Admin</span>
+      </div>
+    </div>
+
+    <div class="admin-info">
+      <div class="a-head">
+        <div class="avatar">SA</div>
+        <div>
+          <div class="a-name">Super Admin</div>
+          <div class="a-id">Platform Administrator</div>
+        </div>
+      </div>
+      <span class="badge badge-red">SUPER ADMIN</span>
+    </div>
+
+    <nav class="sb-nav">
+      <a href="bb-admin.html"><span class="ic">🏠</span>Dashboard</a>
+      <a href="bb-admin-members.html"><span class="ic">👥</span>Member Management</a>
+      <a href="#"><span class="ic">🏪</span>Vendor Management</a>
+      <a href="bb-admin-kyc.html"><span class="ic">📄</span>KYC Verification</a>
+      <a href="bb-admin-payouts.html" class="active"><span class="ic">💸</span>Payout Management</a>
+      <a href="bb-admin-disputes.html"><span class="ic">⚖️</span>Dispute Resolution</a>
+      <a href="#"><span class="ic">⚙️</span>Commission Engine</a>
+      <a href="bb-admin-reports.html"><span class="ic">📊</span>Reports &amp; Export</a>
+      <a href="bb-admin-settings.html"><span class="ic">🔐</span>System Settings</a>
+      <a href="bb-bharatiya-bazaar-v2.html" class="logout"><span class="ic">🚪</span>Logout</a>
+    </nav>
+
+    <div class="sb-foot">© 2026 Bharatiya Bazaar<br>Admin Portal v1.0</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+
+    <!-- MOBILE TOP HEADER -->
+    <header class="mobile-top">
+      <div class="mt-logo"><img src="BB-8.png" alt="Bharatiya Bazaar"></div>
+      <div class="mt-center">Admin Panel</div>
+      <div class="mt-right">
+        <div class="bell-wrap">
+          <button class="bell" id="bell" aria-label="Notifications">🔔</button>
+          <span class="bell-badge">5</span>
+          <div class="bell-drop" id="bellDrop">
+            <div class="bd-head">Notifications</div>
+            <div class="bd-item">
+              <div class="bd-ico teal">🏦</div>
+              <div><b>Weekly settlement batch due Monday 11 Aug</b><span>Setu Kosh stream</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico amber">💸</div>
+              <div><b>14 withdrawal requests awaiting processing</b><span>Rs.37,250 total requested</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico red">⚖️</div>
+              <div><b>Dispute #DIS-2026-0892 — awaiting investigation</b><span>Opened 10:15 today</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico amber">📄</div>
+              <div><b>3 KYC verifications pending — oldest: 48 hours</b><span>Awaiting documents</span></div>
+            </div>
+            <div class="bd-item">
+              <div class="bd-ico blue">🔵</div>
+              <div><b>Pool 3 at 75% — 16 IDs needed to complete</b><span>AutoPool stream</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-avatar">SA</div>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <div class="page-head">
+        <div>
+          <h1>Payout Management</h1>
+          <p class="page-sub">Withdrawals · BB-SPEC-002 deduction engine · TDS &amp; deductions report</p>
+        </div>
+      </div>
+
+      <!-- TOP SUMMARY BAR -->
+      <div class="chips-grid">
+        <div class="chip">
+          <span class="chip-label"><span class="c-dot" style="background:var(--amber)"></span>Open Requests</span>
+          <span class="chip-val" id="chipOpen">14</span>
+          <span class="chip-sub">Pending withdrawal requests</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label"><span class="c-dot" style="background:var(--navy)"></span>Total Requested</span>
+          <span class="chip-val" id="chipRequested">Rs.37,250</span>
+          <span class="chip-sub">Gross across open requests</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label"><span class="c-dot" style="background:var(--teal)"></span>Processed Today</span>
+          <span class="chip-val">8</span>
+          <span class="chip-sub">Rs.42,180 net paid out</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label"><span class="c-dot" style="background:var(--red)"></span>TDS Deducted</span>
+          <span class="chip-val">Rs.8,724</span>
+          <span class="chip-sub">This month · Sec 194H</span>
+        </div>
+        <div class="chip">
+          <span class="chip-label"><span class="c-dot" style="background:var(--orange)"></span>Admin Charges</span>
+          <span class="chip-val">Rs.8,725</span>
+          <span class="chip-sub">This month · all methods</span>
+        </div>
+      </div>
+
+      <!-- VIEW TABS -->
+      <div class="view-tabs" role="tablist">
+        <button class="vt active" data-view="pending" type="button">🕒 Pending Requests <span class="vt-badge" id="pendingBadge">14</span></button>
+        <button class="vt" data-view="processed" type="button">✅ Processed Payouts</button>
+        <button class="vt" data-view="tds" type="button">🧾 TDS &amp; Deductions Report</button>
+      </div>
+
+      <!-- ===== TAB 1 : PENDING REQUESTS ===== -->
+      <div class="view active" id="viewPending">
+
+        <div class="batch-bar">
+          <div class="batch-count"><b id="batchCount">14</b> requests · <b id="batchTotal">Rs.37,250</b> total</div>
+          <div class="batch-actions">
+            <button class="btn btn-navy btn-sm" id="processAll" type="button">⚡ Process All</button>
+            <button class="btn btn-outline-teal btn-sm" id="exportBatch" type="button" style="border-color:rgba(255,255,255,.7);color:#fff">Export Batch</button>
+            <button class="btn btn-outline-red btn-sm" id="rejectSelected" type="button">✗ Reject Selected</button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-row">
+            <span class="s-ico">🔍</span>
+            <input class="input search" type="text" id="pSearch" placeholder="Search by Member ID or name...">
+          </div>
+          <div class="filter-row">
+            <div class="fb-group">
+              <label for="pMethod">Method</label>
+              <select class="input" id="pMethod">
+                <option value="all">All</option>
+                <option value="bank">Bank Transfer</option>
+                <option value="wallet">Wallet Transfer</option>
+              </select>
+            </div>
+            <div class="fb-group">
+              <label for="pAmount">Amount</label>
+              <select class="input" id="pAmount">
+                <option value="all">All</option>
+                <option value="under">Under Rs.500</option>
+                <option value="mid1">Rs.500-2000</option>
+                <option value="mid2">Rs.2000-5000</option>
+                <option value="over">Over Rs.5000</option>
+              </select>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-navy btn-sm" id="pFilterBtn" type="button">Filter</button>
+              <button class="btn btn-outline-navy btn-sm" id="pClearBtn" type="button">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Pending Withdrawal Requests <span class="badge badge-navy" id="pCount">14 requests</span></div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Member ID</th>
+                  <th>Name</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>TDS</th>
+                  <th>Admin Charge</th>
+                  <th>Net Payable</th>
+                  <th>Requested</th>
+                  <th>KYC</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pBody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="pEmpty" style="display:none">
+            <div class="es-ic">✅</div>
+            <p>No pending withdrawal requests</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== TAB 2 : PROCESSED PAYOUTS ===== -->
+      <div class="view" id="viewProcessed">
+
+        <div class="filter-bar">
+          <div class="search-row">
+            <span class="s-ico">🔍</span>
+            <input class="input search" type="text" id="prSearch" placeholder="Search by Ref ID or Member ID...">
+          </div>
+          <div class="filter-row">
+            <div class="fb-group">
+              <label for="prFrom">Date From</label>
+              <input class="input" type="date" id="prFrom">
+            </div>
+            <div class="fb-group">
+              <label for="prTo">Date To</label>
+              <input class="input" type="date" id="prTo">
+            </div>
+            <div class="fb-group">
+              <label for="prMethod">Method</label>
+              <select class="input" id="prMethod">
+                <option value="all">All</option>
+                <option value="bank">Bank Transfer</option>
+                <option value="wallet">Wallet Transfer</option>
+              </select>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn-outline-teal btn-sm" id="prExport" type="button">Export CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Processed Payouts <span class="badge badge-teal" id="prCount">10 payouts</span></div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ref ID</th>
+                  <th>Member</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>TDS</th>
+                  <th>Admin</th>
+                  <th>Net Paid</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="prBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="pg-info" id="prSummary"></span>
+            <div class="pg-controls">
+              <button class="btn btn-outline-navy btn-sm" id="prPrev" type="button">← Prev</button>
+              <span class="pg-info" id="prPage"></span>
+              <button class="btn btn-outline-navy btn-sm" id="prNext" type="button">Next →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== TAB 3 : TDS & DEDUCTIONS REPORT ===== -->
+      <div class="view" id="viewTds">
+
+        <div class="two-col">
+          <div class="tds-card">
+            <div class="card-title">Annual TDS Summary</div>
+            <div class="dr-row" style="display:flex;justify-content:space-between;font-size:.82rem;padding:6px 0;border-bottom:1px dashed var(--border)">
+              <span class="k" style="color:var(--muted)">Financial Year</span><span class="v" style="font-weight:600">2026-27</span>
+            </div>
+            <div class="dr-row" style="display:flex;justify-content:space-between;font-size:.82rem;padding:6px 0;border-bottom:1px dashed var(--border)">
+              <span class="k" style="color:var(--muted)">Section Applied</span><span class="v" style="font-weight:600">194H (commission income)</span>
+            </div>
+            <div class="dr-row" style="display:flex;justify-content:space-between;font-size:.82rem;padding:6px 0">
+              <span class="k" style="color:var(--muted)">Threshold</span><span class="v" style="font-weight:600">Rs.20,000 per year</span>
+            </div>
+            <div class="thr-stack">
+              <div class="seg below" style="width:89.5%"></div>
+              <div class="seg near" style="width:3.6%"></div>
+              <div class="seg above" style="width:6.9%"></div>
+            </div>
+            <div class="thr-legend">
+              <div class="lg-row"><span class="lg-sq" style="background:var(--navy)"></span><span class="lg-txt">Members below threshold</span><span class="lg-val">9,381</span></div>
+              <div class="lg-row"><span class="lg-sq" style="background:var(--amber)"></span><span class="lg-txt">Approaching (Rs.15K–20K)</span><span class="lg-val">380</span></div>
+              <div class="lg-row"><span class="lg-sq" style="background:var(--red)"></span><span class="lg-txt">Above threshold (TDS active)</span><span class="lg-val">721</span></div>
+            </div>
+          </div>
+
+          <div class="tds-card">
+            <div class="card-title">Admin Charges Collected — Aug 2026</div>
+            <div class="sbar">
+              <div class="sb-bank"></div>
+              <div class="sb-wallet"></div>
+            </div>
+            <div class="sbar-labels">
+              <span class="lb-bank">Bank Rs.6,842 (78.4%)</span>
+              <span class="lb-wallet">Wallet Rs.1,883 (21.6%)</span>
+            </div>
+            <div class="stat-mini" style="margin-top:12px">
+              <div class="sm-ico navy">🏦</div>
+              <div><b>Rs.8,725 total</b><span>Admin charges · Aug 2026 · all methods</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">TDS Deductions — Current Month (Aug 2026)</div>
+          <div class="table-scroll">
+            <table style="min-width:760px">
+              <thead>
+                <tr>
+                  <th>Member ID</th>
+                  <th>Name</th>
+                  <th>Gross Commission</th>
+                  <th>TDS Rate</th>
+                  <th>TDS Amount</th>
+                  <th>Cumulative YTD</th>
+                </tr>
+              </thead>
+              <tbody id="tdsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tds-card" style="margin-top:16px">
+          <div class="card-title">Section 194R — Voucher TDS</div>
+          <div class="bd-note" style="margin-bottom:12px">Vouchers attract <b>10% TDS</b> when aggregate value exceeds <b>Rs.20,000/year</b>.</div>
+          <div class="stat-mini">
+            <div class="sm-ico amber">🎟️</div>
+            <div><b>47</b><span>Members with vouchers &gt; Rs.20K</span></div>
+          </div>
+          <div class="stat-mini">
+            <div class="sm-ico teal">🏛️</div>
+            <div><b>Rs.94,000</b><span>Total voucher TDS collected</span></div>
+          </div>
+          <div class="stat-mini">
+            <div class="sm-ico navy">📅</div>
+            <div><b>Rs.12,400</b><span>Current month (Aug 2026)</span></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== MOBILE BOTTOM TABS ===== -->
+  <nav class="bottom-tabs" id="bottomTabs">
+    <button class="tab" data-name="Dashboard"><span class="ti">🏠</span>Dashboard</button>
+    <button class="tab" data-name="Members"><span class="ti">👥</span>Members</button>
+    <button class="tab" data-name="Vendors"><span class="ti">🏪</span>Vendors</button>
+    <button class="tab" data-name="KYC"><span class="ti">📄</span>KYC</button>
+    <button class="tab active" data-name="More"><span class="ti">☰</span>More</button>
+  </nav>
+
+  <!-- ===== PROCESS MODAL ===== -->
+  <div class="modal-overlay" id="procModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="procTitle">Process Withdrawal</h3>
+        <button class="modal-x" data-close="procModal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="pm-member" id="procMember">Member</div>
+        <div class="breakdown">
+          <div class="bd-row"><span class="k">Gross Amount</span><span class="v" id="bdGross"></span></div>
+          <div class="bd-sep"></div>
+          <div class="bd-row small"><span class="k">Step 1 — TDS (3%)</span><span class="v" id="bdTds"></span></div>
+          <div class="bd-row"><span class="k">Post-TDS Amount</span><span class="v" id="bdPost"></span></div>
+          <div class="bd-sep"></div>
+          <div class="bd-row small"><span class="k">Step 2 — Admin (<span id="bdRatePct">10%</span>)</span><span class="v" id="bdAdmin"></span></div>
+          <div class="bd-sep"></div>
+          <div class="bd-row net"><span class="k">NET PAYABLE</span><span class="v" id="bdNet"></span></div>
+        </div>
+        <div class="bd-note">TDS deducted first on gross amount. Admin charge applied on post-TDS net. Order is mandatory per <b>BB-SPEC-002</b>.</div>
+        <div class="form-group">
+          <label>Payout Method</label>
+          <div class="pm-method" id="bdMethod">HDFC Bank **1234</div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Transaction Ref (auto)</label>
+          <input class="input" id="bdRef" type="text" readonly>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline-gray" data-close="procModal" type="button">Cancel</button>
+        <button class="btn btn-teal" id="procConfirm" type="button">Confirm &amp; Process</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== REJECT MODAL ===== -->
+  <div class="modal-overlay" id="rejModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="rejTitle">Reject Withdrawal</h3>
+        <button class="modal-x" data-close="rejModal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="pm-member" id="rejMember">Member</div>
+        <div class="form-group">
+          <label for="rejReason">Rejection reason (required)</label>
+          <input class="input" id="rejReason" type="text" placeholder="e.g. bank details mismatch, suspected duplicate ID">
+        </div>
+        <div class="err-msg" id="rejErr"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline-gray" data-close="rejModal" type="button">Cancel</button>
+        <button class="btn btn-red" id="rejConfirm" type="button">Confirm Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PROCESS ALL MODAL ===== -->
+  <div class="modal-overlay" id="paModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="paTitle">Process All Requests</h3>
+        <button class="modal-x" data-close="paModal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="breakdown">
+          <div class="bd-row"><span class="k">Total Requests</span><span class="v" id="paCount"></span></div>
+          <div class="bd-row"><span class="k">Total Gross</span><span class="v" id="paGross"></span></div>
+          <div class="bd-sep"></div>
+          <div class="bd-row small"><span class="k">Estimated TDS (3% of total)</span><span class="v" id="paTds"></span></div>
+          <div class="bd-row small"><span class="k">Estimated Admin Charges</span><span class="v" id="paAdmin"></span></div>
+          <div class="bd-sep"></div>
+          <div class="bd-row net"><span class="k">Estimated Net Payouts</span><span class="v" id="paNet"></span></div>
+        </div>
+        <div class="bd-note">⚠️ This will process all <span id="paWarn">14</span> pending withdrawal requests simultaneously.</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline-gray" data-close="paModal" type="button">Cancel</button>
+        <button class="btn btn-navy" id="paConfirm" type="button">Process All</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  function $(s){ return document.querySelector(s); }
+  function $$(s){ return Array.from(document.querySelectorAll(s)); }
+
+  var toastTimer = null;
+  function showToast(msg){
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  }
+
+  function round2(n){ return Math.round(n * 100) / 100; }
+  function money(n, dec){
+    return 'Rs.' + n.toLocaleString('en-IN', { minimumFractionDigits: dec ? 2 : 0, maximumFractionDigits: dec ? 2 : 0 });
+  }
+
+  function calc(g, method){
+    var rate = method === 'bank' ? 0.10 : 0.05;
+    var tds = round2(g * 0.03);
+    var post = round2(g - tds);
+    var admin = round2(post * rate);
+    var net = round2(post - admin);
+    return { rate: rate, tds: tds, post: post, admin: admin, net: net };
+  }
+
+  function methodLabel(method){
+    return method === 'bank' ? 'Bank Transfer' : 'Wallet Transfer';
+  }
+  function methodDetail(method){
+    return method === 'bank' ? 'HDFC Bank **1234' : 'BB Wallet Transfer';
+  }
+
+  /* ---------- PENDING DATA ---------- */
+  var PENDING = [
+    { id:'BB10042', name:'Rajesh Kumar',  gross:875,  method:'bank',   req:'01 Aug 2026' },
+    { id:'BB10055', name:'Amit Shah',     gross:1200, method:'bank',   req:'02 Aug 2026' },
+    { id:'BB10088', name:'Kavita Rao',    gross:450,  method:'wallet', req:'02 Aug 2026' },
+    { id:'BB10099', name:'Deepak Verma',  gross:2100, method:'bank',   req:'03 Aug 2026' },
+    { id:'BB10115', name:'Ravi Kumar',    gross:750,  method:'wallet', req:'03 Aug 2026' },
+    { id:'BB10128', name:'Sita Menon',    gross:3200, method:'bank',   req:'04 Aug 2026' },
+    { id:'BB10141', name:'Meena Pillai',  gross:980,  method:'wallet', req:'04 Aug 2026' },
+    { id:'BB10158', name:'Anil Gupta',    gross:5500, method:'bank',   req:'05 Aug 2026' },
+    { id:'BB10189', name:'Lakshmi Iyer',  gross:1800, method:'bank',   req:'05 Aug 2026' },
+    { id:'BB10215', name:'Ananya Roy',    gross:4200, method:'wallet', req:'06 Aug 2026' },
+    { id:'BB10241', name:'Devika Pillai', gross:620,  method:'bank',   req:'06 Aug 2026' },
+    { id:'BB10001', name:'Arjun Mehta',   gross:8900, method:'bank',   req:'07 Aug 2026' },
+    { id:'BB10019', name:'Vikram Patel',  gross:2800, method:'wallet', req:'07 Aug 2026' },
+    { id:'BB10031', name:'Mohan Singh',   gross:3875, method:'bank',   req:'08 Aug 2026' }
+  ];
+
+  var PST = { q:'', method:'all', amt:'all' };
+  var procTarget = null;
+  var rejTarget = null;
+  var refCounter = 892;
+
+  function pendingTotals(){
+    return PENDING.reduce(function(acc, m){
+      acc.count++;
+      acc.gross = round2(acc.gross + m.gross);
+      return acc;
+    }, { count: 0, gross: 0 });
+  }
+
+  function updateCounters(){
+    var t = pendingTotals();
+    $('#chipOpen').textContent = t.count;
+    $('#chipRequested').textContent = money(t.gross, false);
+    $('#batchCount').textContent = t.count;
+    $('#batchTotal').textContent = money(t.gross, false);
+    $('#pCount').textContent = t.count + ' request' + (t.count === 1 ? '' : 's');
+    var badge = $('#pendingBadge');
+    badge.textContent = t.count;
+    badge.style.display = t.count ? '' : 'none';
+    $('#pEmpty').style.display = t.count ? 'none' : '';
+  }
+
+  function amountMatch(gross, amt){
+    if(amt === 'all') return true;
+    if(amt === 'under') return gross < 500;
+    if(amt === 'mid1') return gross >= 500 && gross <= 2000;
+    if(amt === 'mid2') return gross > 2000 && gross <= 5000;
+    if(amt === 'over') return gross > 5000;
+    return true;
+  }
+
+  function filteredPending(){
+    var q = PST.q.trim().toLowerCase();
+    return PENDING.filter(function(m){
+      if(PST.method !== 'all' && m.method !== PST.method) return false;
+      if(!amountMatch(m.gross, PST.amt)) return false;
+      if(q){
+        var hay = (m.id + ' ' + m.name).toLowerCase();
+        if(hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function pendingRowHtml(m){
+    var c = calc(m.gross, m.method);
+    return '<tr data-id="' + m.id + '">' +
+      '<td class="id-cell">' + m.id + '</td>' +
+      '<td class="name-cell">' + m.name + '</td>' +
+      '<td class="amt-cell">' + money(m.gross, false) + '</td>' +
+      '<td><span class="st-badge ' + (m.method === 'bank' ? 'st-bank' : 'st-wallet') + '">' + methodLabel(m.method) + '</span></td>' +
+      '<td class="tds-cell">' + money(c.tds, true) + '</td>' +
+      '<td class="tds-cell">' + money(c.admin, true) + '</td>' +
+      '<td class="net-cell">' + money(c.net, true) + '</td>' +
+      '<td class="sub-cell">' + m.req + '</td>' +
+      '<td><span class="kyc-ok">✔ KYC</span></td>' +
+      '<td>' +
+        '<button class="action-link process" data-proc="' + m.id + '" type="button">Process</button> ' +
+        '<button class="action-link reject" data-rej="' + m.id + '" type="button">Reject</button>' +
+      '</td>' +
+    '</tr>';
+  }
+
+  function renderPending(){
+    var list = filteredPending();
+    $('#pBody').innerHTML = list.map(pendingRowHtml).join('');
+    updateCounters();
+    $$('#pBody [data-proc]').forEach(function(b){
+      b.addEventListener('click', function(){ openProc(b.dataset.proc); });
+    });
+    $$('#pBody [data-rej]').forEach(function(b){
+      b.addEventListener('click', function(){ openRej(b.dataset.rej); });
+    });
+  }
+
+  function removePendingRows(ids){
+    ids.forEach(function(id, i){
+      var row = document.querySelector('#pBody tr[data-id="' + id + '"]');
+      if(row) row.classList.add('removing');
+    });
+    setTimeout(function(){
+      PENDING = PENDING.filter(function(m){ return ids.indexOf(m.id) === -1; });
+      renderPending();
+    }, 320);
+  }
+
+  /* ---------- PROCESS MODAL ---------- */
+  function openProc(id){
+    var m = PENDING.find(function(x){ return x.id === id; });
+    if(!m) return;
+    procTarget = m;
+    var c = calc(m.gross, m.method);
+    var ref = 'BB-PAY-2026-' + String(refCounter++);
+    $('#procTitle').textContent = 'Process Withdrawal — ' + m.id;
+    $('#procMember').textContent = m.name + ' · ' + m.id;
+    $('#bdGross').textContent = money(m.gross, false);
+    $('#bdTds').textContent = '-' + money(c.tds, true);
+    $('#bdPost').textContent = money(c.post, true);
+    $('#bdRatePct').textContent = Math.round(c.rate * 100) + '%';
+    $('#bdAdmin').textContent = '-' + money(c.admin, true);
+    $('#bdNet').textContent = money(c.net, true);
+    $('#bdMethod').textContent = methodDetail(m.method);
+    $('#bdRef').value = ref;
+    $('#procModal').classList.add('show');
+  }
+
+  $('#procConfirm').addEventListener('click', function(){
+    var m = procTarget;
+    if(!m) return;
+    var ref = $('#bdRef').value;
+    $('#procModal').classList.remove('show');
+    procTarget = null;
+    removePendingRows([m.id]);
+    showToast('Payment processed — ' + ref);
+  });
+
+  /* ---------- REJECT MODAL ---------- */
+  function openRej(id){
+    var m = PENDING.find(function(x){ return x.id === id; });
+    if(!m) return;
+    rejTarget = m;
+    $('#rejTitle').textContent = 'Reject Withdrawal — ' + m.id;
+    $('#rejMember').textContent = m.name + ' · ' + m.id + ' — Rs.' + m.gross.toLocaleString('en-IN');
+    $('#rejReason').value = '';
+    $('#rejReason').classList.remove('err');
+    $('#rejErr').classList.remove('show');
+    $('#rejModal').classList.add('show');
+  }
+
+  $('#rejConfirm').addEventListener('click', function(){
+    var m = rejTarget;
+    if(!m) return;
+    var reason = $('#rejReason').value.trim();
+    var err = $('#rejErr');
+    if(!reason){
+      $('#rejReason').classList.add('err');
+      err.textContent = 'Rejection reason is required.';
+      err.classList.add('show');
+      return;
+    }
+    $('#rejModal').classList.remove('show');
+    rejTarget = null;
+    removePendingRows([m.id]);
+    showToast('Withdrawal rejected — ' + m.id);
+  });
+
+  /* ---------- PROCESS ALL ---------- */
+  function openProcessAll(){
+    var t = pendingTotals();
+    if(!t.count){ showToast('No pending requests to process'); return; }
+    var c = calc(t.gross, 'bank');
+    var adminTotal = PENDING.reduce(function(a, m){ return round2(a + calc(m.gross, m.method).admin); }, 0);
+    var netTotal = PENDING.reduce(function(a, m){ return round2(a + calc(m.gross, m.method).net); }, 0);
+    $('#paCount').textContent = t.count + ' requests';
+    $('#paGross').textContent = money(t.gross, false);
+    $('#paTds').textContent = '-' + money(c.tds, true);
+    $('#paAdmin').textContent = '-' + money(adminTotal, true);
+    $('#paNet').textContent = money(netTotal, true);
+    $('#paWarn').textContent = t.count;
+    $('#paModal').classList.add('show');
+  }
+
+  $('#paConfirm').addEventListener('click', function(){
+    var n = pendingTotals().count;
+    var ids = PENDING.map(function(m){ return m.id; });
+    $('#paModal').classList.remove('show');
+    removePendingRows(ids);
+    showToast('Batch processing initiated — ' + n + ' payments queued');
+  });
+
+  /* ---------- BATCH BAR BUTTONS ---------- */
+  $('#processAll').addEventListener('click', openProcessAll);
+  $('#exportBatch').addEventListener('click', function(){
+    var list = filteredPending();
+    var lines = ['Member ID,Name,Gross,Method,TDS,Admin,Net Payable,Requested'];
+    list.forEach(function(m){
+      var c = calc(m.gross, m.method);
+      lines.push([m.id, '"' + m.name + '"', m.gross, methodLabel(m.method), c.tds.toFixed(2), c.admin.toFixed(2), c.net.toFixed(2), m.req].join(','));
+    });
+    var blob = new Blob(['\ufeff' + lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bb-pending-batch.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showToast('Exporting batch of ' + list.length + ' requests...');
+  });
+  $('#rejectSelected').addEventListener('click', function(){
+    showToast('Select rows to reject individually (bulk reject coming soon)');
+  });
+
+  /* ---------- PENDING FILTERS ---------- */
+  $('#pSearch').addEventListener('input', function(){ PST.q = this.value; renderPending(); });
+  $('#pMethod').addEventListener('change', function(){ PST.method = this.value; renderPending(); });
+  $('#pAmount').addEventListener('change', function(){ PST.amt = this.value; renderPending(); });
+  $('#pFilterBtn').addEventListener('click', function(){
+    PST.q = $('#pSearch').value; PST.method = $('#pMethod').value; PST.amt = $('#pAmount').value;
+    renderPending();
+    showToast('Filters applied');
+  });
+  $('#pClearBtn').addEventListener('click', function(){
+    $('#pSearch').value = ''; $('#pMethod').value = 'all'; $('#pAmount').value = 'all';
+    PST.q = ''; PST.method = 'all'; PST.amt = 'all';
+    renderPending();
+    showToast('Filters cleared');
+  });
+
+  /* ---------- PROCESSED DATA ---------- */
+  var PROCESSED = [
+    { ref:'BB-PAY-2026-00891', id:'BB10042', net:501.97,  method:'bank',   on:'2026-07-26' },
+    { ref:'BB-PAY-2026-00890', id:'BB10001', net:4832.25, method:'bank',   on:'2026-07-25' },
+    { ref:'BB-PAY-2026-00889', id:'BB10088', net:892.50,  method:'wallet', on:'2026-07-24' },
+    { ref:'BB-PAY-2026-00888', id:'BB10099', net:1247.40, method:'bank',   on:'2026-07-23' },
+    { ref:'BB-PAY-2026-00887', id:'BB10115', net:712.50,  method:'wallet', on:'2026-07-22' },
+    { ref:'BB-PAY-2026-00886', id:'BB10128', net:2887.20, method:'bank',   on:'2026-07-21' },
+    { ref:'BB-PAY-2026-00885', id:'BB10141', net:931.00,  method:'wallet', on:'2026-07-20' },
+    { ref:'BB-PAY-2026-00884', id:'BB10158', net:4498.50, method:'bank',   on:'2026-07-19' },
+    { ref:'BB-PAY-2026-00883', id:'BB10189', net:1620.00, method:'bank',   on:'2026-07-18' },
+    { ref:'BB-PAY-2026-00882', id:'BB10215', net:3780.00, method:'wallet', on:'2026-07-17' }
+  ];
+
+  var PST2 = { q:'', from:'', to:'', method:'all', page:1, per:10 };
+
+  var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtDate(iso){
+    var d = new Date(iso + 'T00:00:00');
+    return d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function memberName(id){
+    var all = PENDING.concat(PROCESSED.map(function(p){ return { id:p.id, name:'—' }; }));
+    var known = { BB10042:'Rajesh Kumar', BB10001:'Arjun Mehta', BB10088:'Kavita Rao', BB10099:'Deepak Verma', BB10115:'Ravi Kumar', BB10128:'Sita Menon', BB10141:'Meena Pillai', BB10158:'Anil Gupta', BB10189:'Lakshmi Iyer', BB10215:'Ananya Roy' };
+    return known[id] || id;
+  }
+
+  function revCalc(net, method){
+    var rate = method === 'bank' ? 0.10 : 0.05;
+    var g = round2(net / (0.97 * (1 - rate)));
+    var tds = round2(g * 0.03);
+    var post = round2(g - tds);
+    var admin = round2(post * rate);
+    return { gross: g, tds: tds, admin: admin };
+  }
+
+  function filteredProcessed(){
+    var q = PST2.q.trim().toLowerCase();
+    return PROCESSED.filter(function(p){
+      if(PST2.method !== 'all' && p.method !== PST2.method) return false;
+      if(PST2.from && p.on < PST2.from) return false;
+      if(PST2.to && p.on > PST2.to) return false;
+      if(q){
+        var hay = (p.ref + ' ' + p.id).toLowerCase();
+        if(hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function prRowHtml(p){
+    var r = revCalc(p.net, p.method);
+    return '<tr class="pt-row" data-ref="' + p.ref + '">' +
+      '<td class="id-cell">' + p.ref + '</td>' +
+      '<td class="name-cell">' + memberName(p.id) + '</td>' +
+      '<td class="amt-cell">' + money(r.gross, false) + '</td>' +
+      '<td><span class="st-badge ' + (p.method === 'bank' ? 'st-bank' : 'st-wallet') + '">' + methodLabel(p.method) + '</span></td>' +
+      '<td class="tds-cell">' + money(r.tds, true) + '</td>' +
+      '<td class="tds-cell">' + money(r.admin, true) + '</td>' +
+      '<td class="net-cell">' + money(p.net, true) + '</td>' +
+      '<td class="sub-cell">' + fmtDate(p.on) + '</td>' +
+      '<td><span class="st-badge st-paid">✔ PAID</span></td>' +
+    '</tr>';
+  }
+
+  function renderProcessed(){
+    var list = filteredProcessed();
+    var totalPages = Math.max(1, Math.ceil(list.length / PST2.per));
+    if(PST2.page > totalPages) PST2.page = totalPages;
+    var start = (PST2.page - 1) * PST2.per;
+    var pageRows = list.slice(start, start + PST2.per);
+    $('#prBody').innerHTML = pageRows.map(prRowHtml).join('');
+    $('#prCount').textContent = list.length + ' payout' + (list.length === 1 ? '' : 's');
+    $('#prSummary').textContent = 'Showing ' + (list.length ? (start + 1) + '–' + Math.min(start + PST2.per, list.length) : 0) + ' of ' + list.length;
+    $('#prPage').textContent = 'Page ' + PST2.page + ' of ' + totalPages;
+    $('#prPrev').disabled = PST2.page <= 1;
+    $('#prNext').disabled = PST2.page >= totalPages;
+    $$('#prBody tr.pt-row').forEach(function(tr){
+      tr.addEventListener('click', function(){
+        var wasOpen = tr.nextElementSibling && tr.nextElementSibling.classList.contains('pt-detail');
+        $$('#prBody tr.pt-detail').forEach(function(r){ r.remove(); });
+        if(wasOpen) return;
+        var p = PROCESSED.find(function(x){ return x.ref === tr.dataset.ref; });
+        if(!p) return;
+        var r = revCalc(p.net, p.method);
+        var det = document.createElement('tr');
+        det.className = 'pt-detail';
+        det.innerHTML = '<td colspan="9"><div class="tx-detail">' +
+          '<div class="tx-block"><span class="tx-label">Gross Amount</span><span class="tx-value">' + money(r.gross, true) + '</span></div>' +
+          '<div class="tx-block"><span class="tx-label">TDS Deducted</span><span class="tx-value">-' + money(r.tds, true) + '</span></div>' +
+          '<div class="tx-block"><span class="tx-label">Admin Charge</span><span class="tx-value">-' + money(r.admin, true) + '</span></div>' +
+          '<div class="tx-block"><span class="tx-label">Net Paid</span><span class="tx-value">' + money(p.net, true) + '</span></div>' +
+          '<div class="tx-block"><span class="tx-label">' + (p.method === 'bank' ? 'Bank' : 'Wallet') + '</span><span class="tx-value">' + methodDetail(p.method) + '</span></div>' +
+          '<div class="tx-block"><span class="tx-label">Processed By</span><span class="tx-value">Admin-01</span></div>' +
+        '</div></td>';
+        tr.parentNode.insertBefore(det, tr.nextSibling);
+      });
+    });
+  }
+
+  $('#prSearch').addEventListener('input', function(){ PST2.q = this.value; PST2.page = 1; renderProcessed(); });
+  $('#prFrom').addEventListener('change', function(){ PST2.from = this.value; PST2.page = 1; renderProcessed(); });
+  $('#prTo').addEventListener('change', function(){ PST2.to = this.value; PST2.page = 1; renderProcessed(); });
+  $('#prMethod').addEventListener('change', function(){ PST2.method = this.value; PST2.page = 1; renderProcessed(); });
+  $('#prPrev').addEventListener('click', function(){ if(PST2.page > 1){ PST2.page--; renderProcessed(); } });
+  $('#prNext').addEventListener('click', function(){ PST2.page++; renderProcessed(); });
+
+  $('#prExport').addEventListener('click', function(){
+    var list = filteredProcessed();
+    var lines = ['Ref ID,Member,Gross,Method,TDS,Admin,Net Paid,Date,Status'];
+    list.forEach(function(p){
+      var r = revCalc(p.net, p.method);
+      lines.push([p.ref, '"' + memberName(p.id) + '"', r.gross.toFixed(2), methodLabel(p.method), r.tds.toFixed(2), r.admin.toFixed(2), p.net.toFixed(2), fmtDate(p.on), 'PAID'].join(','));
+    });
+    var blob = new Blob(['\ufeff' + lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bb-processed-payouts.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showToast('Exporting ' + list.length + ' processed payout' + (list.length === 1 ? '' : 's') + '...');
+  });
+
+  /* ---------- TDS REPORT TABLE ---------- */
+  var TDSROWS = [
+    { id:'BB10001', name:'Arjun Mehta',  comm:24500, ytd:4200 },
+    { id:'BB10012', name:'Ananya Singh', comm:18200, ytd:3150 },
+    { id:'BB10019', name:'Vikram Patel', comm:21300, ytd:3820 },
+    { id:'BB10031', name:'Mohan Singh',  comm:15800, ytd:2940 },
+    { id:'BB10035', name:'Priya Gupta',  comm:19600, ytd:3560 },
+    { id:'BB10038', name:'Deepak Kumar', comm:22100, ytd:3980 },
+    { id:'BB10042', name:'Rajesh Kumar', comm:875,   ytd:245  },
+    { id:'BB10088', name:'Kavita Rao',   comm:12400, ytd:2180 }
+  ];
+
+  function renderTds(){
+    var rows = TDSROWS.map(function(r){
+      var tds = round2(r.comm * 0.03);
+      return '<tr>' +
+        '<td class="id-cell">' + r.id + '</td>' +
+        '<td class="name-cell">' + r.name + '</td>' +
+        '<td class="amt-cell">' + money(r.comm, false) + '</td>' +
+        '<td class="sub-cell">3%</td>' +
+        '<td class="amt-cell">' + money(tds, true) + '</td>' +
+        '<td class="amt-cell">' + money(r.ytd, false) + '</td>' +
+      '</tr>';
+    }).join('');
+    var tComm = TDSROWS.reduce(function(a, r){ return a + r.comm; }, 0);
+    var tTds = TDSROWS.reduce(function(a, r){ return round2(a + round2(r.comm * 0.03)); }, 0);
+    var tYtd = TDSROWS.reduce(function(a, r){ return a + r.ytd; }, 0);
+    rows += '<tr class="total-row">' +
+      '<td class="id-cell">Total</td><td></td>' +
+      '<td class="amt-cell">' + money(tComm, false) + '</td><td></td>' +
+      '<td class="amt-cell">' + money(tTds, true) + '</td>' +
+      '<td class="amt-cell">' + money(tYtd, false) + '</td>' +
+    '</tr>';
+    $('#tdsBody').innerHTML = rows;
+  }
+
+  /* ---------- VIEW TABS ---------- */
+  $$('.vt').forEach(function(t){
+    t.addEventListener('click', function(){
+      $$('.vt').forEach(function(x){ x.classList.toggle('active', x === t); });
+      var v = t.dataset.view;
+      $('#viewPending').classList.toggle('active', v === 'pending');
+      $('#viewProcessed').classList.toggle('active', v === 'processed');
+      $('#viewTds').classList.toggle('active', v === 'tds');
+    });
+  });
+
+  /* ---------- MODAL CLOSE ---------- */
+  $$('[data-close]').forEach(function(b){
+    b.addEventListener('click', function(){ $('#' + b.dataset.close).classList.remove('show'); });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      $('#procModal').classList.remove('show');
+      $('#rejModal').classList.remove('show');
+      $('#paModal').classList.remove('show');
+      procTarget = null;
+      rejTarget = null;
+    }
+  });
+
+  /* ---------- SIDEBAR / TABS / BELL ---------- */
+  $$('.sb-nav a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      if(a.classList.contains('active')) return;
+      if(a.getAttribute('href') && a.getAttribute('href') !== '#') return;
+      e.preventDefault();
+      if(a.classList.contains('logout')){ showToast('Logging out (demo)'); return; }
+      showToast('Coming soon: ' + a.textContent.trim());
+    });
+  });
+
+  var ADMIN_TABS = { 'Dashboard':'bb-admin.html', 'Members':'bb-admin-members.html', 'KYC':'bb-admin-kyc.html' };
+  $$('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      if(t.classList.contains('active')) return;
+      var name = t.getAttribute('data-name');
+      if(ADMIN_TABS[name]) location.href = ADMIN_TABS[name]; else showToast('Coming soon: ' + name);
+    });
+  });
+
+  var bell = $('#bell');
+  var drop = $('#bellDrop');
+  bell.addEventListener('click', function(e){
+    e.stopPropagation();
+    drop.classList.toggle('show');
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.bell-wrap')) drop.classList.remove('show');
+  });
+
+  /* ---------- INIT ---------- */
+  renderPending();
+  renderProcessed();
+  renderTds();
+})();
+</script>
+</body>
+</html>
