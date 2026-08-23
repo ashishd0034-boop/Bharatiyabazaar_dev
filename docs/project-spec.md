@@ -140,12 +140,51 @@ bb-backend/
 ### 3. Setu Kosh
 - Separate 10-level global binary tree.
 - Shopping-based: Every Rs.1,000 of shopping at partner vendors creates 1 Setu Kosh ID.
-- Counter is per member / MAIN ID. Purchases through MAIN, SUB, or REBIRTH all count.
-- **Commission Formula:** `Base rate = weighted vendor margin × 0.071428`
-  - L1–L3, L5–L6, L8–L10: Full rate
-  - L4, L7: Half rate
-- **Referral Bonus:** 0.25% of purchase amount to MY SYSTEM sponsor (`PENDING_SETTLEMENT`).
+- Counter is per member / MAIN ID (`SetuKoshCounter`). Purchases through MAIN, SUB, or REBIRTH all accumulate into the owner's single counter.
+- **Unified Margin Accumulation:**
+  - Every purchase adds `amountPaise` to `counterPaise` and `floor(amount * marginPct / 100)` to `accumulatedMarginPaise`.
+  - Tree node placement and commission distribution occur **ONLY** when $\ge 1$ new ID is created ($k = \lfloor \text{newCounter} / 100000 \rfloor \ge 1$).
+  - Each of the $k$ nodes distributes $M_{\text{node}} = \lfloor \text{accumulatedMargin} / k \rfloor$ up its L1–L10 upline. Leftover spend and margin carry forward automatically.
+- **Strict Integer Commission Formula:**
+  - L1–L3, L5–L6, L8–L10 (Full rate): $\lfloor M / 14 \rfloor$
+  - L4, L7 (Half rate): $\lfloor M / 28 \rfloor$
+  - Referral Bonus: 0.25% of purchase amount ($\lfloor A \times 25 / 10000 \rfloor$) to purchasing card's MY SYSTEM sponsor (fallback to owner's MAIN card sponsor if card has no MY SYSTEM node, e.g. REBIRTH).
+  - Cap Invariant: $\sum \text{Commission} + \text{ReferralBonus} \le M$ (clamped if formula exceeds margin).
+- **PIN-Code Activation Gate:**
+  - Commissions stored as `PIN_GATE_INACTIVE` when buyer's PIN code has $< N$ active members (`PlatformSetting` default: 10).
+  - When PIN code reaches $\ge N$ active members, subsequent purchases create `PENDING_SETTLEMENT` and automatically activate all existing `PIN_GATE_INACTIVE` entries for that PIN.
+- **Placement:** Deterministic breadth-first binary tree using atomic `SETUKOSH_GLOBAL` counter ($P > 1 \implies \text{parent} = \lfloor P/2 \rfloor$, side = `P % 2 === 0 ? 'LEFT' : 'RIGHT'`).
 - Settles weekly on Mondays. No ACB required for Setu Kosh withdrawals.
+
+---
+
+## Withdrawal & TDS Engine
+
+### Exact Calculation Order (Steps 0–3)
+For any member cash withdrawal of Gross Amount $G$ (in paise):
+1. **Step 0 (194R Liability Recovery):**
+   $$R_{194R} = \min(G, \text{Pending 194R Liability}), \quad G' = G - R_{194R}$$
+2. **Step 1 (Section 194H TDS on $G'$):**
+   ₹20,000 FY threshold, marginal excess calculation:
+   - 3% for KYC Tier 2 / Verified PAN (`Member.kycTier == "TIER2"` or `panVerified` / `kycStatus == "VERIFIED"`)
+   - 20% for Unverified / No PAN (`Member.kycTier == "NONE"`)
+   $$\text{Post-TDS} = G' - TDS_{194H}$$
+3. **Step 2 (Admin Charge on Post-TDS Amount):**
+   $$\text{Admin Charge} = \lfloor \text{Post-TDS} \times \text{AdminRate} \rfloor \quad (\text{Bank: } 10\%, \text{ Wallet: } 5\%, \text{ Voucher: } 5\%)$$
+4. **Step 3 (Net Payable):**
+   $$\text{Net Payable} = \text{Post-TDS} - \text{Admin Charge}$$
+5. **Financial Invariant:** $G = R_{194R} + TDS_{194H} + \text{Admin Charge} + \text{Net Payable}$.
+
+### Multiple TDS Sections
+- **Section 194H (Member Cash & Vendor Referral Bonuses):** ₹20k FY threshold, marginal method, 3% with PAN / 20% without.
+- **Section 194R (Voucher Redemptions):** ₹20k FY threshold, full aggregate method (10% of total aggregate once crossed, e.g. ₹15k + ₹10k = ₹25k $\implies$ ₹2,500 liability). Recovered at Step 0 of next cash withdrawal.
+- **Section 194C (Vendor Payouts):** ₹30k single / ₹1L aggregate per FY, marginal on aggregate excess, 1% ind+PAN / 2% comp+PAN / 20% no PAN.
+
+### Escrow & Hold/Reverse Lifecycle
+- **On Request:** Wallet balance locked via `SELECT ... FOR UPDATE`, gross amount debited as `WITHDRAWAL_ESCROW`, TDS recorded as `PENDING`.
+- **On Complete:** Escrow reversed (`ESCROW_RELEASED`), split ledger debits posted (`WITHDRAWAL_PAYOUT`, `TDS_DEDUCTED`, `ADMIN_FEE`, `TDS_194R_RECOVERY`), TDS marked `DEPOSITED`.
+- **On Reject:** Escrow fully refunded (`WITHDRAWAL_REFUND`), TDS flipped to `REVERSED`.
+- **KYC Tiers:** `Member.kycTier` (`NONE`, `TIER1`, `TIER2`).
 
 ---
 
@@ -218,10 +257,12 @@ bb-backend/
 
 ## Background Jobs & Schedulers
 
-- **Scheduler (`src/jobs/scheduler.js`):** Runs hourly via `node-cron` (`0 * * * *`).
-- **Hourly 7-Day Expiry Sweep:** Selects `PENDING_7_DAY` commissions older than 7 days. If the owner's MAIN card has ACB, updates status to `WITHDRAWABLE` and credits the wallet via `walletService.credit()`; otherwise updates to `LOCKED_ACB`.
-- **Hourly ACB Sweep:** Evaluates cards without ACB status for 1 LEFT + 1 RIGHT direct referrals, unlocks ACB, and releases existing `LOCKED_ACB` earnings.
-- Logs exactly one summary line per execution.
+- **Scheduler (`src/jobs/scheduler.js`):**
+  - **Hourly 7-Day Hold Expiry Sweep (`0 * * * *`):** Selects `PENDING_7_DAY` commissions older than 7 days $\to$ `WITHDRAWABLE` (if ACB) or `LOCKED_ACB`.
+  - **Hourly ACB Sweep (`0 * * * *`):** Evaluates direct referrals $\to$ unlocks ACB and releases `LOCKED_ACB` earnings.
+  - **Weekly Monday Settlement Run (`0 0 * * MON`):** Processes vendor settlements for previous Mon–Sun and releases `PENDING_SETTLEMENT` commissions (`settlePending`).
+  - **Daily Inactivity Sweep (`0 2 * * *`):** Evaluates vendor last-sale dates (31d $\to$ `INACTIVE`, 91d $\to$ `FROZEN`, 181d $\to$ `CLOSED` with stream redirection to `COMPANY_WALLET`).
+- Logs summary lines per execution.
 
 ---
 
@@ -230,7 +271,7 @@ bb-backend/
 - **Password Hashing:** `bcrypt` cost factor 10.
 - **Input Validation:** Strict schema validation with `zod` middleware.
 - **Rate Limiting:** Auth endpoint limiter (10 req/15min) + Global rate limiter (300 req/15min).
-- **HTTP Security:** `helmet` enabled (CSP configured with `unsafe-inline` for styles/scripts), CORS origin whitelist from env (defaults to `http://localhost:4000`), body parser limit `100kb`.
+- **HTTP Security:** `helmet` enabled (CSP configured with `script-src-attr` & `unsafe-inline` for scripts/styles), CORS origin whitelist from env (defaults to `http://localhost:4000`), body parser limit `100kb`.
 - **JWT Hardening:** JWT secret loaded exclusively from environment variables with fail-fast startup check.
 - **IDOR Protection:** All mutation endpoints (`POST /api/id-cards/purchase`, withdrawals, vendor operations) derive identity directly from validated JWT `req.member.id`.
 
@@ -239,33 +280,36 @@ bb-backend/
 ## Database Schema (22 Models)
 
 See `prisma/schema.prisma` for full model definitions:
-1. `Member`
-2. `MemberIdCard`
-3. `AutoPoolNode`
-4. `MySystemNode`
-5. `SetuKoshNode`
-6. `SetuKoshCounter`
-7. `Wallet`
-8. `LedgerEntry`
-9. `CommissionEntry`
-10. `PayOnceLedger`
-11. `Voucher`
-12. `Withdrawal`
-13. `TdsLedger`
-14. `Vendor`
-15. `VendorSale`
-16. `VendorSettlement`
-17. `VendorReferralBonus`
-18. `PlatformSetting`
-19. `AuditLog`
-20. `AdminUser`
-21. `SystemCounter`
-22. `SettlementRun`
+1. `Member` (`kycTier`, `memberCode`, `mobile`, `pinCode`)
+2. `MemberIdCard` (`cardNumber`, `type`, `acbStatus`)
+3. `AutoPoolNode` (`globalPosition`, `depthLevel`)
+4. `MySystemNode` (`sponsorIdCardId`, `parentNodeId`)
+5. `SetuKoshNode` (`globalPosition`, `depthLevel`)
+6. `SetuKoshCounter` (`counterPaise`, `accumulatedMarginPaise`, `idsCreated`)
+7. `Wallet` (`balancePaise`)
+8. `LedgerEntry` (`balanceBeforePaise`, `balanceAfterPaise`, `source`)
+9. `CommissionEntry` (`stream`, `level`, `amountPaise`, `status`, `sourceIdCardId`)
+10. `PayOnceLedger` (`idCardId`, `level`)
+11. `Voucher` (`faceValuePaise`, `status`)
+12. `Withdrawal` (`grossPaise`, `tdsPaise`, `adminFeePaise`, `netPayablePaise`, `recovered194RPaise`, `idempotencyKey`)
+13. `TdsLedger` (`section`, `taxableAmountPaise`, `tdsAmountPaise`, `status`)
+14. `Vendor` (`marginRatePct`, `securityDepositPaise`, `walletBalancePaise`, `isDepositFrozen`, `lastSaleAt`, `payoutMethod`)
+15. `VendorSale` (`amountPaise`, `marginPaise`, `idempotencyKey`)
+16. `VendorSettlement` (`grossSalesPaise`, `postMarginPaise`, `volumeDiscountPaise`, `earlyFeePaise`, `payoutBeforeTdsPaise`, `tdsPaise`, `netPayablePaise`)
+17. `VendorReferralBonus` (`bonusPaise`, `status`)
+18. `PlatformSetting` (`key`, `value`)
+19. `AuditLog` (`actorType`, `action`, `metadata`)
+20. `AdminUser` (`email`, `role`)
+21. `SystemCounter` (`id`, `currentValue`)
+22. `SettlementRun` (`runType`, `periodStart`, `periodEnd`, `vendorCount`, `grossPaise`, `netPaise`, `status`)
 
 ### Key Constraints & Indexes
 - `Member.mobile` (unique), `Member.memberCode` (unique)
 - `MemberIdCard.cardNumber` (unique), `[memberId]` index
 - `AutoPoolNode.globalPosition` (unique), `[idCardId]` (unique)
 - `MySystemNode.idCardId` (unique), `[parentNodeId]` index, `[sponsorIdCardId]` index
+- `SetuKoshNode.globalPosition` (unique)
 - `CommissionEntry`: index on `[idCardId]`, compound index on `[idCardId, status]`
 - `PayOnceLedger`: unique constraint on `[idCardId, level]`
+- `VendorSale.idempotencyKey` (unique)
+- `Withdrawal.idempotencyKey` (unique)

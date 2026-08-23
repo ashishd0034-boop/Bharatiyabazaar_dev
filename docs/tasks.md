@@ -39,22 +39,28 @@ Status: Phase 1 & Tasks 2,3,4, Wave 1 completed. Active development on backend &
 - [x] Latest-first / deepest-first priority resolution
 - [x] Rebirth voucher creation for L5–L7
 
-### Task 5: Withdrawal & TDS Engine 🟡 GUARD-ONLY
+### Task 5: Withdrawal & TDS Engine ✅ COMPLETED & VERIFIED (Wave 2 — 45c01a2)
 - [x] Minimum withdrawal limit validation (Rs.100)
 - [x] MAIN ID login restriction for withdrawal requests
 - [x] Source-card ACB verification guard
-- [ ] Full TDS (194H/194R/194C) calculation pipeline integration
+- [x] Full calculation order (Steps 0–3) with 194R recovery and post-TDS admin fees
+- [x] Sections 194H, 194R (full aggregate 10%), and 194C implemented in `tdsService.js`
+- [x] Atomic row locking (`FOR UPDATE`), escrow ledger splits, and hold/reverse lifecycle
 
-### Task 6: Setu Kosh Engine ⏳ PENDING
-- [ ] Per-member Rs.1,000 shopping counter
-- [ ] 10-level tree placement & weighted margin commission calculation
-- [ ] Weekly Monday settlement release
+### Task 6: Setu Kosh Engine ✅ COMPLETED & VERIFIED (Wave 3 — e64e015)
+- [x] Unified shopping counter (`SetuKoshCounter`) with overflow carry-forward
+- [x] Deterministic 10-level binary tree (`SETUKOSH_GLOBAL`) with integer splits ($\lfloor M/14 \rfloor, \lfloor M/28 \rfloor$)
+- [x] PIN-code activation gate with retroactive unlocking
+- [x] 0.25% referral bonus with REBIRTH $\to$ owner MAIN sponsor fallback
 
-### Task 7: Vendor Settlement Engine ⏳ PENDING
-- [ ] Weekly settlement cron & volume discount tiers
-- [ ] Security deposit freeze rules & vendor referral bonuses
+### Task 7: Vendor Settlement Engine ✅ COMPLETED & VERIFIED (Wave 4 — aaea48f)
+- [x] Weekly Monday settlement cron (`0 0 * * MON`) and early on-demand payout (Rs.250 fee)
+- [x] Section 194C TDS with marginal aggregate excess calculation
+- [x] Volume discount tiers applied to admin charge ONLY
+- [x] Daily inactivity lifecycle (31d/91d/181d) & stream redirection to `COMPANY_WALLET`
+- [x] Admin fraud penalties (10x FRAUD, 5x TAMPERING, Rs.1,000 QR_REFUSAL) with deposit recovery
 
-### Task 8: Admin Settings & Audit ⏳ PENDING
+### Task 8: Admin Settings & Audit ⏳ CURRENT ACTIVE TASK
 - [ ] Dynamic `PlatformSetting` controls with audit logging
 - [ ] Role-based access control (SUPER_ADMIN, ADMIN, SUPPORT)
 
@@ -62,14 +68,16 @@ Status: Phase 1 & Tasks 2,3,4, Wave 1 completed. Active development on backend &
 
 ## Testing & Quality Assurance
 
-### Task 9: Automated Test Suite 🟡 PARTIAL
+### Task 9: Automated Test Suite 🟡 EXPANDED & VERIFIED
 - [x] `tests/scenarios/scenario-a.test.js` (3 IDs flow)
 - [x] `tests/scenarios/scenario-b.test.js` (Sponsor placement flow)
 - [x] `tests/scenarios/scenario-c.test.js` (Rebirth generation)
 - [x] `tests/scenarios/scenario-d.test.js` (Multi-level cascading rebirths)
 - [x] `tests/scenarios/attack.test.js` (IDOR attack validation)
 - [x] `tests/scenarios/registration.test.js` (3-ID registration regression)
-- [ ] Standalone unit test suite (`payonce.test.js`, `tds.test.js`, `withdrawal.test.js`)
+- [x] `tests/scenarios/withdrawal-tds.test.js` (Wave 2 full withdrawal & TDS validation)
+- [x] `tests/scenarios/setu-kosh.test.js` (Wave 3 Setu Kosh tree, PIN gate, and counter validation)
+- [x] `tests/scenarios/vendor-settlement.test.js` (Wave 4 vendor settlement, 194C, and lifecycle validation)
 
 ---
 
@@ -82,11 +90,9 @@ Status: Phase 1 & Tasks 2,3,4, Wave 1 completed. Active development on backend &
 
 ---
 
-## Security Hardening (Wave 1) ✅ COMPLETED & COMMITTED
-- [x] IDOR fix on `POST /api/id-cards/purchase` (enforces `req.member.id`)
-- [x] Regression testing on registration flow
-- [x] Fail-fast JWT startup check & dev fallback secret removal
-- [x] Helmet security headers (CSP configured for inline scripts/styles)
-- [x] CORS origin whitelist & body parser size limit (100kb)
-- [x] Global rate limiter (300 req/15min) + auth rate limiter (10 req/15min)
-- [x] Hourly background cron scheduler for 7-day hold expiry and ACB sweeps
+## Completed Waves Summary
+- **Wave 1 (`7061c17`):** IDOR fix, fail-fast JWT check, Helmet CSP, body parser limit, rate limits, hourly scheduler.
+- **CSP Hotfix (`45db1a4`):** `script-src-attr: ["'unsafe-inline'"]` to enable inline button onclick handlers.
+- **Wave 2 (`45c01a2`):** Withdrawal & TDS engine (194H/194R/194C, admin charges, hold/reverse, admin auth).
+- **Wave 3 (`e64e015`):** Setu Kosh engine (shopping counter, 10-level tree, integer commissions, PIN gate, vendor auth).
+- **Wave 4 (`aaea48f`):** Vendor settlement engine (Monday cron, 194C marginal, volume discounts, deposits, fraud, inactivity).
