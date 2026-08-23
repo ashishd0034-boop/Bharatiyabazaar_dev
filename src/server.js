@@ -1,7 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path"); // Added for serving static files
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
+
+// Fail-fast JWT Check
+if (!process.env.JWT_SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET is not defined.");
+  process.exit(1);
+}
 
 // Route imports
 const authRoutes = require("./routes/authRoutes");
@@ -20,8 +28,27 @@ const auth = require("./middleware/authMiddleware");
 const app = express();
 
 // Global Middleware
-app.use(cors());
-app.use(express.json());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "script-src": ["'self'", "'unsafe-inline'"],
+      "style-src": ["'self'", "'unsafe-inline'"]
+    }
+  }
+}));
+
+const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",") : ["http://localhost:4000"];
+app.use(cors({ origin: allowedOrigins }));
+app.use(express.json({ limit: "100kb" }));
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // 300 requests
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(globalLimiter);
 
 // --- NEW: Serve Static Files (Frontend) ---
 // This tells Express to look for HTML/CSS/JS files in the 'public' folder
@@ -42,6 +69,9 @@ app.use("/api/withdrawals", withdrawalRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/id-cards", auth, idCardRoutes);
+
+// Background Jobs
+require("./jobs/scheduler");
 
 // Global Error Handler
 app.use(errorHandler);

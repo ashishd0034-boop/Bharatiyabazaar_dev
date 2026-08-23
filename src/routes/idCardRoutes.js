@@ -6,12 +6,13 @@ const prisma = require("../lib/prisma");
 // POST /api/id-cards/purchase
 router.post("/purchase", async (req, res) => {
   try {
-    const { memberId, count, sponsorIdCardId, sponsorSide } = req.body;
+    const { count, sponsorIdCardId, sponsorSide } = req.body;
+    const memberId = req.member.id; // Enforce authenticated member's ID
 
-    if (!memberId || !count || count < 1) {
+    if (!count || count < 1) {
       return res.status(400).json({
         success: false,
-        message: "memberId and count (minimum 1) are required"
+        message: "count (minimum 1) is required"
       });
     }
 

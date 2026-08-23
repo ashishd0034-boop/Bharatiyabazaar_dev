@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const prisma = require("../lib/prisma");
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_dev";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 async function validateReferral(req, res, next) {
   try {

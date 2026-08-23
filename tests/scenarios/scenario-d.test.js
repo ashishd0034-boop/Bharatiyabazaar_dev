@@ -39,7 +39,7 @@ describe("Scenario D: Withdrawal, Escrow, TDS, and Rejection", () => {
   });
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
+    await prisma.payOnceLedger.deleteMany({});
     await prisma.withdrawal.deleteMany({});
     await prisma.tdsLedger.deleteMany({});
     await prisma.wallet.deleteMany({});

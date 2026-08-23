@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const prisma = require("../lib/prisma");
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_dev";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function requireAdmin(roles = ["SUPPORT", "ADMIN", "SUPER_ADMIN"]) {
   return async (req, res, next) => {
