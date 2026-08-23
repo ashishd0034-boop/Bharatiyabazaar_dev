@@ -18,6 +18,7 @@ const walletRoutes = require("./routes/walletRoutes");
 const withdrawalRoutes = require("./routes/withdrawalRoutes");
 const vendorRoutes = require("./routes/vendorRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const setuKoshRoutes = require("./routes/setuKoshRoutes");
 const healthRoutes = require("./routes/healthRoutes");
 const idCardRoutes = require("./routes/idCardRoutes"); // Legacy from before, keeping it
 
@@ -68,6 +69,7 @@ app.use("/api/members", memberRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
 app.use("/api/vendors", vendorRoutes);
+app.use("/api/setu-kosh", setuKoshRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/id-cards", auth, idCardRoutes);
 

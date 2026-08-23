@@ -244,14 +244,16 @@ model Vendor {
 }
 
 model VendorSale {
-  id          String   @id @default(cuid())
-  vendorId    String
-  memberId    String
-  idCardId    String?
-  amountPaise Int
-  status      String   @default("COMPLETED") // COMPLETED, REFUNDED, CANCELLED
-  createdAt   DateTime @default(now())
-  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+  id             String   @id @default(cuid())
+  vendorId       String
+  memberId       String
+  idCardId       String?
+  amountPaise    Int
+  marginPaise    Int      @default(0)
+  idempotencyKey String?  @unique
+  status         String   @default("COMPLETED") // COMPLETED, REFUNDED, CANCELLED
+  createdAt      DateTime @default(now())
+  vendor         Vendor   @relation(fields: [vendorId], references: [id])
 
   @@map("vendor_sales")
 }
