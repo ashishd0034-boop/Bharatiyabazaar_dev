@@ -1,6 +1,7 @@
-const prisma = require("/Users/ashishdubey/Desktop/coder/Bharatiya Bazaar/qewn/bb-backend/src/lib/prisma");
+const prisma = require("../src/lib/prisma");
 const bcrypt = require("bcrypt");
-const { purchaseIds } = require("/Users/ashishdubey/Desktop/coder/Bharatiya Bazaar/qewn/bb-backend/src/services/idCardService");
+const { purchaseIds } = require("../src/services/idCardService");
+const { seedSettingsAndSuperAdmin } = require("../src/lib/seedSettings");
 
 async function seedFullProductionState() {
   console.log("================================================================================");
@@ -22,15 +23,18 @@ async function seedFullProductionState() {
   await prisma.setuKoshCounter.deleteMany({});
   await prisma.member.deleteMany({});
   await prisma.systemCounter.deleteMany({});
+  await prisma.platformSetting.deleteMany({});
+  await prisma.adminUser.deleteMany({});
   console.log("  ✓ All tables cleaned");
 
-  // 2. Initialize SystemCounters
+  // 2. Initialize SystemCounters & Platform Settings
   await prisma.systemCounter.createMany({
     data: [
       { id: "MEMBER_CODE", currentValue: 10000 },
       { id: "AUTOPOOL_GLOBAL", currentValue: 0 }
     ]
   });
+  await seedSettingsAndSuperAdmin();
 
   const passwordHash = await bcrypt.hash("password123", 10);
 
@@ -43,7 +47,7 @@ async function seedFullProductionState() {
         mobile,
         passwordHash,
         kycStatus: "APPROVED",
-        kycTier: 1,
+        kycTier: "TIER_1",
         mainWallet: {
           create: {
             balancePaise: 0
