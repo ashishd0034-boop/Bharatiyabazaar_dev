@@ -81,6 +81,8 @@ async function checkMySystemLevelCompletion(tx, newNodeId) {
   }
 }
 
+const adminService = require("./adminService");
+
 // Main orchestrator for creating commissions with Pay-Once rule
 async function calculateAndCreateCommissions(tx, idCardId, level, stream, amountPaise) {
   // 1. Check Pay-Once Ledger
@@ -108,19 +110,35 @@ async function calculateAndCreateCommissions(tx, idCardId, level, stream, amount
     // Record payment in PayOnceLedger
     await payOnceService.recordPayment(tx, idCardId, level, stream);
     
-    // Determine initial status based on ACB and Stream
+    // Read live system toggles
+    const mySystem7DayHold = await adminService.getSettingBoolean("MY_SYSTEM_7DAY_HOLD", true);
+    const autoPoolLockedBeforeAcb = await adminService.getSettingBoolean("AUTOPOOL_LOCKED_BEFORE_ACB", true);
+    const rebirthRequiresMainAcb = await adminService.getSettingBoolean("REBIRTH_WITHDRAWAL_REQUIRES_MAIN_ACB", true);
+
+    const isRebirth = idCard.type === "REBIRTH";
+    const ownerMainCard = await tx.memberIdCard.findFirst({
+      where: { memberId: idCard.memberId, type: "MAIN" }
+    });
+
+    let hasAcb = true;
+    if (isRebirth) {
+      hasAcb = rebirthRequiresMainAcb ? Boolean(ownerMainCard?.acbStatus) : true;
+    } else {
+      hasAcb = Boolean(ownerMainCard?.acbStatus || idCard.acbStatus);
+    }
+
     let initialStatus = "CONFIRMED";
-    
+
     if (stream === "MY_SYSTEM") {
-      // MY SYSTEM commissions are pending for 7 days (fraud prevention)
-      initialStatus = "PENDING_7_DAY";
+      if (mySystem7DayHold) {
+        initialStatus = "PENDING_7_DAY";
+      } else {
+        initialStatus = hasAcb ? "WITHDRAWABLE" : "LOCKED_ACB";
+      }
     } else if (stream === "AUTOPOOL") {
-      // AutoPool commissions require ACB to be unlocked
-      const ownerMainCard = await tx.memberIdCard.findFirst({
-        where: { memberId: idCard.memberId, type: "MAIN" }
-      });
-      
-      if (ownerMainCard && !ownerMainCard.acbStatus) {
+      if (!autoPoolLockedBeforeAcb) {
+        initialStatus = "WITHDRAWABLE";
+      } else if (!hasAcb) {
         initialStatus = "LOCKED_ACB";
       } else {
         initialStatus = "WITHDRAWABLE";

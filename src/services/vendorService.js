@@ -17,10 +17,13 @@ const DEFAULT_CATEGORY_MARGINS = {
  */
 async function getCategoryMargin(category = "GENERAL") {
   const normCat = (category || "GENERAL").toUpperCase();
-  const settingKey = `VENDOR_MARGIN_${normCat}`;
+  const settingKey = `CATEGORY_MARGIN_${normCat}`;
+  const legacyKey = `VENDOR_MARGIN_${normCat}`;
 
-  const dynamicMargin = await adminService.getSetting(settingKey).catch(() => null);
-  if (dynamicMargin) {
+  const dynamicMargin = await adminService.getSetting(settingKey).catch(() => null) ||
+    await adminService.getSetting(legacyKey).catch(() => null);
+
+  if (dynamicMargin !== null && dynamicMargin !== undefined) {
     return parseFloat(dynamicMargin);
   }
 

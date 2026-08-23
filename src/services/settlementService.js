@@ -10,13 +10,6 @@ const WALLET_MIN_BALANCE_PAISE = 50000; // Rs. 500 in paise
 
 /**
  * Calculates volume discount percentage on the admin charge based on monthly sales in the calendar month containing periodEnd.
- *
- * Tiers:
- * >= Rs. 5,00,000 (50,000,000 paise) -> 50% discount on admin charge
- * >= Rs. 2,00,000 (20,000,000 paise) -> 30% discount on admin charge
- * >= Rs. 1,00,000 (10,000,000 paise) -> 20% discount on admin charge
- * >= Rs. 50,000   (5,000,000 paise)  -> 10% discount on admin charge
- * < Rs. 50,000                       -> 0% discount
  */
 async function getVolumeDiscountPct(tx, vendorId, periodEnd) {
   const year = periodEnd.getFullYear();
@@ -38,10 +31,19 @@ async function getVolumeDiscountPct(tx, vendorId, periodEnd) {
 
   const monthlySales = aggregate._sum.amountPaise || 0;
 
-  if (monthlySales >= 50000000) return 50;
-  if (monthlySales >= 20000000) return 30;
-  if (monthlySales >= 10000000) return 20;
-  if (monthlySales >= 5000000) return 10;
+  const t5Min = await adminService.getSetting("VOLUME_DISCOUNT_TIER_5_MIN_SALES_PAISE", 50000000, "integer");
+  const t5Rate = await adminService.getSetting("VOLUME_DISCOUNT_TIER_5_RATE_PCT", 50, "integer");
+  const t4Min = await adminService.getSetting("VOLUME_DISCOUNT_TIER_4_MIN_SALES_PAISE", 20000000, "integer");
+  const t4Rate = await adminService.getSetting("VOLUME_DISCOUNT_TIER_4_RATE_PCT", 30, "integer");
+  const t3Min = await adminService.getSetting("VOLUME_DISCOUNT_TIER_3_MIN_SALES_PAISE", 10000000, "integer");
+  const t3Rate = await adminService.getSetting("VOLUME_DISCOUNT_TIER_3_RATE_PCT", 20, "integer");
+  const t2Min = await adminService.getSetting("VOLUME_DISCOUNT_TIER_2_MIN_SALES_PAISE", 5000000, "integer");
+  const t2Rate = await adminService.getSetting("VOLUME_DISCOUNT_TIER_2_RATE_PCT", 10, "integer");
+
+  if (monthlySales >= t5Min) return t5Rate;
+  if (monthlySales >= t4Min) return t4Rate;
+  if (monthlySales >= t3Min) return t3Rate;
+  if (monthlySales >= t2Min) return t2Rate;
   return 0;
 }
 
@@ -64,8 +66,8 @@ async function calculateSettlementBreakdown(tx, sales, vendor, options = {}) {
   let adminRatePct = adminRatePctOverride;
   if (adminRatePct === null) {
     const settingKey = vendor.payoutMethod === "WALLET" ? "VENDOR_ADMIN_CHARGE_WALLET_PCT" : "VENDOR_ADMIN_CHARGE_BANK_PCT";
-    const customRate = await adminService.getSetting(settingKey).catch(() => null);
-    adminRatePct = customRate ? parseFloat(customRate) : (vendor.payoutMethod === "WALLET" ? 5 : 10);
+    const customRate = await adminService.getSetting(settingKey, vendor.payoutMethod === "WALLET" ? 5 : 10, "number");
+    adminRatePct = customRate !== null ? customRate : (vendor.payoutMethod === "WALLET" ? 5 : 10);
   }
 
   const baseAdminChargePaise = Math.floor((postMarginPaise * adminRatePct) / 100);
@@ -76,7 +78,8 @@ async function calculateSettlementBreakdown(tx, sales, vendor, options = {}) {
   const netAdminChargePaise = baseAdminChargePaise - volumeDiscountPaise;
 
   // Early Fee: Deducted before TDS
-  const earlyFeePaise = isEarly ? EARLY_SETTLEMENT_FEE_PAISE : 0;
+  const earlyFeeSetting = await adminService.getSetting("EARLY_SETTLEMENT_FEE_PAISE", EARLY_SETTLEMENT_FEE_PAISE, "integer");
+  const earlyFeePaise = isEarly ? earlyFeeSetting : 0;
   const payoutBeforeTdsPaise = Math.max(0, postMarginPaise - netAdminChargePaise - earlyFeePaise);
 
   // 194C TDS Calculation
@@ -421,12 +424,16 @@ async function sweepVendorInactivity(currentDate = new Date()) {
     closed: 0
   };
 
+  const inactiveDaysLimit = await adminService.getSetting("VENDOR_INACTIVITY_INACTIVE_DAYS", 31, "integer");
+  const frozenDaysLimit = await adminService.getSetting("VENDOR_INACTIVITY_FROZEN_DAYS", 91, "integer");
+  const closedDaysLimit = await adminService.getSetting("VENDOR_INACTIVITY_CLOSED_DAYS", 181, "integer");
+
   for (const vendor of vendors) {
     const referenceDate = vendor.lastSaleAt || vendor.joinedAt;
     const diffMs = currentDate.getTime() - new Date(referenceDate).getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays >= 181 && vendor.status !== "CLOSED") {
+    if (diffDays >= closedDaysLimit && vendor.status !== "CLOSED") {
       await prisma.$transaction(async (tx) => {
         await tx.vendor.update({
           where: { id: vendor.id },
@@ -462,7 +469,7 @@ async function sweepVendorInactivity(currentDate = new Date()) {
         });
       });
       results.closed++;
-    } else if (diffDays >= 91 && vendor.status !== "FROZEN" && vendor.status !== "CLOSED") {
+    } else if (diffDays >= frozenDaysLimit && vendor.status !== "FROZEN" && vendor.status !== "CLOSED") {
       await prisma.vendor.update({
         where: { id: vendor.id },
         data: { status: "FROZEN", isDepositFrozen: true }
@@ -478,7 +485,7 @@ async function sweepVendorInactivity(currentDate = new Date()) {
         }
       });
       results.frozen++;
-    } else if (diffDays >= 31 && vendor.status === "ACTIVE") {
+    } else if (diffDays >= inactiveDaysLimit && vendor.status === "ACTIVE") {
       await prisma.vendor.update({
         where: { id: vendor.id },
         data: { status: "INACTIVE" }

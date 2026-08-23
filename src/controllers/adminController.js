@@ -1,15 +1,34 @@
-const { getSettings, updateSetting } = require("../services/adminService");
+const { getAllSettings, getSetting, updateSetting, updateCategoryMargin } = require("../services/adminService");
 const { completeWithdrawal, rejectWithdrawal } = require("../services/withdrawalService");
 const { getAuditLogs } = require("../services/auditService");
-const { processWeeklySettlement, penalizeVendor, checkDepositFreeze } = require("../services/settlementService");
+const { processWeeklySettlement, penalizeVendor } = require("../services/settlementService");
 const prisma = require("../lib/prisma");
 
-async function getAllSettings(req, res, next) {
+async function listSettings(req, res, next) {
   try {
-    const settings = await getSettings();
+    const settings = await getAllSettings();
     res.json({
       success: true,
       data: settings
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getSingleSetting(req, res, next) {
+  try {
+    const { key } = req.params;
+    const value = await getSetting(key, null);
+    if (value === null) {
+      return res.status(404).json({
+        success: false,
+        error: { code: "NOT_FOUND", message: `Setting ${key} not found` }
+      });
+    }
+    res.json({
+      success: true,
+      data: { key, value }
     });
   } catch (err) {
     next(err);
@@ -24,6 +43,20 @@ async function updateSettingValue(req, res, next) {
     res.json({
       success: true,
       data: setting
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateCategoryMarginReq(req, res, next) {
+  try {
+    const { category } = req.params;
+    const { marginRatePct, applyToExisting = false, description } = req.body;
+    const result = await updateCategoryMargin(category, marginRatePct, applyToExisting, req.admin.id, description);
+    res.json({
+      success: true,
+      data: result
     });
   } catch (err) {
     next(err);
@@ -133,8 +166,10 @@ async function getLogs(req, res, next) {
 }
 
 module.exports = {
-  getAllSettings,
+  listSettings,
+  getSingleSetting,
   updateSettingValue,
+  updateCategoryMarginReq,
   approveWithdrawalReq,
   rejectWithdrawalReq,
   runSettlement,

@@ -2,9 +2,21 @@ const prisma = require("../lib/prisma");
 const commissionService = require("./commissionService");
 const acbService = require("./acbService");
 const rebirthService = require("./rebirthService");
+const adminService = require("./adminService");
 
 async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide = null) {
   const existingCards = await prisma.memberIdCard.findMany({ where: { memberId } });
+
+  // Enforce MAX_PURCHASED_IDS (rebirths are exempt)
+  const maxPurchasedIds = await adminService.getSetting("MAX_PURCHASED_IDS", 255, "integer");
+  const nonRebirthCount = existingCards.filter(c => c.type !== "REBIRTH").length;
+  if (nonRebirthCount + count > maxPurchasedIds) {
+    const err = new Error(`Cannot purchase ${count} IDs. Member already owns ${nonRebirthCount} purchased IDs (Limit: ${maxPurchasedIds}).`);
+    err.code = "ID_PURCHASE_LIMIT_REACHED";
+    err.status = 400;
+    throw err;
+  }
+
   const hasMain = existingCards.some(c => c.type === "MAIN");
   const bulkMode = count > 1;
 

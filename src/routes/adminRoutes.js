@@ -13,9 +13,13 @@ router.post("/login", validate(schemas.adminLoginSchema), authController.adminLo
 // Require admin authentication for all subsequent routes
 router.use(adminAuthMiddleware(["SUPER_ADMIN", "ADMIN", "SUPPORT"]));
 
-router.get("/settings", adminController.getAllSettings);
-router.put("/settings/:key", adminAuthMiddleware(["SUPER_ADMIN"]), validate(schemas.settingUpdateSchema), adminController.updateSettingValue);
+// Settings Endpoints
+router.get("/settings", adminController.listSettings);
+router.get("/settings/:key", adminController.getSingleSetting);
+router.put("/settings/:key", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), adminController.updateSettingValue);
+router.put("/categories/:category/margin", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), adminController.updateCategoryMarginReq);
 
+// Operational Endpoints
 router.post("/withdrawals/:id/approve", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), adminController.approveWithdrawalReq);
 router.post("/withdrawals/:id/reject", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), adminController.rejectWithdrawalReq);
 

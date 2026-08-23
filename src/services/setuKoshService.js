@@ -292,8 +292,9 @@ async function recordPurchase(memberId, vendorId, amountPaise, options = {}) {
       await activatePinGateCommissions(tx, buyer.pinCode);
     }
 
-    // 6. Referral Bonus (0.25% of purchase amount to MY SYSTEM sponsor)
-    const bonusPaise = Math.floor((amountPaise * 25) / 10000);
+    // 6. Referral Bonus (0.25% or dynamic BPS to MY SYSTEM sponsor)
+    const bonusBps = await adminService.getSetting("SETU_KOSH_REFERRAL_BONUS_BPS", 25, "integer");
+    const bonusPaise = Math.floor((amountPaise * bonusBps) / 10000);
     if (bonusPaise > 0) {
       let sponsorCardId = buyerCard?.mySystemNode?.sponsorIdCardId ||
         (buyerCard?.mySystemNode?.parentNodeId
@@ -358,7 +359,9 @@ async function recordPurchase(memberId, vendorId, amountPaise, options = {}) {
 
     const newCounterPaise = counter.counterPaise;
     const accMarginPaise = counter.accumulatedMarginPaise;
-    const k = Math.floor(newCounterPaise / SETU_KOSH_THRESHOLD_PAISE);
+
+    const counterThresholdPaise = await adminService.getSetting("SETU_KOSH_COUNTER_THRESHOLD_PAISE", SETU_KOSH_THRESHOLD_PAISE, "integer");
+    const k = Math.floor(newCounterPaise / counterThresholdPaise);
 
     let remainingCounterPaise = newCounterPaise;
     let remainingMarginPaise = accMarginPaise;

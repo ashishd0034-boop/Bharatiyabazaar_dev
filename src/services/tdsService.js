@@ -29,7 +29,7 @@ const getCurrentFYDateRange = getCurrentFinancialYearRange;
 
 /**
  * Section 194H: Member Cash Commissions
- * ₹20k FY threshold, marginal method, 3% with PAN / KYC Tier 2 / Verified, 20% without.
+ * ₹20k FY threshold (or dynamic), marginal method, 3% with PAN / KYC Tier 2 / Verified, 20% without.
  */
 async function calculate194HTds(tx, memberId, requestGrossPaise) {
   const member = await tx.member.findUnique({ where: { id: memberId } });
@@ -37,15 +37,16 @@ async function calculate194HTds(tx, memberId, requestGrossPaise) {
     throw new Error(`Member with id ${memberId} not found`);
   }
 
-  let rate = 0.03;
+  const thresholdPaise = await adminService.getSetting("TDS_194H_THRESHOLD_PAISE", THRESHOLD_194H_PAISE, "integer");
   const isPanVerified = member.panVerified || member.kycStatus === "VERIFIED" || member.kycTier === "TIER2";
 
+  let rate = 0.03;
   if (isPanVerified) {
-    const dynamicRate = await adminService.getSetting("TDS_194H_RATE").catch(() => null);
-    rate = dynamicRate ? parseFloat(dynamicRate) / 100 : 0.03;
+    const dynamicRate = await adminService.getSetting("TDS_194H_RATE_VERIFIED", 0.03, "number");
+    rate = dynamicRate > 1 ? dynamicRate / 100 : dynamicRate;
   } else {
-    const unverifiedRate = await adminService.getSetting("TDS_UNVERIFIED_RATE").catch(() => null);
-    rate = unverifiedRate ? parseFloat(unverifiedRate) / 100 : 0.20;
+    const unverifiedRate = await adminService.getSetting("TDS_194H_RATE_UNVERIFIED", 0.20, "number");
+    rate = unverifiedRate > 1 ? unverifiedRate / 100 : unverifiedRate;
   }
 
   const { startDate, endDate } = getCurrentFinancialYearRange();
@@ -67,11 +68,11 @@ async function calculate194HTds(tx, memberId, requestGrossPaise) {
 
   let taxablePaise = 0;
 
-  if (totalGrossPaise > THRESHOLD_194H_PAISE) {
-    if (priorGrossPaise >= THRESHOLD_194H_PAISE) {
+  if (totalGrossPaise > thresholdPaise) {
+    if (priorGrossPaise >= thresholdPaise) {
       taxablePaise = requestGrossPaise;
     } else {
-      taxablePaise = totalGrossPaise - THRESHOLD_194H_PAISE;
+      taxablePaise = totalGrossPaise - thresholdPaise;
     }
   }
 
@@ -83,7 +84,7 @@ async function calculate194HTds(tx, memberId, requestGrossPaise) {
     rate,
     priorGrossPaise,
     totalGrossPaise,
-    thresholdPaise: THRESHOLD_194H_PAISE,
+    thresholdPaise,
     isPanVerified
   };
 }
@@ -94,6 +95,9 @@ async function calculate194HTds(tx, memberId, requestGrossPaise) {
  */
 async function calculate194R(tx, memberId, newVoucherFaceValuePaise, currentVoucherId = null) {
   const { startDate, endDate } = getCurrentFinancialYearRange();
+  const thresholdPaise = await adminService.getSetting("TDS_194R_THRESHOLD_PAISE", THRESHOLD_194R_PAISE, "integer");
+  const rawRate = await adminService.getSetting("TDS_194R_RATE", 0.10, "number");
+  const rate = rawRate > 1 ? rawRate / 100 : rawRate;
 
   // 1. Get all vouchers redeemed in current FY
   const redeemedVouchers = await tx.voucher.findMany({
@@ -128,9 +132,9 @@ async function calculate194R(tx, memberId, newVoucherFaceValuePaise, currentVouc
   const existing194RLiabilityPaise = past194RLedger.reduce((sum, l) => sum + l.amountPaise, 0);
 
   let liabilityPaise = 0;
-  if (totalVoucherPaise > THRESHOLD_194R_PAISE) {
-    // 10% on FULL aggregate
-    const totalTargetTaxPaise = Math.floor((totalVoucherPaise * 10) / 100);
+  if (totalVoucherPaise > thresholdPaise) {
+    // 10% (or dynamic rate) on FULL aggregate
+    const totalTargetTaxPaise = Math.floor(totalVoucherPaise * rate);
     liabilityPaise = Math.max(0, totalTargetTaxPaise - existing194RLiabilityPaise);
   }
 
@@ -138,7 +142,7 @@ async function calculate194R(tx, memberId, newVoucherFaceValuePaise, currentVouc
     liabilityPaise,
     totalVoucherPaise,
     priorRedeemedPaise,
-    thresholdExceeded: totalVoucherPaise > THRESHOLD_194R_PAISE,
+    thresholdExceeded: totalVoucherPaise > thresholdPaise,
     existingLiabilityPaise: existing194RLiabilityPaise
   };
 }
@@ -165,23 +169,24 @@ async function create194RLiability(tx, memberId, voucherFaceValuePaise, referenc
 }
 
 /**
- * Section 194C: Vendor Settlements
- * ₹30k single / ₹1L aggregate per FY. Rates: 1% individual+PAN, 2% company+PAN, 20% no PAN.
-/**
  * Section 194C: Vendor Payout TDS Calculation
- *
- * Tax Rules & Semantics:
- * - Aggregate is the FY sum of payout-before-TDS (B = PostMargin - NetAdminCharge - EarlyFee).
- * - Single payment threshold: > Rs. 30,000 (3,000,000 paise) -> entire B is taxable.
- * - Aggregate FY threshold: > Rs. 1,00,000 (10,000,000 paise) -> marginal tax on excess above 1L.
- * - If prior FY aggregate already exceeded Rs. 1L, the entire current payout B is taxable.
- * - Early Settlement Fee: Flat Rs. 250 fee is deducted BEFORE TDS; TDS is computed on post-fee payout B.
- * - Tax Rates: 1% (Individual with PAN), 2% (Company with PAN), 20% (No PAN / unverified).
  */
 async function calculate194C(tx, vendorId, payoutBeforeTdsPaise, entityType = "INDIVIDUAL", hasPan = true) {
+  const singleThreshold = await adminService.getSetting("TDS_194C_SINGLE_THRESHOLD_PAISE", SINGLE_194C_PAISE, "integer");
+  const aggregateThreshold = await adminService.getSetting("TDS_194C_AGGREGATE_THRESHOLD_PAISE", AGGREGATE_194C_PAISE, "integer");
+
   let rate = 0.20;
   if (hasPan) {
-    rate = entityType.toUpperCase() === "COMPANY" ? 0.02 : 0.01;
+    if (entityType.toUpperCase() === "COMPANY") {
+      const compRate = await adminService.getSetting("TDS_194C_RATE_COMPANY", 0.02, "number");
+      rate = compRate > 1 ? compRate / 100 : compRate;
+    } else {
+      const indRate = await adminService.getSetting("TDS_194C_RATE_INDIVIDUAL", 0.01, "number");
+      rate = indRate > 1 ? indRate / 100 : indRate;
+    }
+  } else {
+    const unvRate = await adminService.getSetting("TDS_194C_RATE_UNVERIFIED", 0.20, "number");
+    rate = unvRate > 1 ? unvRate / 100 : unvRate;
   }
 
   const { startDate, endDate } = getCurrentFinancialYearRange();
@@ -203,16 +208,16 @@ async function calculate194C(tx, vendorId, payoutBeforeTdsPaise, entityType = "I
   );
   const totalAggregatePaise = priorAggregatePaise + payoutBeforeTdsPaise;
 
-  const isSingleThresholdCrossed = payoutBeforeTdsPaise > SINGLE_194C_PAISE;
-  const isAggregateThresholdCrossed = totalAggregatePaise > AGGREGATE_194C_PAISE;
+  const isSingleThresholdCrossed = payoutBeforeTdsPaise > singleThreshold;
+  const isAggregateThresholdCrossed = totalAggregatePaise > aggregateThreshold;
 
   let taxablePaise = 0;
 
   if (isSingleThresholdCrossed || isAggregateThresholdCrossed) {
-    if (priorAggregatePaise >= AGGREGATE_194C_PAISE || isSingleThresholdCrossed) {
+    if (priorAggregatePaise >= aggregateThreshold || isSingleThresholdCrossed) {
       taxablePaise = payoutBeforeTdsPaise;
     } else {
-      taxablePaise = totalAggregatePaise - AGGREGATE_194C_PAISE;
+      taxablePaise = totalAggregatePaise - aggregateThreshold;
     }
   }
 

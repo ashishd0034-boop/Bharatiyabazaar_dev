@@ -73,8 +73,10 @@ app.use("/api/setu-kosh", setuKoshRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/id-cards", auth, idCardRoutes);
 
-// Background Jobs
+// Background Jobs & Startup Seeds
 require("./jobs/scheduler");
+const { seedSettingsAndSuperAdmin } = require("./lib/seedSettings");
+seedSettingsAndSuperAdmin().catch(err => console.error("Error during settings seed:", err));
 
 // Global Error Handler
 app.use(errorHandler);

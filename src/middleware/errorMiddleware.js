@@ -56,8 +56,13 @@ function errorHandler(err, req, res, next) {
     message = "The requested record was not found.";
   } 
   
-  // 4. Custom "Invalid" throws
-  else if (err.message && err.message.includes("Invalid")) {
+  // 4. Custom Error status / code
+  if (err.status || err.statusCode) {
+    statusCode = err.status || err.statusCode;
+    errorCode = err.code || (statusCode === 403 ? "FORBIDDEN" : statusCode === 401 ? "UNAUTHORIZED" : statusCode === 404 ? "NOT_FOUND" : "BAD_REQUEST");
+    message = err.message;
+  }
+  else if (err.message && (err.message.includes("Invalid") || err.message.includes("Cannot purchase"))) {
     statusCode = 400;
     errorCode = "BAD_REQUEST";
     message = err.message;

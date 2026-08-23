@@ -1,3 +1,5 @@
+const adminService = require("./adminService");
+
 async function checkAndProcessRebirths(tx, newlyPlacedGlobalPosition) {
   const rebirthsToQueue = [];
   
@@ -30,13 +32,16 @@ async function checkAndProcessRebirths(tx, newlyPlacedGlobalPosition) {
 
           // Generate Voucher for Levels 5, 6, 7
           if (L >= 5 && L <= 7) {
+            const faceValuePaise = await adminService.getSetting("VOUCHER_FACE_VALUE_PAISE", 20000, "integer");
+            const validityDays = await adminService.getSetting("VOUCHER_VALIDITY_DAYS", 365, "integer");
+
             await tx.voucher.create({
               data: {
                 memberId: ancestorNode.idCard.memberId,
                 idCardId: ancestorNode.idCardId,
                 sourceType: `AUTOPOOL_LEVEL_${L}`,
-                faceValuePaise: 20000,
-                expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+                faceValuePaise,
+                expiresAt: new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000)
               }
             });
           }
