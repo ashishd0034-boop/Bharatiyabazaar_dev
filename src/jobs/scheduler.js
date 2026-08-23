@@ -2,11 +2,12 @@ const cron = require("node-cron");
 const prisma = require("../lib/prisma");
 const acbService = require("../services/acbService");
 const walletService = require("../services/walletService");
+const settlementService = require("../services/settlementService");
 
 async function run7DaySweep() {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   let processed = 0;
-  
+
   const pendingCommissions = await prisma.commissionEntry.findMany({
     where: {
       status: "PENDING_7_DAY",
@@ -18,7 +19,7 @@ async function run7DaySweep() {
   for (const commission of pendingCommissions) {
     await prisma.$transaction(async (tx) => {
       // Idempotency check inside transaction
-      const current = await tx.commissionEntry.findUnique({ where: { id: commission.id }});
+      const current = await tx.commissionEntry.findUnique({ where: { id: commission.id } });
       if (current.status !== "PENDING_7_DAY") return;
 
       // Check if source card owner has ACB
@@ -35,7 +36,7 @@ async function run7DaySweep() {
           where: { id: commission.id },
           data: { status: "WITHDRAWABLE" }
         });
-        
+
         await walletService.credit(tx, commission.idCard.memberId, commission.amountPaise, commission.stream, commission.id, `7-day hold released for ${commission.stream} Level ${commission.level}`);
       } else {
         await tx.commissionEntry.update({
@@ -69,6 +70,35 @@ async function runAcbSweep() {
   return processed;
 }
 
+/**
+ * Weekly Monday Settlement Sweep at 00:00 UTC/IST
+ */
+async function runMondaySettlement() {
+  try {
+    const result = await settlementService.processWeeklySettlement(new Date());
+    console.log(`[JOB SUMMARY] Weekly Settlement: Processed ${result.totalEntries} vendor payouts, Total Net: Rs. ${(result.netPaise / 100).toFixed(2)}`);
+    return result;
+  } catch (error) {
+    console.error("[JOB ERROR] Weekly Settlement Failed:", error);
+    throw error;
+  }
+}
+
+/**
+ * Daily Inactivity Lifecycle Sweep at 02:00
+ */
+async function runDailyInactivitySweep() {
+  try {
+    const result = await settlementService.sweepVendorInactivity(new Date());
+    console.log(`[JOB SUMMARY] Inactivity Sweep: Inactivated: ${result.inactivated}, Frozen: ${result.frozen}, Closed: ${result.closed}`);
+    return result;
+  } catch (error) {
+    console.error("[JOB ERROR] Inactivity Sweep Failed:", error);
+    throw error;
+  }
+}
+
+// 1. Hourly 7-day and ACB Sweeps
 cron.schedule("0 * * * *", async () => {
   try {
     const holdProcessed = await run7DaySweep();
@@ -79,7 +109,19 @@ cron.schedule("0 * * * *", async () => {
   }
 });
 
+// 2. Weekly Monday Settlement at 00:00 ("0 0 * * MON")
+cron.schedule("0 0 * * MON", async () => {
+  await runMondaySettlement().catch(() => {});
+});
+
+// 3. Daily Inactivity Lifecycle Sweep at 02:00 ("0 2 * * *")
+cron.schedule("0 2 * * *", async () => {
+  await runDailyInactivitySweep().catch(() => {});
+});
+
 module.exports = {
   run7DaySweep,
-  runAcbSweep
+  runAcbSweep,
+  runMondaySettlement,
+  runDailyInactivitySweep
 };

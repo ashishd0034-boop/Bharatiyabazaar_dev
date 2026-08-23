@@ -295,10 +295,23 @@ async function recordPurchase(memberId, vendorId, amountPaise, options = {}) {
     // 6. Referral Bonus (0.25% of purchase amount to MY SYSTEM sponsor)
     const bonusPaise = Math.floor((amountPaise * 25) / 10000);
     if (bonusPaise > 0) {
-      const sponsorCardId = buyerCard?.mySystemNode?.sponsorIdCardId ||
+      let sponsorCardId = buyerCard?.mySystemNode?.sponsorIdCardId ||
         (buyerCard?.mySystemNode?.parentNodeId
           ? (await tx.mySystemNode.findUnique({ where: { id: buyerCard.mySystemNode.parentNodeId } }))?.idCardId
           : null);
+
+      // Confirmation C1: Fallback to owner's MAIN card MY SYSTEM sponsor if current card has no MY SYSTEM node (e.g. REBIRTH)
+      if (!sponsorCardId) {
+        const ownerMainCard = buyer?.idCards.find(c => c.type === "MAIN") ||
+          (await tx.memberIdCard.findFirst({ where: { memberId, type: "MAIN" }, include: { mySystemNode: true } }));
+
+        if (ownerMainCard?.mySystemNode) {
+          sponsorCardId = ownerMainCard.mySystemNode.sponsorIdCardId ||
+            (ownerMainCard.mySystemNode.parentNodeId
+              ? (await tx.mySystemNode.findUnique({ where: { id: ownerMainCard.mySystemNode.parentNodeId } }))?.idCardId
+              : null);
+        }
+      }
 
       if (sponsorCardId) {
         const sponsorCard = await tx.memberIdCard.findUnique({

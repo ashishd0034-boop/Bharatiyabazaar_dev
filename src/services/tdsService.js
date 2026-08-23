@@ -167,8 +167,18 @@ async function create194RLiability(tx, memberId, voucherFaceValuePaise, referenc
 /**
  * Section 194C: Vendor Settlements
  * ₹30k single / ₹1L aggregate per FY. Rates: 1% individual+PAN, 2% company+PAN, 20% no PAN.
+/**
+ * Section 194C: Vendor Payout TDS Calculation
+ *
+ * Tax Rules & Semantics:
+ * - Aggregate is the FY sum of payout-before-TDS (B = PostMargin - NetAdminCharge - EarlyFee).
+ * - Single payment threshold: > Rs. 30,000 (3,000,000 paise) -> entire B is taxable.
+ * - Aggregate FY threshold: > Rs. 1,00,000 (10,000,000 paise) -> marginal tax on excess above 1L.
+ * - If prior FY aggregate already exceeded Rs. 1L, the entire current payout B is taxable.
+ * - Early Settlement Fee: Flat Rs. 250 fee is deducted BEFORE TDS; TDS is computed on post-fee payout B.
+ * - Tax Rates: 1% (Individual with PAN), 2% (Company with PAN), 20% (No PAN / unverified).
  */
-async function calculate194C(tx, vendorId, settlementAmountPaise, entityType = "INDIVIDUAL", hasPan = true) {
+async function calculate194C(tx, vendorId, payoutBeforeTdsPaise, entityType = "INDIVIDUAL", hasPan = true) {
   let rate = 0.20;
   if (hasPan) {
     rate = entityType.toUpperCase() === "COMPANY" ? 0.02 : 0.01;
@@ -179,7 +189,7 @@ async function calculate194C(tx, vendorId, settlementAmountPaise, entityType = "
   const pastSettlements = await tx.vendorSettlement.findMany({
     where: {
       vendorId,
-      status: "SETTLED",
+      status: { in: ["COMPLETED", "SETTLED", "PAYOUT_DUE"] },
       settledAt: {
         gte: startDate,
         lte: endDate
@@ -187,19 +197,22 @@ async function calculate194C(tx, vendorId, settlementAmountPaise, entityType = "
     }
   });
 
-  const priorGrossPaise = pastSettlements.reduce((sum, s) => sum + s.grossSalesPaise, 0);
-  const totalGrossPaise = priorGrossPaise + settlementAmountPaise;
+  const priorAggregatePaise = pastSettlements.reduce(
+    (sum, s) => sum + (s.payoutBeforeTdsPaise > 0 ? s.payoutBeforeTdsPaise : (s.grossSalesPaise || 0)),
+    0
+  );
+  const totalAggregatePaise = priorAggregatePaise + payoutBeforeTdsPaise;
 
-  const isSingleThresholdCrossed = settlementAmountPaise >= SINGLE_194C_PAISE;
-  const isAggregateThresholdCrossed = totalGrossPaise > AGGREGATE_194C_PAISE;
+  const isSingleThresholdCrossed = payoutBeforeTdsPaise > SINGLE_194C_PAISE;
+  const isAggregateThresholdCrossed = totalAggregatePaise > AGGREGATE_194C_PAISE;
 
   let taxablePaise = 0;
 
   if (isSingleThresholdCrossed || isAggregateThresholdCrossed) {
-    if (priorGrossPaise >= AGGREGATE_194C_PAISE || isSingleThresholdCrossed) {
-      taxablePaise = settlementAmountPaise;
+    if (priorAggregatePaise >= AGGREGATE_194C_PAISE || isSingleThresholdCrossed) {
+      taxablePaise = payoutBeforeTdsPaise;
     } else {
-      taxablePaise = totalGrossPaise - AGGREGATE_194C_PAISE;
+      taxablePaise = totalAggregatePaise - AGGREGATE_194C_PAISE;
     }
   }
 

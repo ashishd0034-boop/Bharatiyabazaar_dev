@@ -1,7 +1,8 @@
 const { getSettings, updateSetting } = require("../services/adminService");
 const { completeWithdrawal, rejectWithdrawal } = require("../services/withdrawalService");
 const { getAuditLogs } = require("../services/auditService");
-const { processWeeklySettlement } = require("../services/settlementService");
+const { processWeeklySettlement, penalizeVendor, checkDepositFreeze } = require("../services/settlementService");
+const prisma = require("../lib/prisma");
 
 async function getAllSettings(req, res, next) {
   try {
@@ -58,10 +59,60 @@ async function rejectWithdrawalReq(req, res, next) {
 
 async function runSettlement(req, res, next) {
   try {
-    const result = await processWeeklySettlement();
+    const runDate = req.body.runDate ? new Date(req.body.runDate) : new Date();
+    const result = await processWeeklySettlement(runDate, {
+      adminRatePctOverride: req.body.adminRatePctOverride ? parseFloat(req.body.adminRatePctOverride) : null,
+      actorId: req.admin.id
+    });
     res.json({
       success: true,
       data: result
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function penalizeVendorReq(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { penaltyType, transactionAmountPaise } = req.body;
+    const result = await penalizeVendor(id, penaltyType, parseInt(transactionAmountPaise) || 0, req.admin.id);
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function freezeVendorReq(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { freeze = true } = req.body;
+    const vendor = await prisma.vendor.update({
+      where: { id },
+      data: {
+        isDepositFrozen: freeze,
+        status: freeze ? "FROZEN" : "ACTIVE"
+      }
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        actorId: req.admin.id,
+        actorType: "ADMIN",
+        action: freeze ? "VENDOR_MANUAL_FREEZE" : "VENDOR_MANUAL_UNFREEZE",
+        entityType: "Vendor",
+        entityId: id,
+        metadata: { status: vendor.status, isDepositFrozen: vendor.isDepositFrozen }
+      }
+    });
+
+    res.json({
+      success: true,
+      data: vendor
     });
   } catch (err) {
     next(err);
@@ -87,5 +138,7 @@ module.exports = {
   approveWithdrawalReq,
   rejectWithdrawalReq,
   runSettlement,
+  penalizeVendorReq,
+  freezeVendorReq,
   getLogs
 };

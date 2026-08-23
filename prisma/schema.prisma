@@ -234,6 +234,10 @@ model Vendor {
   marginRatePct        Float
   status               String             @default("PROVISIONAL")
   securityDepositPaise Int                @default(500000)
+  walletBalancePaise   Int                @default(0)
+  isDepositFrozen      Boolean            @default(false)
+  lastSaleAt           DateTime?
+  payoutMethod         String             @default("BANK")
   joinedAt             DateTime           @default(now())
   verifiedAt           DateTime?
   sales                VendorSale[]
@@ -259,19 +263,24 @@ model VendorSale {
 }
 
 model VendorSettlement {
-  id               String    @id @default(cuid())
-  vendorId         String
-  grossSalesPaise  Int
-  marginPaise      Int
-  postMarginPaise  Int
-  adminChargePaise Int
-  tdsPaise         Int
-  netPayablePaise  Int
-  status           String    @default("PENDING")
-  periodStart      DateTime
-  periodEnd        DateTime
-  settledAt        DateTime?
-  vendor           Vendor    @relation(fields: [vendorId], references: [id])
+  id                   String    @id @default(cuid())
+  vendorId             String
+  settlementRunId      String?
+  grossSalesPaise      Int
+  marginPaise          Int
+  postMarginPaise      Int
+  adminChargePaise     Int
+  volumeDiscountPaise  Int       @default(0)
+  earlyFeePaise        Int       @default(0)
+  payoutBeforeTdsPaise Int       @default(0)
+  tdsPaise             Int
+  netPayablePaise      Int
+  payoutMethod         String    @default("BANK")
+  status               String    @default("PENDING") // PENDING, COMPLETED, PAYOUT_DUE
+  periodStart          DateTime
+  periodEnd            DateTime
+  settledAt            DateTime?
+  vendor               Vendor    @relation(fields: [vendorId], references: [id])
 
   @@map("vendor_settlements")
 }
@@ -337,13 +346,19 @@ model SystemCounter {
 }
 
 model SettlementRun {
-  id            String    @id @default(cuid())
-  runDate       DateTime  @unique
-  status        String    // RUNNING, COMPLETED, FAILED
-  totalEntries  Int       @default(0)
-  totalPaise    Int       @default(0)
-  startedAt     DateTime  @default(now())
-  completedAt   DateTime?
+  id           String    @id @default(cuid())
+  runDate      DateTime  @unique
+  runType      String    @default("REGULAR") // REGULAR, EARLY
+  periodStart  DateTime?
+  periodEnd    DateTime?
+  vendorCount  Int       @default(0)
+  grossPaise   Int       @default(0)
+  netPaise     Int       @default(0)
+  status       String    // RUNNING, COMPLETED, FAILED
+  totalEntries Int       @default(0)
+  totalPaise   Int       @default(0)
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
 
   @@map("settlement_runs")
 }

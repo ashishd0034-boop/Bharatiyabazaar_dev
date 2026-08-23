@@ -1,4 +1,5 @@
 const { processMemberPurchase } = require("../services/vendorService");
+const { processEarlySettlement } = require("../services/settlementService");
 const prisma = require("../lib/prisma");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -58,7 +59,6 @@ async function recordSale(req, res, next) {
   try {
     const { memberId, amountPaise, idCardId, idempotencyKey } = req.body;
 
-    // Vendor is inferred from auth token or vendor entity
     const vendor = req.vendor || (await prisma.vendor.findUnique({
       where: { memberId: req.member.id }
     }));
@@ -118,8 +118,42 @@ async function getSettlements(req, res, next) {
   }
 }
 
+async function requestEarlySettlement(req, res, next) {
+  try {
+    const vendor = req.vendor || (await prisma.vendor.findUnique({
+      where: { memberId: req.member.id }
+    }));
+
+    if (!vendor) {
+      return res.status(403).json({
+        success: false,
+        error: { code: "FORBIDDEN", message: "Only registered vendors can request early settlement" }
+      });
+    }
+
+    if (vendor.status === "FROZEN" || vendor.status === "CLOSED") {
+      return res.status(403).json({
+        success: false,
+        error: { code: "FORBIDDEN", message: `Vendor account is ${vendor.status}. Settlements unavailable.` }
+      });
+    }
+
+    const settlement = await processEarlySettlement(vendor.id, {
+      actorId: req.member?.id || vendor.memberId
+    });
+
+    res.json({
+      success: true,
+      data: settlement
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   login,
   recordSale,
-  getSettlements
+  getSettlements,
+  requestEarlySettlement
 };

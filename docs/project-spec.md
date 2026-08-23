@@ -149,6 +149,31 @@ bb-backend/
 
 ---
 
+## Vendor Settlement Engine
+
+### Calculation Order & Invariants (Strict Integer Paise)
+1. **Gross Sales ($G$):** Sum of sales in settlement period.
+2. **Platform Margin ($M$):** Category rate snapshotted at sale time.
+3. **Post-Margin Amount ($P = G - M$).**
+4. **Base Admin Charge ($A_{\text{base}} = \lfloor P \times \text{AdminRate} / 100 \rfloor$):** Default 10% Bank / 5% Wallet.
+5. **Volume Discount ($V_{\text{disc}} = \lfloor A_{\text{base}} \times D_{\text{vol}} / 100 \rfloor$):** Applied to admin charge ONLY based on monthly sales in the calendar month of period end (0+ = 0%, 50k+ = 10%, 1L+ = 20%, 2L+ = 30%, 5L+ = 50%).
+6. **Net Admin Charge ($A_{\text{net}} = A_{\text{base}} - V_{\text{disc}}$).**
+7. **Early Fee ($F_{\text{early}} = 25000 \text{ paise / Rs.250}$ if on-demand early payout, else 0).**
+8. **Payout Before TDS ($B = P - A_{\text{net}} - F_{\text{early}}$).**
+9. **Section 194C TDS ($T_{194C}$):** Computed on $B$. Single $> \text{Rs.30k}$ or FY aggregate $> \text{Rs.1L}$ (marginal on excess). Rates: 1% individual+PAN / 2% company+PAN / 20% no PAN.
+10. **Net Payable ($N_{\text{pay}} = B - T_{194C}$).**
+
+### Reconciled Formula Example
+- **Gross Sales:** Rs. 13,750.00 (1,375,000 paise) @ 7% category margin
+- **Platform Margin (7%):** Rs. 962.50 (96,250 paise)
+- **Post-Margin:** Rs. 12,787.50 (1,278,750 paise)
+- **Admin Charge (9% on Post-Margin):** Rs. 1,150.87 (115,087 paise)
+- **Payout Before TDS:** Rs. 11,636.63 (1,163,663 paise)
+- **194C TDS (1% on Payout Before TDS, FY aggregate $> \text{Rs.1L}$):** Rs. 116.36 (11,636 paise)
+- **Net Payable Payout:** **Rs. 11,520.27 (1,152,027 paise)**
+
+---
+
 ## Pay-Once Rule
 
 - One ID can receive Level 1–3 cash **ONLY ONCE** across AutoPool and MY SYSTEM combined.

@@ -19,7 +19,9 @@ router.put("/settings/:key", adminAuthMiddleware(["SUPER_ADMIN"]), validate(sche
 router.post("/withdrawals/:id/approve", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), adminController.approveWithdrawalReq);
 router.post("/withdrawals/:id/reject", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), adminController.rejectWithdrawalReq);
 
-router.post("/settlements/run", adminAuthMiddleware(["SUPER_ADMIN"]), adminController.runSettlement);
+router.post("/settlements/run", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), adminController.runSettlement);
+router.post("/vendors/:id/penalize", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), adminController.penalizeVendorReq);
+router.post("/vendors/:id/freeze", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), adminController.freezeVendorReq);
 
 router.get("/audit-logs", adminAuthMiddleware(["SUPER_ADMIN"]), adminController.getLogs);
 
