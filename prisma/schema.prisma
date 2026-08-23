@@ -19,7 +19,7 @@ model Member {
   dateOfBirth     DateTime?
   panNumber       String?
   panVerified     Boolean               @default(false)
-  kycTier         Int                   @default(1)
+  kycTier         String                @default("NONE")
   kycStatus       String                @default("PENDING")
   status          String                @default("ACTIVE")
   createdAt       DateTime              @default(now())
@@ -193,11 +193,13 @@ model Withdrawal {
   idCardId         String
   idCard           MemberIdCard @relation(fields: [idCardId], references: [id]) // 🆕 ADDED THIS LINE
   method           String
-  grossPaise       Int
-  tdsPaise         Int
-  adminChargePaise Int
-  netPaise         Int
-  status           String    @default("REQUESTED")
+  grossPaise         Int
+  recovered194RPaise Int       @default(0)
+  tdsPaise           Int
+  adminChargePaise   Int
+  netPaise           Int
+  idempotencyKey     String?   @unique
+  status             String    @default("REQUESTED")
   requestedAt      DateTime  @default(now())
   completedAt      DateTime?
   paymentDetails   String?

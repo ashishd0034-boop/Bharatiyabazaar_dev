@@ -8,6 +8,19 @@ describe("Security: IDOR Prevention on /api/id-cards/purchase", () => {
   let victimId;
 
   beforeAll(async () => {
+    await prisma.ledgerEntry.deleteMany({});
+    await prisma.withdrawal.deleteMany({});
+    await prisma.tdsLedger.deleteMany({});
+    await prisma.wallet.deleteMany({});
+    await prisma.commissionEntry.deleteMany({});
+    await prisma.payOnceLedger.deleteMany({});
+    await prisma.autoPoolNode.deleteMany({});
+    await prisma.mySystemNode.deleteMany({});
+    await prisma.voucher.deleteMany({});
+    await prisma.memberIdCard.deleteMany({});
+    await prisma.member.deleteMany({});
+    await prisma.systemCounter.deleteMany({});
+
     const uniqueSuffix = Date.now().toString().slice(-6);
     
     // Create Victim

@@ -38,9 +38,11 @@ const kycSchema = z.object({
 
 const withdrawalRequestSchema = z.object({
   body: z.object({
-    idCardId: z.string().min(1, "ID Card ID is required"),
-    method: z.enum(["BANK", "UPI", "WALLET", "CRYPTO"]),
-    amountPaise: z.number().positive("Amount must be positive")
+    idCardId: z.string().optional(),
+    method: z.enum(["BANK", "UPI", "WALLET", "MEMBER_WALLET", "VOUCHER_CONVERSION"]).optional(),
+    amountPaise: z.number().positive("Amount must be positive"),
+    paymentDetails: z.any().optional(),
+    idempotencyKey: z.string().optional()
   })
 });
 

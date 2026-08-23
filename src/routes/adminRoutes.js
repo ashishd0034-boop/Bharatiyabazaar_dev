@@ -5,8 +5,12 @@ const validate = require("../middleware/validateMiddleware");
 const schemas = require("../validations/schemas");
 
 const router = express.Router();
+const authController = require("../controllers/authController");
 
-// Require admin authentication for all routes
+// Public admin login endpoint
+router.post("/login", validate(schemas.adminLoginSchema), authController.adminLogin);
+
+// Require admin authentication for all subsequent routes
 router.use(adminAuthMiddleware(["SUPER_ADMIN", "ADMIN", "SUPPORT"]));
 
 router.get("/settings", adminController.getAllSettings);

@@ -1,15 +1,20 @@
 const express = require("express");
 const withdrawalController = require("../controllers/withdrawalController");
 const authMiddleware = require("../middleware/authMiddleware");
+const adminAuthMiddleware = require("../middleware/adminAuthMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const schemas = require("../validations/schemas");
 
 const router = express.Router();
 
-router.use(authMiddleware);
+// Member Endpoints
+router.post("/request", authMiddleware, validate(schemas.withdrawalRequestSchema), withdrawalController.request);
+router.get("/history", authMiddleware, withdrawalController.getHistory);
+router.get("/tds-preview", authMiddleware, withdrawalController.getTdsPreview);
 
-router.post("/request", validate(schemas.withdrawalRequestSchema), withdrawalController.request);
-router.get("/history", withdrawalController.getHistory);
-router.get("/tds-preview", withdrawalController.getTdsPreview);
+// Admin Approval & Rejection Endpoints
+router.post("/:id/complete", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), withdrawalController.complete);
+router.post("/:id/approve", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), withdrawalController.complete);
+router.post("/:id/reject", adminAuthMiddleware(["SUPER_ADMIN", "ADMIN"]), withdrawalController.reject);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const { getSettings, updateSetting } = require("../services/adminService");
-const { approveWithdrawal, rejectWithdrawal } = require("../services/adminService");
+const { completeWithdrawal, rejectWithdrawal } = require("../services/withdrawalService");
 const { getAuditLogs } = require("../services/auditService");
 const { processWeeklySettlement } = require("../services/settlementService");
 
@@ -32,7 +32,7 @@ async function updateSettingValue(req, res, next) {
 async function approveWithdrawalReq(req, res, next) {
   try {
     const { id } = req.params;
-    const withdrawal = await approveWithdrawal(id, req.admin.id, req.admin.role);
+    const withdrawal = await completeWithdrawal(id, req.admin.id);
     res.json({
       success: true,
       data: withdrawal
@@ -46,7 +46,7 @@ async function rejectWithdrawalReq(req, res, next) {
   try {
     const { id } = req.params;
     const { reason } = req.body;
-    const withdrawal = await rejectWithdrawal(id, reason, req.admin.id, req.admin.role);
+    const withdrawal = await rejectWithdrawal(id, reason, req.admin.id);
     res.json({
       success: true,
       data: withdrawal

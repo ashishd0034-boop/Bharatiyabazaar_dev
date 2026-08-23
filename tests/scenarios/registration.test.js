@@ -8,7 +8,18 @@ describe("Regression Guard: Registration Flow with Multiple IDs", () => {
   const testMobile = "8888" + Date.now().toString().slice(-6);
 
   beforeAll(async () => {
-    // No-op
+    await prisma.ledgerEntry.deleteMany({});
+    await prisma.withdrawal.deleteMany({});
+    await prisma.tdsLedger.deleteMany({});
+    await prisma.wallet.deleteMany({});
+    await prisma.commissionEntry.deleteMany({});
+    await prisma.payOnceLedger.deleteMany({});
+    await prisma.autoPoolNode.deleteMany({});
+    await prisma.mySystemNode.deleteMany({});
+    await prisma.voucher.deleteMany({});
+    await prisma.memberIdCard.deleteMany({});
+    await prisma.member.deleteMany({});
+    await prisma.systemCounter.deleteMany({});
   });
 
   afterAll(async () => {

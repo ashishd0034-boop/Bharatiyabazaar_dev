@@ -86,8 +86,8 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
         if (mySystemNode && !firstMySystemNodeId) firstMySystemNodeId = mySystemNode.id;
       }
 
-      if (mySystemNode) await commissionService.checkMySystemLevelCompletion(tx, mySystemNode.id);
       await commissionService.checkAutoPoolLevelCompletion(tx, globalPosition);
+      if (mySystemNode) await commissionService.checkMySystemLevelCompletion(tx, mySystemNode.id);
 
       // 1. Evaluate ACB for direct tree sponsor (enables SUB cards with L+R referrals to unlock ACB)
       if (mySystemNode && mySystemNode.sponsorIdCardId) {

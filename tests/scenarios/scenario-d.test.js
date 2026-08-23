@@ -23,7 +23,15 @@ describe("Scenario D: Withdrawal, Escrow, TDS, and Rejection", () => {
         memberId: member.id,
         cardNumber: "BB55555",
         type: "MAIN",
+        acbStatus: true,
         status: "ACTIVE"
+      }
+    });
+
+    await prisma.wallet.create({
+      data: {
+        memberId: member.id,
+        balancePaise: 0
       }
     });
   });
@@ -33,12 +41,8 @@ describe("Scenario D: Withdrawal, Escrow, TDS, and Rejection", () => {
     await prisma.$disconnect();
   });
 
-  afterEach(async () => {
-    // Small delay to prevent database lock exhaustion between tests
-    await new Promise(r => setTimeout(r, 100));
-  });
-
   async function cleanDb() {
+    await prisma.ledgerEntry.deleteMany({});
     await prisma.payOnceLedger.deleteMany({});
     await prisma.withdrawal.deleteMany({});
     await prisma.tdsLedger.deleteMany({});
@@ -54,8 +58,8 @@ describe("Scenario D: Withdrawal, Escrow, TDS, and Rejection", () => {
 
   it("should enforce minimum withdrawal limit", async () => {
     await expect(
-      requestWithdrawal(member.id, idCard.id, "BANK", 40000)
-    ).rejects.toThrow("Minimum withdrawal amount is Rs. 500");
+      requestWithdrawal(member.id, idCard.id, "BANK", 5000)
+    ).rejects.toThrow("Minimum withdrawal amount is Rs. 100");
   });
 
   it("should fail to request withdrawal if balance is insufficient", async () => {
@@ -195,7 +199,7 @@ describe("Scenario D: Withdrawal, Escrow, TDS, and Rejection", () => {
       where: { referenceId: withdrawal.id }
     });
     expect(tdsEntry.amountPaise).toBe(15000);
-    expect(tdsEntry.status).toBe("HELD");
+    expect(tdsEntry.status).toBe("DEPOSITED");
     expect(tdsEntry.section).toBe("SECTION_194H");
   });
   
@@ -243,6 +247,7 @@ describe("Scenario D: Withdrawal, Escrow, TDS, and Rejection", () => {
         memberId: unverifiedMember.id,
         cardNumber: "BB55556",
         type: "MAIN",
+        acbStatus: true,
         status: "ACTIVE"
       }
     });

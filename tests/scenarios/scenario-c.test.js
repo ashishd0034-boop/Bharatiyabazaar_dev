@@ -25,6 +25,7 @@ describe("Scenario C & Cascading Rebirths", () => {
   async function cleanDb() {
     await prisma.ledgerEntry.deleteMany({});
     await prisma.withdrawal.deleteMany({});
+    await prisma.tdsLedger.deleteMany({});
     await prisma.wallet.deleteMany({});
     await prisma.commissionEntry.deleteMany({});
     await prisma.payOnceLedger.deleteMany({});
@@ -32,7 +33,7 @@ describe("Scenario C & Cascading Rebirths", () => {
     await prisma.mySystemNode.deleteMany({});
     await prisma.voucher.deleteMany({});
     await prisma.memberIdCard.deleteMany({});
-    await prisma.member.deleteMany({ where: { mobile: testMobile } });
+    await prisma.member.deleteMany({});
     await prisma.systemCounter.deleteMany({});
   }
 

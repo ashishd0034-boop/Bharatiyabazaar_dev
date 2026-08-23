@@ -37,7 +37,7 @@ async function createMember(args) {
       address: args.address,
       pinCode: args.pinCode,
       memberCode: tempCode,
-      kycTier: 1,
+      kycTier: args.kycTier || "NONE",
       kycStatus: args.kycStatus || "PENDING",
       status: "ACTIVE"
     }

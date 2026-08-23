@@ -24,12 +24,18 @@ describe("Scenario A: Member joins with 3 IDs", () => {
   });
 
   async function cleanDb() {
+    await prisma.ledgerEntry.deleteMany({});
+    await prisma.withdrawal.deleteMany({});
+    await prisma.tdsLedger.deleteMany({});
+    await prisma.wallet.deleteMany({});
     await prisma.commissionEntry.deleteMany({});
     await prisma.payOnceLedger.deleteMany({});
     await prisma.autoPoolNode.deleteMany({});
     await prisma.mySystemNode.deleteMany({});
+    await prisma.voucher.deleteMany({});
     await prisma.memberIdCard.deleteMany({});
-    await prisma.member.deleteMany({ where: { mobile: testMobile } });
+    await prisma.member.deleteMany({});
+    await prisma.systemCounter.deleteMany({});
   }
 
   it("should calculate correct commissions and ACB status", async () => {
@@ -52,7 +58,7 @@ describe("Scenario A: Member joins with 3 IDs", () => {
     expect(autoPoolCommissions).toHaveLength(1);
     expect(autoPoolCommissions[0].level).toBe(1);
     expect(autoPoolCommissions[0].amountPaise).toBe(30000);
-    expect(autoPoolCommissions[0].status).toBe("CONFIRMED");
+    expect(autoPoolCommissions[0].status).toBe("WITHDRAWABLE");
 
     // Verify MY SYSTEM Commission (should be PAY_ONCE_BLOCKED)
     const mySystemCommissions = await prisma.commissionEntry.findMany({

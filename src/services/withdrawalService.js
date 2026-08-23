@@ -5,121 +5,306 @@ const tdsService = require("./tdsService");
 const ADMIN_CHARGE_PERCENT = {
   BANK: 0.10,
   MEMBER_WALLET: 0.05,
-  VOUCHER_CONVERSION: 0.05
+  VOUCHER_CONVERSION: 0.05,
+  UPI: 0.10,
+  WALLET: 0.05
 };
 
-async function requestWithdrawal(memberId, idCardId, method, amountPaise, paymentDetails = null) {
-  if (amountPaise < 50000) {
-    throw new Error("Minimum withdrawal amount is Rs. 500");
-  }
-  
-  if (!ADMIN_CHARGE_PERCENT[method]) {
-    throw new Error("Invalid withdrawal method");
-  }
+const MIN_WITHDRAWAL_PAISE = 10000; // Rs. 100 = 10,000 paise
+
+/**
+ * Preview calculations for withdrawal without applying database mutations.
+ */
+async function previewWithdrawal(memberId, method, amountPaise) {
+  const normMethod = (method || "BANK").toUpperCase();
+  const adminPercent = ADMIN_CHARGE_PERCENT[normMethod] ?? 0.10;
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Debit the wallet immediately (Escrow)
-    // The walletService will throw an error if balance goes below 0.
-    await walletService.debit(tx, memberId, amountPaise, "WITHDRAWAL_ESCROW", null, "Withdrawal Request Escrow");
+    const member = await tx.member.findUnique({ where: { id: memberId } });
+    if (!member) throw new Error("Member not found");
 
-    // 2. Create the withdrawal record
-    return await tx.withdrawal.create({
-      data: {
-        memberId,
-        idCardId,
-        method,
-        grossPaise: amountPaise,
-        tdsPaise: 0,
-        adminChargePaise: 0,
-        netPaise: 0,
-        status: "REQUESTED",
-        paymentDetails
-      }
-    });
+    // Step 0: 194R Liability
+    const pending194R = await tdsService.getPending194RLiability(tx, memberId);
+    const recovered194RPaise = Math.min(amountPaise, pending194R);
+    const taxableBasePaise = amountPaise - recovered194RPaise;
+
+    // Step 1: 194H TDS
+    const { tdsPaise, rate: tdsRate, priorGrossPaise, totalGrossPaise, thresholdPaise } =
+      await tdsService.calculate194HTds(tx, memberId, taxableBasePaise);
+
+    // Step 2: Admin Charge on Post-TDS Amount
+    const postTdsPaise = taxableBasePaise - tdsPaise;
+    const adminChargePaise = Math.floor((postTdsPaise * (adminPercent * 100)) / 100);
+
+    // Step 3: Net Payable
+    const netPaise = postTdsPaise - adminChargePaise;
+
+    return {
+      grossPaise: amountPaise,
+      recovered194RPaise,
+      taxableBasePaise,
+      tdsSection: "SECTION_194H",
+      appliedTdsRatePct: tdsRate * 100,
+      estimatedTdsPaise: tdsPaise,
+      postTdsPaise,
+      adminChargeRatePct: adminPercent * 100,
+      estimatedAdminChargePaise: adminChargePaise,
+      netPayablePaise: netPaise,
+      kycStatus: member.kycStatus,
+      kycTier: member.kycTier,
+      currentFyGrossTotalPaise: priorGrossPaise,
+      fyThresholdPaise: thresholdPaise
+    };
   });
 }
 
-async function processWithdrawal(withdrawalId, action, rejectionReason = null) {
+/**
+ * Request a withdrawal with atomic FOR UPDATE lock and Step 0-3 calculation.
+ */
+async function requestWithdrawal(memberId, idCardId, method, amountPaise, paymentDetails = null, idempotencyKey = null) {
+  if (amountPaise < MIN_WITHDRAWAL_PAISE) {
+    throw new Error("Minimum withdrawal amount is Rs. 100");
+  }
+
+  const normMethod = (method || "BANK").toUpperCase();
+  if (ADMIN_CHARGE_PERCENT[normMethod] === undefined) {
+    throw new Error("Invalid withdrawal method. Supported: BANK, MEMBER_WALLET, VOUCHER_CONVERSION, UPI");
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    // 0. Idempotency Check
+    if (idempotencyKey) {
+      const existing = await tx.withdrawal.findUnique({
+        where: { idempotencyKey }
+      });
+      if (existing) return existing;
+    }
+
+    // 1. Verify MAIN ID and ACB Status
+    const idCard = await tx.memberIdCard.findFirst({
+      where: { id: idCardId, memberId }
+    });
+
+    if (!idCard) {
+      throw new Error("ID card not found or does not belong to member");
+    }
+
+    if (idCard.type !== "MAIN") {
+      throw new Error("Withdrawals can only be initiated from MAIN ID card");
+    }
+
+    if (!idCard.acbStatus) {
+      throw new Error("ACB status required for withdrawals. Achieve 1 LEFT + 1 RIGHT direct referral.");
+    }
+
+    // 2. Atomic Balance Check with Row Locking
+    const wallets = await tx.$queryRaw`
+      SELECT * FROM wallets WHERE "memberId" = ${memberId} FOR UPDATE
+    `;
+    const wallet = wallets && wallets[0];
+
+    if (!wallet || wallet.balancePaise < amountPaise) {
+      throw new Error(`Insufficient funds for member ${memberId}`);
+    }
+
+    // 3. Step 0: 194R Liability Recovery Preview
+    const pending194R = await tdsService.getPending194RLiability(tx, memberId);
+    const recovered194RPaise = Math.min(amountPaise, pending194R);
+    const taxableBasePaise = amountPaise - recovered194RPaise;
+
+    // 4. Step 1: 194H TDS on Taxable Base
+    const { tdsPaise } = await tdsService.calculate194HTds(tx, memberId, taxableBasePaise);
+
+    // 5. Step 2: Admin Charge on Post-TDS Amount
+    const postTdsPaise = taxableBasePaise - tdsPaise;
+    const adminPercent = ADMIN_CHARGE_PERCENT[normMethod];
+    const adminChargePaise = Math.floor((postTdsPaise * (adminPercent * 100)) / 100);
+
+    // 6. Step 3: Net Payable
+    const netPaise = postTdsPaise - adminChargePaise;
+
+    // Invariant Check
+    if (amountPaise !== (recovered194RPaise + tdsPaise + adminChargePaise + netPaise)) {
+      throw new Error("Ledger Math Assertion Failed: Gross does not equal Recovery + TDS + Admin + Net.");
+    }
+
+    // 7. Debit Escrow from Wallet
+    await walletService.debit(tx, memberId, amountPaise, "WITHDRAWAL_ESCROW", null, "Withdrawal Request Escrow");
+
+    // 8. Create Withdrawal Record
+    const withdrawal = await tx.withdrawal.create({
+      data: {
+        memberId,
+        idCardId,
+        method: normMethod,
+        grossPaise: amountPaise,
+        recovered194RPaise,
+        tdsPaise,
+        adminChargePaise,
+        netPaise,
+        idempotencyKey: idempotencyKey || null,
+        status: "REQUESTED",
+        paymentDetails: paymentDetails ? JSON.stringify(paymentDetails) : null
+      }
+    });
+
+    // 9. Hold TDS in TdsLedger as PENDING if applicable
+    if (tdsPaise > 0) {
+      await tx.tdsLedger.create({
+        data: {
+          memberId,
+          section: "SECTION_194H",
+          amountPaise: tdsPaise,
+          status: "PENDING",
+          referenceId: withdrawal.id
+        }
+      });
+    }
+
+    return withdrawal;
+  });
+}
+
+/**
+ * Complete / Approve Withdrawal: releases escrow and writes distinct split ledger entries.
+ */
+async function completeWithdrawal(withdrawalId, adminId = null) {
   return await prisma.$transaction(async (tx) => {
     const withdrawal = await tx.withdrawal.findUnique({
       where: { id: withdrawalId }
     });
 
     if (!withdrawal) throw new Error("Withdrawal not found");
-    if (withdrawal.status !== "REQUESTED") throw new Error(`Withdrawal already processed (Status: ${withdrawal.status})`);
-
-    if (action === "REJECT") {
-      // Refund the wallet (release escrow)
-      await walletService.credit(tx, withdrawal.memberId, withdrawal.grossPaise, "WITHDRAWAL_REFUND", withdrawal.id, `Withdrawal Rejected: ${rejectionReason}`);
-      
-      return await tx.withdrawal.update({
-        where: { id: withdrawalId },
-        data: {
-          status: "REJECTED",
-          completedAt: new Date(),
-          rejectionReason
-        }
-      });
+    if (withdrawal.status !== "REQUESTED") {
+      throw new Error(`Withdrawal already processed (Status: ${withdrawal.status})`);
     }
 
-    if (action === "APPROVE") {
-      // 1. Calculate TDS
-      const { tdsPaise, taxablePaise } = await tdsService.calculate194HTds(tx, withdrawal.memberId, withdrawal.grossPaise);
-      
-      // 2. Calculate Admin Fee and Net Payable
-      const postTdsPaise = withdrawal.grossPaise - tdsPaise;
-      const adminPercent = ADMIN_CHARGE_PERCENT[withdrawal.method];
-      
-      // Strict Integer Math
-      const adminChargePaise = Math.floor((postTdsPaise * (adminPercent * 100)) / 100);
-      const netPaise = postTdsPaise - adminChargePaise;
-      
-      // Math Assertion
-      if (withdrawal.grossPaise !== (netPaise + tdsPaise + adminChargePaise)) {
-        throw new Error("Ledger Math Assertion Failed: Gross does not equal Net + TDS + Admin.");
-      }
-
-      // 3. Reverse Escrow (Wallet Balance temporarily restored)
-      await walletService.credit(tx, withdrawal.memberId, withdrawal.grossPaise, "ESCROW_RELEASED", withdrawal.id, "Reversing escrow for final payout splits");
-      
-      // 4. Debit the specific splits
-      await walletService.debit(tx, withdrawal.memberId, netPaise, "WITHDRAWAL_PAYOUT", withdrawal.id, `Net Payout via ${withdrawal.method}`);
-      if (tdsPaise > 0) {
-        await walletService.debit(tx, withdrawal.memberId, tdsPaise, "TDS_DEDUCTED", withdrawal.id, "TDS Section 194H");
-        
-        // Track in TdsLedger
-        await tx.tdsLedger.create({
-          data: {
-            memberId: withdrawal.memberId,
-            section: "SECTION_194H",
-            amountPaise: tdsPaise,
-            status: "HELD",
-            referenceId: withdrawal.id
-          }
-        });
-      }
-      if (adminChargePaise > 0) {
-        await walletService.debit(tx, withdrawal.memberId, adminChargePaise, "ADMIN_FEE", withdrawal.id, "Admin Charge");
-      }
-      
-      // 5. Mark as Completed
-      return await tx.withdrawal.update({
-        where: { id: withdrawalId },
-        data: {
-          status: "COMPLETED",
-          completedAt: new Date(),
-          tdsPaise,
-          adminChargePaise,
-          netPaise
-        }
-      });
+    // 1. Recover Step 0 194R Liability if any
+    if (withdrawal.recovered194RPaise > 0) {
+      await tdsService.recover194RLiability(tx, withdrawal.memberId, withdrawal.recovered194RPaise);
     }
 
-    throw new Error("Invalid action. Must be APPROVE or REJECT.");
+    // 2. Reverse Escrow
+    await walletService.credit(
+      tx,
+      withdrawal.memberId,
+      withdrawal.grossPaise,
+      "ESCROW_RELEASED",
+      withdrawal.id,
+      "Reversing escrow for final payout splits"
+    );
+
+    // 3. Post Individual Split Debits
+    await walletService.debit(
+      tx,
+      withdrawal.memberId,
+      withdrawal.netPaise,
+      "WITHDRAWAL_PAYOUT",
+      withdrawal.id,
+      `Net Payout via ${withdrawal.method}`
+    );
+
+    if (withdrawal.tdsPaise > 0) {
+      await walletService.debit(
+        tx,
+        withdrawal.memberId,
+        withdrawal.tdsPaise,
+        "TDS_DEDUCTED",
+        withdrawal.id,
+        "TDS Section 194H"
+      );
+      // Mark TDS as deposited
+      await tdsService.depositTDS(tx, withdrawal.id);
+    }
+
+    if (withdrawal.adminChargePaise > 0) {
+      await walletService.debit(
+        tx,
+        withdrawal.memberId,
+        withdrawal.adminChargePaise,
+        "ADMIN_FEE",
+        withdrawal.id,
+        "Admin Charge"
+      );
+    }
+
+    if (withdrawal.recovered194RPaise > 0) {
+      await walletService.debit(
+        tx,
+        withdrawal.memberId,
+        withdrawal.recovered194RPaise,
+        "TDS_194R_RECOVERY",
+        withdrawal.id,
+        "194R Voucher Tax Recovery"
+      );
+    }
+
+    // 4. Mark Withdrawal as COMPLETED
+    return await tx.withdrawal.update({
+      where: { id: withdrawalId },
+      data: {
+        status: "COMPLETED",
+        completedAt: new Date()
+      }
+    });
   });
 }
 
+/**
+ * Reject Withdrawal: refunds escrow in full and reverses held TDS.
+ */
+async function rejectWithdrawal(withdrawalId, rejectionReason = "Rejected by admin", adminId = null) {
+  return await prisma.$transaction(async (tx) => {
+    const withdrawal = await tx.withdrawal.findUnique({
+      where: { id: withdrawalId }
+    });
+
+    if (!withdrawal) throw new Error("Withdrawal not found");
+    if (withdrawal.status !== "REQUESTED") {
+      throw new Error(`Withdrawal already processed (Status: ${withdrawal.status})`);
+    }
+
+    // 1. Refund the wallet (release escrow)
+    await walletService.credit(
+      tx,
+      withdrawal.memberId,
+      withdrawal.grossPaise,
+      "WITHDRAWAL_REFUND",
+      withdrawal.id,
+      `Withdrawal Rejected: ${rejectionReason}`
+    );
+
+    // 2. Reverse TDS Ledger entries
+    await tdsService.reverseTDS(tx, withdrawal.id);
+
+    // 3. Mark as REJECTED
+    return await tx.withdrawal.update({
+      where: { id: withdrawalId },
+      data: {
+        status: "REJECTED",
+        completedAt: new Date(),
+        rejectionReason
+      }
+    });
+  });
+}
+
+async function processWithdrawal(withdrawalId, action, rejectionReason = null) {
+  if (action === "APPROVE" || action === "COMPLETE") {
+    return await completeWithdrawal(withdrawalId);
+  }
+  if (action === "REJECT") {
+    return await rejectWithdrawal(withdrawalId, rejectionReason);
+  }
+  throw new Error("Invalid action. Must be APPROVE or REJECT.");
+}
+
 module.exports = {
+  previewWithdrawal,
   requestWithdrawal,
-  processWithdrawal
+  completeWithdrawal,
+  rejectWithdrawal,
+  processWithdrawal,
+  ADMIN_CHARGE_PERCENT,
+  MIN_WITHDRAWAL_PAISE
 };
