@@ -73,7 +73,7 @@ describe("Scenario G: Admin Settings & Audit", () => {
   it("should prevent SUPPORT role from updating financial settings", async () => {
     await expect(
       updateSetting("TDS_194H_RATE", "5", supportAdmin.id)
-    ).rejects.toThrow("Unauthorized: Only SUPER_ADMIN can update financial setting TDS_194H_RATE.");
+    ).rejects.toThrow("Unauthorized: Only SUPER_ADMIN can update TDS_194H_RATE.");
   });
 
   it("should allow SUPPORT role to update non-financial settings", async () => {

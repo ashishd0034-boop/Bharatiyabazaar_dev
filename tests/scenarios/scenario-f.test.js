@@ -17,6 +17,7 @@ describe("Scenario F: Vendor Settlement Engine", () => {
         panNumber: "ABCDE1234F"
       }
     });
+    await prisma.wallet.create({ data: { memberId: vendorMember.id, balancePaise: 0 } });
 
     vendor = await prisma.vendor.create({
       data: {
@@ -24,6 +25,7 @@ describe("Scenario F: Vendor Settlement Engine", () => {
         businessName: "Test Store",
         category: "GROCERY",
         marginRatePct: 7.0, // 7% margin
+        payoutMethod: "WALLET",
         status: "VERIFIED"
       }
     });
@@ -37,6 +39,7 @@ describe("Scenario F: Vendor Settlement Engine", () => {
           kycStatus: "VERIFIED"
         }
       });
+      await prisma.wallet.create({ data: { memberId: member.id, balancePaise: 0 } });
       const idCard = await prisma.memberIdCard.create({
         data: {
           memberId: member.id,
@@ -91,12 +94,13 @@ describe("Scenario F: Vendor Settlement Engine", () => {
       }
     });
 
-    // Create a PENDING_SETTLEMENT Vendor Referral Bonus
-    await prisma.vendorReferralBonus.create({
+    // Create a referral bonus (should be swept)
+    await prisma.commissionEntry.create({
       data: {
-        memberId: testMembers[1].member.id,
-        referredVendorId: vendor.id,
-        bonusPaise: 3437, // 0.25% of 13750
+        idCardId: testMembers[1].idCard.id,
+        stream: "VENDOR_REFERRAL_BONUS",
+        level: 1,
+        amountPaise: 3437, // 0.25% of 13750
         status: "PENDING_SETTLEMENT",
         createdAt: new Date(testMonday.getTime() - 24 * 60 * 60 * 1000)
       }
@@ -111,24 +115,32 @@ describe("Scenario F: Vendor Settlement Engine", () => {
 
   async function cleanDb() {
     await prisma.ledgerEntry.deleteMany({});
+    await prisma.withdrawal.deleteMany({});
+    await prisma.tdsLedger.deleteMany({});
     await prisma.commissionEntry.deleteMany({});
     await prisma.vendorReferralBonus.deleteMany({});
     await prisma.vendorSettlement.deleteMany({});
     await prisma.vendorSale.deleteMany({});
+    await prisma.setuKoshNode.deleteMany({});
+    await prisma.payOnceLedger.deleteMany({});
+    await prisma.autoPoolNode.deleteMany({});
+    await prisma.mySystemNode.deleteMany({});
+    await prisma.voucher.deleteMany({});
     await prisma.wallet.deleteMany({});
     await prisma.memberIdCard.deleteMany({});
     await prisma.setuKoshCounter.deleteMany({});
     await prisma.vendor.deleteMany({});
     await prisma.member.deleteMany({});
     await prisma.settlementRun.deleteMany({});
+    await prisma.systemCounter.deleteMany({});
   }
 
   it("should process the settlement accurately and update wallets", async () => {
     const testMonday = new Date("2026-08-10T00:00:00.000Z");
     const result = await processWeeklySettlement(testMonday);
     
-    // Total entries: 1 vendor settlement + 1 commission + 1 referral bonus = 3
-    expect(result.totalEntries).toBe(3);
+    // Total vendor settlements in this run = 1
+    expect(result.totalEntries).toBe(1);
 
     // Verify Vendor Settlement Math
     const settlement = await prisma.vendorSettlement.findFirst({
@@ -140,30 +152,30 @@ describe("Scenario F: Vendor Settlement Engine", () => {
     expect(settlement.marginPaise).toBe(96250); // 7% of 13,750 = 962.5
     expect(settlement.postMarginPaise).toBe(1278750); // 13750 - 962.5 = 12787.5
     
-    // Admin charge = 10% on post margin = 12787.5 * 10% = 1278.75
-    // Volume discount = Tier 1 (0%) -> final admin charge = 1278.75
-    expect(settlement.adminChargePaise).toBe(127875);
+    // Admin charge on WALLET payout = 5% on post margin = 12787.5 * 5% = 639.375 -> 63937 paise
+    // Volume discount = Tier 1 (0%) -> final admin charge = 63937 paise
+    expect(settlement.adminChargePaise).toBe(63937);
     
-    // Payout before TDS = 12787.5 - 1278.75 = 11508.75
-    // TDS = 1% on Gross (13,750) = 137.50
-    expect(settlement.tdsPaise).toBe(13750);
+    // Payout before TDS = 12787.5 - 639.375 = 12148.125 -> 1214813 paise
+    // TDS under 194C = 0 (payout < ₹30k single and < ₹1L aggregate threshold)
+    expect(settlement.tdsPaise).toBe(0);
 
-    // Net payable = 11508.75 - 137.50 = 11371.25
-    expect(settlement.netPayablePaise).toBe(1137125);
+    // Net payable = 12148.125 - 0 = 12148.125 -> 1214813 paise
+    expect(settlement.netPayablePaise).toBe(1214813);
 
     // Verify Vendor Wallet is credited
     const vendorWallet = await prisma.wallet.findUnique({ where: { memberId: vendorMember.id }});
-    expect(vendorWallet.balancePaise).toBe(1137125);
+    expect(vendorWallet.balancePaise).toBe(1214813);
 
     // Verify Setu Kosh commission swept
     const commission = await prisma.commissionEntry.findFirst({ where: { idCardId: testMembers[2].idCard.id }});
-    expect(commission.status).toBe("CONFIRMED");
+    expect(commission.status).toBe("WITHDRAWABLE");
     const member2Wallet = await prisma.wallet.findUnique({ where: { memberId: testMembers[2].member.id }});
     expect(member2Wallet.balancePaise).toBe(2500);
 
     // Verify Referral bonus swept
-    const bonus = await prisma.vendorReferralBonus.findFirst({ where: { memberId: testMembers[1].member.id }});
-    expect(bonus.status).toBe("CONFIRMED");
+    const bonus = await prisma.commissionEntry.findFirst({ where: { idCardId: testMembers[1].idCard.id, stream: "VENDOR_REFERRAL_BONUS" }});
+    expect(bonus.status).toBe("WITHDRAWABLE");
     const member1Wallet = await prisma.wallet.findUnique({ where: { memberId: testMembers[1].member.id }});
     expect(member1Wallet.balancePaise).toBe(3437);
   });
@@ -171,12 +183,11 @@ describe("Scenario F: Vendor Settlement Engine", () => {
   it("should fail gracefully and not process twice on the same runDate (Idempotency)", async () => {
     const testMonday = new Date("2026-08-10T00:00:00.000Z");
     
-    await expect(processWeeklySettlement(testMonday)).rejects.toThrow(
-      "Settlement run for 2026-08-10T00:00:00.000Z is already in progress or completed."
-    );
+    const reRunResult = await processWeeklySettlement(testMonday);
+    expect(reRunResult.alreadyRan).toBe(true);
 
     // Ensure wallet wasn't credited twice
     const vendorWallet = await prisma.wallet.findUnique({ where: { memberId: vendorMember.id }});
-    expect(vendorWallet.balancePaise).toBe(1137125); // Should still be exactly one payout
+    expect(vendorWallet.balancePaise).toBe(1214813); // Should still be exactly one payout
   });
 });
