@@ -538,4 +538,143 @@ async function getAutoPoolExplorer(req, res, next) {
   }
 }
 
+/**
+ * Derived Notification Feed (strictly member-scoped from existing tables).
+ */
+async function getNotifications(req, res, next) {
+  try {
+    const memberId = req.member.id;
+
+    // Fetch the 6 sources for this member concurrently
+    const [ledgerEntries, withdrawals, rebirthCards, acbCards, referralBonuses, vouchers] = await Promise.all([
+      // 1. Ledger credits (wallet credits)
+      prisma.ledgerEntry.findMany({
+        where: {
+          wallet: { memberId },
+          type: "CREDIT"
+        },
+        orderBy: { createdAt: "desc" },
+        take: 30
+      }),
+      // 2. Withdrawals
+      prisma.withdrawal.findMany({
+        where: { memberId },
+        orderBy: { requestedAt: "desc" },
+        take: 20
+      }),
+      // 3. Rebirth cards
+      prisma.memberIdCard.findMany({
+        where: { memberId, type: "REBIRTH" },
+        orderBy: { createdAt: "desc" },
+        take: 20
+      }),
+      // 4. ACB Unlocks
+      prisma.memberIdCard.findMany({
+        where: { memberId, acbStatus: true },
+        orderBy: { createdAt: "desc" },
+        take: 20
+      }),
+      // 5. Vendor referral bonuses
+      prisma.vendorReferralBonus.findMany({
+        where: { memberId },
+        orderBy: { createdAt: "desc" },
+        take: 20
+      }),
+      // 6. Vouchers issued
+      prisma.voucher.findMany({
+        where: { memberId },
+        orderBy: { issuedAt: "desc" },
+        take: 20
+      })
+    ]);
+
+    const notifications = [];
+
+    // 1. Ledger Entries
+    for (const l of ledgerEntries) {
+      notifications.push({
+        id: `ledger-${l.id}`,
+        type: "WALLET_CREDIT",
+        category: "COMMISSION",
+        title: "Wallet Credit Received",
+        message: `₹${(l.amountPaise / 100).toFixed(2)} credited to your wallet (${l.description || l.source})`,
+        timestamp: l.createdAt.toISOString()
+      });
+    }
+
+    // 2. Withdrawals
+    for (const w of withdrawals) {
+      notifications.push({
+        id: `wd-${w.id}`,
+        type: "WITHDRAWAL_STATUS",
+        category: "WITHDRAWAL",
+        title: `Withdrawal ${w.status}`,
+        message: `Withdrawal request for ₹${(w.grossPaise / 100).toFixed(2)} via ${w.method} is currently ${w.status}${w.rejectionReason ? ': ' + w.rejectionReason : ''}`,
+        timestamp: (w.completedAt || w.requestedAt).toISOString()
+      });
+    }
+
+    // 3. Rebirth Cards
+    for (const r of rebirthCards) {
+      notifications.push({
+        id: `rebirth-${r.id}`,
+        type: "REBIRTH_GENERATED",
+        category: "LIFECYCLE",
+        title: "Rebirth ID Generated 🎉",
+        message: `Rebirth ID Card #${r.cardNumber} was auto-generated and placed into the AutoPool tree.`,
+        timestamp: r.createdAt.toISOString()
+      });
+    }
+
+    // 4. ACB Cards
+    for (const a of acbCards) {
+      notifications.push({
+        id: `acb-${a.id}`,
+        type: "ACB_UNLOCKED",
+        category: "LIFECYCLE",
+        title: "ACB Qualification Achieved 🚀",
+        message: `Card #${a.cardNumber} has unlocked Active Commission Beneficiary (ACB) status for AutoPool payouts.`,
+        timestamp: (a.acbUnlockedAt || a.createdAt).toISOString()
+      });
+    }
+
+    // 5. Referral Bonuses
+    for (const b of referralBonuses) {
+      notifications.push({
+        id: `ref-${b.id}`,
+        type: "REFERRAL_BONUS",
+        category: "SETU_KOSH",
+        title: "Merchant Referral Bonus",
+        message: `Earned ₹${(b.bonusPaise / 100).toFixed(2)} referral bonus from store purchase (Status: ${b.status}).`,
+        timestamp: b.createdAt.toISOString()
+      });
+    }
+
+    // 6. Vouchers
+    for (const v of vouchers) {
+      notifications.push({
+        id: `voucher-${v.id}`,
+        type: "VOUCHER_ISSUED",
+        category: "COMMISSION",
+        title: "Reward Voucher Issued 🎁",
+        message: `Reward voucher worth ₹${(v.faceValuePaise / 100).toFixed(2)} issued (Status: ${v.status}).`,
+        timestamp: (v.issuedAt || v.createdAt).toISOString()
+      });
+    }
+
+    // Sort descending by timestamp and cap at latest 50
+    notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const cappedNotifications = notifications.slice(0, 50);
+
+    res.json({
+      success: true,
+      data: cappedNotifications
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports.getAutoPoolExplorer = getAutoPoolExplorer;
+module.exports.getNotifications = getNotifications;
+

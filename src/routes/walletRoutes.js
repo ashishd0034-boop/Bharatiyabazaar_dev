@@ -10,6 +10,7 @@ const router = express.Router();
 
 // Member Wallet Endpoints
 router.get("/balance", authMiddleware, walletController.getBalance);
+router.get("/summary", authMiddleware, walletController.getBalance);
 router.get("/ledger", authMiddleware, walletController.getLedger);
 router.get("/commissions", authMiddleware, walletController.getCommissions);
 router.post("/withdraw", authMiddleware, validate(schemas.withdrawalRequestSchema), withdrawalController.request);

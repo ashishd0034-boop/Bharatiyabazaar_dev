@@ -14,10 +14,46 @@ const MIN_WITHDRAWAL_PAISE = 10000; // Rs. 100 = 10,000 paise
 
 /**
  * Preview calculations for withdrawal without applying database mutations.
+ * Supports both authenticated member sessions and guest mode (zero prior FY aggregates).
  */
 async function previewWithdrawal(memberId, method, amountPaise) {
   const normMethod = (method || "BANK").toUpperCase();
   const adminPercent = ADMIN_CHARGE_PERCENT[normMethod] ?? 0.10;
+
+  // Guest Mode: Zero prior FY aggregates, default 3% rate on > ₹20k
+  if (!memberId) {
+    const thresholdPaise = 2000000; // Rs. 20,000
+    const tdsRate = 0.03;
+    const recovered194RPaise = 0;
+    const taxableBasePaise = amountPaise;
+    let tdsPaise = 0;
+
+    if (taxableBasePaise > thresholdPaise) {
+      tdsPaise = Math.floor(((taxableBasePaise - thresholdPaise) * 3) / 100);
+    }
+
+    const postTdsPaise = taxableBasePaise - tdsPaise;
+    const adminChargePaise = Math.floor((postTdsPaise * (adminPercent * 100)) / 100);
+    const netPaise = postTdsPaise - adminChargePaise;
+
+    return {
+      grossPaise: amountPaise,
+      recovered194RPaise: 0,
+      taxableBasePaise,
+      tdsSection: "SECTION_194H",
+      appliedTdsRatePct: tdsRate * 100,
+      estimatedTdsPaise: tdsPaise,
+      postTdsPaise,
+      adminChargeRatePct: adminPercent * 100,
+      estimatedAdminChargePaise: adminChargePaise,
+      netPayablePaise: netPaise,
+      kycStatus: "GUEST",
+      kycTier: "TIER_0",
+      currentFyGrossTotalPaise: 0,
+      fyThresholdPaise: thresholdPaise,
+      isGuest: true
+    };
+  }
 
   return await prisma.$transaction(async (tx) => {
     const member = await tx.member.findUnique({ where: { id: memberId } });
@@ -53,7 +89,8 @@ async function previewWithdrawal(memberId, method, amountPaise) {
       kycStatus: member.kycStatus,
       kycTier: member.kycTier,
       currentFyGrossTotalPaise: priorGrossPaise,
-      fyThresholdPaise: thresholdPaise
+      fyThresholdPaise: thresholdPaise,
+      isGuest: false
     };
   });
 }

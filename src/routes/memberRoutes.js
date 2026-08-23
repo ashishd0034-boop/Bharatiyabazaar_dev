@@ -18,5 +18,6 @@ router.get("/check-availability", memberController.checkAvailability);
 router.get("/my-placement", memberController.getMyPlacement);
 router.get("/my-referrals", memberController.getMyReferralCount);
 router.get("/my-referral-count", memberController.getMyReferralCount);
+router.get("/notifications", memberController.getNotifications);
 
 module.exports = router;

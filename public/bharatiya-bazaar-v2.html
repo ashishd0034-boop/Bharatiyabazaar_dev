@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Bharatiya Bazaar — India's Community Commerce Network. Join. Refer. Shop. Earn Together.">
+  <title>Bharatiya Bazaar | भारतीय बाज़ार — Community Commerce Network</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --navy: #1B3A6B;
+      --navy-dark: #12294c;
+      --teal: #1A6B5A;
+      --teal-dark: #135241;
+      --amber: #B8860B;
+      --bg: #F8F9FA;
+      --white: #ffffff;
+      --ink: #1f2a3a;
+      --muted: #5b6b7f;
+      --border: #e4e9f0;
+      --shadow: 0 10px 30px rgba(27,58,107,.10);
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --font: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --font-display: 'Poppins', var(--font);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.2; }
+    a { text-decoration: none; color: inherit; }
+
+    /* Top Utility Bar */
+    .utility-bar {
+      background: var(--navy-dark);
+      color: #fff;
+      font-size: 13px;
+      padding: 6px 16px;
+    }
+    .utility-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .utility-links { display: flex; gap: 14px; align-items: center; }
+    .utility-links a { color: rgba(255,255,255,0.85); transition: color 0.15s; }
+    .utility-links a:hover { color: #fff; text-decoration: underline; }
+
+    /* Main Navigation */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--navy);
+    }
+    .brand-badge {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy) 55% 100%);
+      flex-shrink: 0;
+    }
+    .nav-menu {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      font-size: 14.5px;
+      font-weight: 600;
+    }
+    .nav-menu a { color: var(--navy); transition: color 0.15s; }
+    .nav-menu a:hover { color: var(--teal); }
+
+    .nav-actions { display: flex; gap: 8px; align-items: center; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 18px;
+      border-radius: var(--radius-btn);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--teal); color: #fff; }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn-secondary { background: var(--navy); color: #fff; }
+    .btn-secondary:hover { background: var(--navy-dark); }
+    .btn-outline { border-color: var(--border); background: #fff; color: var(--navy); }
+    .btn-outline:hover { background: #f1f5f9; }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+      color: #fff;
+      padding: 70px 16px 60px;
+      text-align: center;
+    }
+    .hero-container { max-width: 900px; margin: 0 auto; }
+    .hero h1 { font-size: clamp(28px, 4.5vw, 46px); font-weight: 800; margin-bottom: 16px; }
+    .hero p { font-size: clamp(15px, 2vw, 18px); color: rgba(255,255,255,0.9); margin-bottom: 28px; line-height: 1.6; }
+    .hero-cta { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+    /* Feature Pillars */
+    .section { padding: 60px 16px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-head { text-align: center; max-width: 700px; margin: 0 auto 40px; }
+    .section-head h2 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 8px; }
+    .section-head p { color: var(--muted); font-size: 15px; }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+    .card h3 { font-size: 18px; color: var(--navy); margin-bottom: 8px; }
+    .card p { font-size: 14px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+
+    /* Footer */
+    .footer {
+      background: var(--navy-dark);
+      color: #fff;
+      padding: 40px 16px 20px;
+      font-size: 13.5px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+    .footer-col h4 { font-size: 15px; margin-bottom: 12px; color: var(--amber); }
+    .footer-col ul { list-style: none; display: grid; gap: 6px; }
+    .footer-col a { color: rgba(255,255,255,0.8); }
+    .footer-col a:hover { color: #fff; text-decoration: underline; }
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+      color: rgba(255,255,255,0.6);
+      font-size: 12px;
+    }
+
+    @media (max-width: 860px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: repeat(2, 1fr); }
+      .nav-menu { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- TOP UTILITY BAR -->
+  <div class="utility-bar">
+    <div class="utility-inner">
+      <div>🇮🇳 स्वदेशी सामुदायिक मंच · Bharatiya Bazaar Commerce Network</div>
+      <div class="utility-links">
+        <a href="bb-hindi.html">हिंदी पोर्टल (Hindi)</a>
+        <span>·</span>
+        <a href="bb-calculator.html">कैलकुलेटर</a>
+        <span>·</span>
+        <a href="bb-admin.html">प्रशासक लॉगिन (Admin)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN HEADER -->
+  <header class="header">
+    <div class="nav-container">
+      <a href="bharatiya-bazaar-v2.html" class="brand">
+        <span class="brand-badge"></span>
+        <span>Bharatiya Bazaar</span>
+      </a>
+      <nav class="nav-menu">
+        <a href="bb-dashboard.html">Member Portal</a>
+        <a href="bb-setu-kosh.html">Setu Kosh</a>
+        <a href="bb-calculator.html">Calculator</a>
+        <a href="bb-notifications.html">Notifications</a>
+        <a href="bb-vendor-register.html">Merchant Onboarding</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="bb-register.html" class="btn btn-primary">Join as Member</a>
+        <a href="bb-dashboard.html" class="btn btn-outline">Sign In</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-container">
+      <h1>Shop Local. Refer Friends. Earn Together.</h1>
+      <p>
+        भारतीय बाज़ार — A revolutionary tri-stream community commerce engine. Earn non-working AutoPool payouts, 10-level MY SYSTEM binary team commissions, and shopping margin rewards through Setu Kosh!
+      </p>
+      <div class="hero-cta">
+        <a href="bb-register.html" class="btn btn-primary" style="font-size:16px; padding:12px 24px;">Start Earning (Member Registration) →</a>
+        <a href="bb-vendor-register.html" class="btn btn-secondary" style="font-size:16px; padding:12px 24px;">Register as Merchant (दुकानदार पंजीकरण)</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- THREE INCOME PILLARS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Three Synergistic Income Streams</h2>
+        <p>A unified mathematical model built for statutory compliance, fast weekly settlements, and sustainable growth.</p>
+      </div>
+
+      <div class="grid-3">
+        <!-- Pillar 1 -->
+        <div class="card">
+          <h3>1. AutoPool Global (2x2 BFS)</h3>
+          <p>National auto-filling binary matrix providing up to 6 cycles of payouts and automated rebirth sub-IDs.</p>
+          <a href="bb-autopool.html" class="btn btn-outline" style="width:100%;">Explore AutoPool →</a>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="card">
+          <h3>2. MY SYSTEM (10-Level)</h3>
+          <p>Direct sponsorship tree rewarding your personal team growth with 10-level direct referral commissions.</p>
+          <a href="bb-tree.html" class="btn btn-outline" style="width:100%;">Inspect MY SYSTEM →</a>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="card">
+          <h3>3. Setu Kosh (Shopping Rewards)</h3>
+          <p>Every purchase at local verified merchants accumulates margin towards free sub-IDs and binary tree payouts.</p>
+          <a href="bb-setu-kosh.html" class="btn btn-outline" style="width:100%;">Setu Kosh Rewards →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>Bharatiya Bazaar</h4>
+        <p style="color:rgba(255,255,255,0.7); font-size:13px; margin-bottom:8px;">
+          Empowering local commerce through transparent, mathematical community commission distribution.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Member Portals</h4>
+        <ul>
+          <li><a href="bb-register.html">Member Registration</a></li>
+          <li><a href="bb-dashboard.html">Member Login &amp; Wallet</a></li>
+          <li><a href="bb-hindi.html">हिंदी डैशबोर्ड (Hindi Portal)</a></li>
+          <li><a href="bb-calculator.html">TDS &amp; Withdrawal Calculator</a></li>
+          <li><a href="bb-notifications.html">Notifications Center</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Merchant &amp; Operations</h4>
+        <ul>
+          <li><a href="bb-vendor-register.html">Merchant Onboarding</a></li>
+          <li><a href="bb-vendor-dashboard.html">Merchant Dashboard</a></li>
+          <li><a href="bb-settlement.html">Settlements Explorer</a></li>
+          <li><a href="bb-admin.html">Admin Governance Portal</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Compliance &amp; Legal</h4>
+        <ul>
+          <li><a href="bb-calculator.html">Section 194H / 194R / 194C TDS</a></li>
+          <li><a href="bb-components.html">Component Design System</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Bharatiya Bazaar (भारतीय बाज़ार). All Rights Reserved. Fully compliant with Indian Income Tax &amp; GST regulations.
+    </div>
+  </footer>
+</body>
+</html>

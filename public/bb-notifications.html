@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notifications | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+  <title>Notifications &amp; Activity Feed | Bharatiya Bazaar (भारतीय बाज़ार)</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,6 +28,7 @@
       --warning: #d97706;
       --danger: #dc2626;
       --info: #0369a1;
+      --purple: #7c3aed;
       --radius-card: 12px;
       --radius-btn: 8px;
       --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
@@ -46,11 +47,11 @@
 
     .topbar {
       background: var(--navy); color: #fff; padding: 14px 22px;
-      display: flex; justify-content: space-between; align-items: center; gap: 12px;
-      position: sticky; top: 0; z-index: 20;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; position: sticky; top: 0; z-index: 20;
     }
 
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: #fff; }
     .brand-badge {
       width: 34px; height: 34px; border-radius: 50%;
       background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
@@ -62,307 +63,232 @@
       display: grid; place-items: center; font-weight: 700; color: #fff;
     }
 
-    .container { width: min(900px, calc(100% - 32px)); margin: 24px auto 40px; }
+    .container { width: min(880px, calc(100% - 32px)); margin: 24px auto 40px; }
 
-    .page-head { margin-bottom: 16px; }
+    .page-head { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
     .page-head h1 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 4px; }
     .page-head p { color: var(--muted); font-size: 14.5px; }
 
-    .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav-btn {
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
+      background: #fff; color: var(--navy); border: 1px solid var(--border);
     }
+    .nav-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 
-    .panel { padding: 18px; }
-
-    .toolbar {
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
-    }
-
-    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-
+    .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
     .tab-btn {
-      border: 1px solid var(--border); background: #fff; color: var(--navy);
-      padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; cursor: pointer;
+      padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer;
+      background: #fff; color: var(--navy); border: 1px solid var(--border);
     }
-
     .tab-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 
-    .btn-ghost {
-      border: 1px solid var(--border); background: #fff; color: var(--navy);
-      padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
+    .notif-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-card);
+      box-shadow: var(--shadow); padding: 18px; margin-bottom: 12px; display: flex; gap: 14px;
+      align-items: flex-start; transition: transform 0.1s ease;
     }
-
-    .btn-ghost:hover { border-color: var(--teal); color: var(--teal-dark); }
-
-    .notif-list { display: grid; gap: 10px; }
-
-    .notif-item {
-      display: flex; gap: 12px; border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px; background: #fff; position: relative;
-    }
+    .notif-card:hover { transform: translateY(-1px); }
 
     .notif-icon {
-      width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center;
-      font-size: 18px; font-weight: 700; flex: 0 0 auto; color: #fff;
+      width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+      font-size: 18px; flex-shrink: 0;
     }
+    .icon-comm { background: #e8f8ee; color: var(--success); }
+    .icon-wd { background: #fff4e0; color: var(--warning); }
+    .icon-life { background: #ede9fe; color: var(--purple); }
+    .icon-setu { background: #e0f2fe; color: var(--info); }
 
-    .notif-icon.earnings { background: var(--teal); }
-    .notif-icon.withdrawals { background: var(--navy); }
-    .notif-icon.kyc { background: var(--amber); }
-    .notif-icon.events { background: var(--info); }
+    .notif-body { flex: 1; }
+    .notif-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .notif-title { font-size: 15px; font-weight: 700; color: var(--navy); }
+    .notif-time { font-size: 12px; color: var(--muted); }
+    .notif-desc { font-size: 13.5px; color: #334155; line-height: 1.4; }
 
-    .notif-body { flex: 1; min-width: 0; }
-
-    .notif-title {
-      font-weight: 700; color: var(--navy); font-size: 14.5px;
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    }
-
-    .notif-desc { font-size: 13.5px; color: var(--text); margin-top: 4px; }
-
-    .notif-meta {
-      display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
-      margin-top: 8px; font-size: 12.5px; color: var(--muted);
-    }
-
-    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .badge { display: inline-flex; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; }
     .badge.success { background: #e8f8ee; color: var(--success); }
-    .badge.pending { background: #fff4e0; color: var(--warning); }
-    .badge.info { background: #e8f6ff; color: var(--info); }
-    .badge.blocked { background: #f1f5f9; color: #475569; }
-    .badge.danger { background: #fee2e2; color: var(--danger); }
+    .badge.warning { background: #fff4e0; color: var(--warning); }
+    .badge.info { background: #e0f2fe; color: var(--info); }
+    .badge.purple { background: #ede9fe; color: var(--purple); }
 
-    .unread-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: var(--danger); position: absolute; top: 14px; right: 14px;
+    .btn-ghost {
+      background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
 
-    .note {
-      border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
-      padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 14px;
+    .empty-box {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-card);
+      padding: 40px 20px; text-align: center; color: var(--muted); font-size: 14px;
     }
 
-    .empty-state {
-      border: 2px dashed var(--border); border-radius: 12px;
-      padding: 26px 18px; text-align: center; color: var(--muted); display: none;
-    }
-
-    .hidden { display: none; }
-
-    @media (max-width: 640px) {
-      .toolbar { flex-direction: column; align-items: flex-start; }
-    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
+  <!-- TOPBAR -->
   <header class="topbar">
-    <div class="brand"><span class="brand-badge"></span><span>Bharatiya Bazaar · भारतीय बाज़ार</span></div>
-    <div class="member-chip"><span>Rajesh Kumar · BB10042 · ✓ ACB Member</span><span class="avatar">RK</span></div>
+    <a href="bb-dashboard.html" class="brand">
+      <span class="brand-badge"></span>
+      <span>Bharatiya Bazaar · Notifications</span>
+    </a>
+    <div id="topbarMemberInfo" class="member-chip hidden">
+      <span id="topbarMemberName">Member</span>
+      <span id="topbarCardNumber" class="badge info">MAIN</span>
+      <span id="topbarAvatar" class="avatar">M</span>
+      <button class="btn-ghost" onclick="logoutMember()">Logout</button>
+    </div>
   </header>
 
   <main class="container">
     <section class="page-head">
-      <h1>Notifications</h1>
-      <p>Rajesh Kumar · BB10042 · Business-critical platform events only</p>
+      <div>
+        <h1>Activity &amp; Notifications Feed</h1>
+        <p>सूचनाएं एवं गतिविधि · Real-time ledger credits, withdrawal status, rebirths, and rewards (Latest 50 events)</p>
+      </div>
+      <div class="nav-links">
+        <a href="bb-dashboard.html" class="nav-btn">← Dashboard</a>
+        <a href="bb-setu-kosh.html" class="nav-btn">Setu Kosh</a>
+        <a href="bb-calculator.html" class="nav-btn">Calculator</a>
+        <a href="bb-notifications.html" class="nav-btn active">Notifications</a>
+      </div>
     </section>
 
-    <div class="card panel">
-      <div class="toolbar">
-        <div class="tabs">
-          <button class="tab-btn active" data-filter="all" type="button">All</button>
-          <button class="tab-btn" data-filter="earnings" type="button">Earnings</button>
-          <button class="tab-btn" data-filter="withdrawals" type="button">Withdrawals</button>
-          <button class="tab-btn" data-filter="kyc" type="button">KYC</button>
-          <button class="tab-btn" data-filter="events" type="button">Events</button>
-        </div>
+    <!-- FILTER TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="filterCategory('ALL')">All Activity (सभी)</button>
+      <button class="tab-btn" onclick="filterCategory('COMMISSION')">Commissions &amp; Credits (कमीशन)</button>
+      <button class="tab-btn" onclick="filterCategory('WITHDRAWAL')">Withdrawals (निकासी)</button>
+      <button class="tab-btn" onclick="filterCategory('LIFECYCLE')">Rebirth &amp; ACB (रीबर्थ/एसीबी)</button>
+      <button class="tab-btn" onclick="filterCategory('SETU_KOSH')">Setu Kosh Referrals (रेफरल)</button>
+    </div>
 
-        <button class="btn-ghost" id="markAllBtn" type="button">Mark All Read</button>
-      </div>
-
-      <div class="notif-list" id="notifList">
-
-        <!-- WITHDRAWAL — CORRECTED -->
-        <div class="notif-item" data-cat="withdrawals">
-          <div class="notif-icon withdrawals">💸</div>
-          <div class="notif-body">
-            <div class="notif-title">
-              Withdrawal Approved
-              <span class="badge success">COMPLETED</span>
-            </div>
-            <div class="notif-desc">
-              Your withdrawal of Rs.575.00 has been processed.<br />
-              TDS: Rs.0.00 · Admin charge: Rs.57.50 · Net transferred: Rs.517.50 to HDFC Bank ····4217.
-            </div>
-            <div class="notif-meta">
-              <span>Ref: BB-WD-2026-00138</span>
-              <span>2 hours ago · 07 Aug 2026</span>
-            </div>
-          </div>
-          <span class="unread-dot"></span>
-        </div>
-
-        <!-- MY SYSTEM / ACB — CORRECTED -->
-        <div class="notif-item" data-cat="earnings">
-          <div class="notif-icon earnings">🎯</div>
-          <div class="notif-body">
-            <div class="notif-title">
-              MY SYSTEM Level 1 Completed — ACB Unlocked
-              <span class="badge blocked">PAY-ONCE BLOCKED</span>
-            </div>
-            <div class="notif-desc">
-              MY SYSTEM Level 1 completed on 05 Aug 2026.<br />
-              Level 1 cash was already paid via AutoPool on 26 Jul 2026, so no duplicate Rs.300 was credited.<br />
-              ACB status unlocked. Your locked AutoPool earnings are now withdrawable.
-            </div>
-            <div class="notif-meta">
-              <span>ID: BB10042 · MAIN</span>
-              <span>Yesterday · 05 Aug 2026</span>
-            </div>
-          </div>
-          <span class="unread-dot"></span>
-        </div>
-
-        <!-- AUTOPOOL EARNING -->
-        <div class="notif-item" data-cat="earnings">
-          <div class="notif-icon earnings">⚙️</div>
-          <div class="notif-body">
-            <div class="notif-title">
-              AutoPool Level 2 Bonus
-              <span class="badge success">CONFIRMED</span>
-            </div>
-            <div class="notif-desc">
-              Rs.300.00 credited for AutoPool Level 2 completion — 4 IDs filled.
-            </div>
-            <div class="notif-meta">
-              <span>ID: BB10042 · MAIN</span>
-              <span>04 Aug 2026</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- SETU KOSH — CORRECTED -->
-        <div class="notif-item" data-cat="earnings">
-          <div class="notif-icon earnings">🛒</div>
-          <div class="notif-body">
-            <div class="notif-title">
-              Setu Kosh Commission Pending
-              <span class="badge pending">PENDING</span>
-            </div>
-            <div class="notif-desc">
-              Rs.75.00 Setu Kosh commission is pending Monday vendor settlement.
-              Setu Kosh earnings do not require ACB. They become withdrawable after settlement confirmation.
-            </div>
-            <div class="notif-meta">
-              <span>Source: Member counter · BB10042</span>
-              <span>01 Aug 2026</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- VOUCHER RULE — CORRECTED -->
-        <div class="notif-item" data-cat="events">
-          <div class="notif-icon events">🎁</div>
-          <div class="notif-body">
-            <div class="notif-title">
-              Voucher Issuance Rule
-              <span class="badge info">INFO</span>
-            </div>
-            <div class="notif-desc">
-              Rs.200 product vouchers are issued only when your AutoPool completes Levels 5, 6, and 7.
-              Total Rs.600 vouchers per complete pool cycle. Vouchers expire exactly 1 year from issue date.
-            </div>
-            <div class="notif-meta">
-              <span>System update</span>
-              <span>28 Jul 2026</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- KYC -->
-        <div class="notif-item" data-cat="kyc">
-          <div class="notif-icon kyc">🪪</div>
-          <div class="notif-body">
-            <div class="notif-title">
-              KYC Tier 2 Approved
-              <span class="badge success">VERIFIED</span>
-            </div>
-            <div class="notif-desc">
-              Your PAN and bank details have been verified.
-              Withdrawal is enabled for eligible earnings. TDS rate is 3% because PAN is verified.
-            </div>
-            <div class="notif-meta">
-              <span>KYC Tier 2 · PAN + Bank</span>
-              <span>10 Jul 2026</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- WELCOME -->
-        <div class="notif-item" data-cat="events">
-          <div class="notif-icon events">🎉</div>
-          <div class="notif-body">
-            <div class="notif-title">
-              Welcome to Bharatiya Bazaar
-              <span class="badge info">MEMBER JOINED</span>
-            </div>
-            <div class="notif-desc">
-              Your membership is active. Member ID: BB10042 · MAIN ID.<br />
-              Refer 2 members — 1 Left + 1 Right — to achieve ACB status.
-              Your sponsor: Rajesh Kumar · BB10001. Placement: LEFT leg, sponsor-assigned.
-            </div>
-            <div class="notif-meta">
-              <span>Registration completed</span>
-              <span>08 Jul 2026</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="empty-state" id="emptyState">
-        No notifications in this category.
-      </div>
-
-      <div class="note">
-        Notifications are generated only for business-critical events:
-        earnings, withdrawals, KYC, ACB, rebirth, vouchers, settlements, and admin actions.
-        Marketing notifications are not generated by this system.
-      </div>
+    <!-- NOTIFICATIONS FEED CONTAINER -->
+    <div id="notificationsContainer">
+      <div class="empty-box">Loading notifications feed...</div>
     </div>
   </main>
 
   <script>
-    const tabs = Array.from(document.querySelectorAll(".tab-btn"));
-    const items = Array.from(document.querySelectorAll(".notif-item"));
-    const emptyState = document.getElementById("emptyState");
-    const markAllBtn = document.getElementById("markAllBtn");
+    let allNotifications = [];
+    let activeCategory = "ALL";
 
-    function applyFilter(filter) {
-      let visibleCount = 0;
-
-      items.forEach(item => {
-        const show = filter === "all" || item.dataset.cat === filter;
-        item.style.display = show ? "" : "none";
-        if (show) visibleCount++;
-      });
-
-      emptyState.style.display = visibleCount === 0 ? "block" : "none";
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    tabs.forEach(btn => {
-      btn.addEventListener("click", () => {
-        tabs.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        applyFilter(btn.dataset.filter);
-      });
-    });
+    function formatTime(isoStr) {
+      if (!isoStr) return "-";
+      const d = new Date(isoStr);
+      return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
 
-    markAllBtn.addEventListener("click", () => {
-      document.querySelectorAll(".unread-dot").forEach(dot => dot.remove());
-    });
+    function getMemberToken() {
+      return localStorage.getItem("bb_token");
+    }
 
-    applyFilter("all");
+    function logoutMember() {
+      localStorage.removeItem("bb_token");
+      window.location.href = "bb-dashboard.html";
+    }
+
+    async function initNotifications() {
+      const token = getMemberToken();
+      if (!token) {
+        window.location.href = "bb-dashboard.html";
+        return;
+      }
+
+      try {
+        const [profRes, notifRes] = await Promise.all([
+          fetch("/api/members/profile", { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch("/api/members/notifications", { headers: { "Authorization": `Bearer ${token}` } })
+        ]);
+
+        if (profRes.status === 401 || notifRes.status === 401) {
+          logoutMember();
+          return;
+        }
+
+        const profData = await profRes.json();
+        const notifData = await notifRes.json();
+
+        if (profData.success) {
+          document.getElementById("topbarMemberInfo").classList.remove("hidden");
+          document.getElementById("topbarMemberName").textContent = profData.data.name || "Member";
+          const card = profData.data.activeCard || profData.data.idCards?.[0];
+          if (card) document.getElementById("topbarCardNumber").textContent = card.cardNumber || "MAIN";
+        }
+
+        if (notifData.success) {
+          allNotifications = notifData.data || [];
+          renderFilteredFeed();
+        }
+      } catch (err) {
+        document.getElementById("notificationsContainer").innerHTML = `
+          <div class="empty-box" style="color:var(--danger);">${escapeHtml(err.message)}</div>
+        `;
+      }
+    }
+
+    function filterCategory(cat) {
+      activeCategory = cat;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      event.target.classList.add("active");
+      renderFilteredFeed();
+    }
+
+    function renderFilteredFeed() {
+      const container = document.getElementById("notificationsContainer");
+      const filtered = activeCategory === "ALL" 
+        ? allNotifications 
+        : allNotifications.filter(n => n.category === activeCategory);
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-box">
+            No activity notifications recorded in this category yet.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(n => {
+        let iconClass = "icon-comm";
+        let iconSymbol = "💰";
+
+        if (n.category === "WITHDRAWAL") {
+          iconClass = "icon-wd";
+          iconSymbol = "🏦";
+        } else if (n.category === "LIFECYCLE") {
+          iconClass = "icon-life";
+          iconSymbol = "🌱";
+        } else if (n.category === "SETU_KOSH") {
+          iconClass = "icon-setu";
+          iconSymbol = "🛍️";
+        }
+
+        return `
+          <div class="notif-card">
+            <div class="notif-icon ${iconClass}">${iconSymbol}</div>
+            <div class="notif-body">
+              <div class="notif-top">
+                <span class="notif-title">${escapeHtml(n.title)}</span>
+                <span class="notif-time">${formatTime(n.timestamp)}</span>
+              </div>
+              <div class="notif-desc">${escapeHtml(n.message)}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    window.addEventListener("DOMContentLoaded", initNotifications);
   </script>
 </body>
 </html>

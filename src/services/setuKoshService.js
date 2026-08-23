@@ -446,12 +446,23 @@ async function settlePending(tx, settlementRunId = null) {
 }
 
 /**
- * Returns member's current counter status.
+ * Returns member's current counter status, earned cards, and referral bonuses.
  */
 async function getMemberCounter(memberId) {
-  const counter = await prisma.setuKoshCounter.findUnique({
-    where: { memberId }
-  });
+  const [counter, referralBonuses, earnedIdCards] = await Promise.all([
+    prisma.setuKoshCounter.findUnique({
+      where: { memberId }
+    }),
+    prisma.vendorReferralBonus.findMany({
+      where: { memberId },
+      orderBy: { createdAt: "desc" }
+    }),
+    prisma.memberIdCard.findMany({
+      where: { memberId, type: "SUB" },
+      select: { id: true, cardNumber: true, type: true, createdAt: true, status: true },
+      orderBy: { createdAt: "desc" }
+    })
+  ]);
 
   const counterPaise = counter?.counterPaise || 0;
   const idsCreated = counter?.idsCreated || 0;
@@ -466,7 +477,9 @@ async function getMemberCounter(memberId) {
     idsCreated,
     thresholdPaise: SETU_KOSH_THRESHOLD_PAISE,
     progressPct,
-    remainingPaise
+    remainingPaise,
+    referralBonuses: referralBonuses || [],
+    earnedIdCards: earnedIdCards || []
   };
 }
 

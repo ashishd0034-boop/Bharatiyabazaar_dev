@@ -57,9 +57,9 @@ app.use(globalLimiter);
 // This tells Express to look for HTML/CSS/JS files in the 'public' folder
 app.use(express.static(path.join(__dirname, "../public")));
 
-// When someone visits the root URL, serve the main page
+// When someone visits the root URL, serve the main canonical landing page
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "bb-bharatiya-bazaar-v2.html"));
+  res.sendFile(path.join(__dirname, "../public", "bharatiya-bazaar-v2.html"));
 });
 // -----------------------------------------
 
@@ -68,6 +68,7 @@ app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/members", memberRoutes);
 app.use("/api/wallet", walletRoutes);
+app.use("/api/wallets", walletRoutes);
 app.use("/api/withdrawals", withdrawalRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api/setu-kosh", setuKoshRoutes);

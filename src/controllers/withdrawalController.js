@@ -152,7 +152,8 @@ async function getTdsPreview(req, res, next) {
       });
     }
 
-    const preview = await previewWithdrawal(req.member.id, method || "BANK", parseInt(amountPaise));
+    const memberId = req.member ? req.member.id : null;
+    const preview = await previewWithdrawal(memberId, method || "BANK", parseInt(amountPaise));
 
     res.json({
       success: true,

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>डैशबोर्ड | भारतीय बाज़ार</title>
+  <title>डैशबोर्ड | भारतीय बाज़ार (Bharatiya Bazaar)</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,6 +28,7 @@
       --warning: #d97706;
       --danger: #dc2626;
       --info: #0369a1;
+      --purple: #7c3aed;
       --radius-card: 12px;
       --radius-btn: 8px;
       --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
@@ -51,7 +52,7 @@
       position: sticky; top: 0; z-index: 20;
     }
 
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: #fff; }
     .brand-badge {
       width: 34px; height: 34px; border-radius: 50%;
       background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
@@ -65,18 +66,20 @@
 
     .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
 
-    .page-head { margin-bottom: 16px; }
+    .page-head { margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
     .page-head h1 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 4px; }
     .page-head p { color: var(--muted); font-size: 14.5px; }
+
+    .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav-btn {
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
+      background: #fff; color: var(--navy); border: 1px solid var(--border);
+    }
+    .nav-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 
     .card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius-card); box-shadow: var(--shadow);
-    }
-
-    .banner {
-      border-left: 4px solid var(--success); background: #e8f8ee; color: #14532d;
-      padding: 12px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 16px;
     }
 
     .stat-grid {
@@ -91,7 +94,7 @@
 
     .streams { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
 
-    .stream-card { padding: 16px; position: relative; overflow: hidden; }
+    .stream-card { padding: 18px; position: relative; overflow: hidden; }
     .stream-card::before {
       content: ""; position: absolute; inset: 0 0 auto 0; height: 4px;
       background: linear-gradient(90deg, var(--teal), var(--amber));
@@ -99,245 +102,307 @@
     .stream-card h3 { color: var(--navy); font-size: 16px; margin-bottom: 4px; }
     .stream-card .stream-sub { color: var(--muted); font-size: 12.5px; margin-bottom: 12px; }
 
-    .stream-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .metric {
-      border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; background: #fbfdff;
-    }
-    .metric .m-label { font-size: 11.5px; color: var(--muted); }
-    .metric .m-value { font-size: 15px; font-weight: 700; color: var(--navy); }
-
-    .stream-link {
-      display: inline-block; margin-top: 12px; color: var(--teal-dark);
-      font-weight: 700; font-size: 13.5px; text-decoration: none;
-    }
-
-    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge { display: inline-flex; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
     .badge.success { background: #e8f8ee; color: var(--success); }
-    .badge.pending { background: #fff4e0; color: var(--warning); }
-    .badge.blocked { background: #f1f5f9; color: #475569; }
-    .badge.info { background: #e8f6ff; color: var(--info); }
+    .badge.warning { background: #fff4e0; color: var(--warning); }
+    .badge.info { background: #e0f2fe; color: var(--info); }
+    .badge.purple { background: #ede9fe; color: var(--purple); }
 
-    .grid-2 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 16px; align-items: start; }
+    .panel { padding: 20px; margin-bottom: 16px; }
+    .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 12px; }
 
-    .panel { padding: 18px; }
-    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 13px; }
+    th { background: #f8fafc; color: var(--navy); font-weight: 700; }
 
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 13.5px; vertical-align: top; }
-    th { background: #f8fafc; color: var(--navy); }
-
-    .wallet-row {
-      display: flex; justify-content: space-between; gap: 10px;
-      border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px;
-      margin-top: 8px; background: #fbfdff;
+    .btn-ghost {
+      background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
-    .wallet-row .name { font-weight: 700; color: var(--navy); font-size: 14px; }
-    .wallet-row .desc { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
-    .wallet-row .amt { font-weight: 700; color: var(--navy); white-space: nowrap; }
-
-    .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
-    .qa-btn {
-      border: 1px solid var(--border); background: #fff; border-radius: 10px;
-      padding: 12px; text-align: left; cursor: pointer;
-    }
-    .qa-btn strong { display: block; color: var(--navy); font-size: 14px; margin-bottom: 3px; }
-    .qa-btn span { color: var(--muted); font-size: 12.5px; }
-    .qa-btn:hover { border-color: var(--teal); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); }
 
     .note {
       border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
-      padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px;
+      padding: 12px 14px; border-radius: 8px; font-size: 13.5px; margin-bottom: 16px;
     }
-    .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
 
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
-      border-top: 1px solid var(--border); display: flex; z-index: 30;
+    .hidden { display: none !important; }
+
+    @media (max-width: 900px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .streams { grid-template-columns: 1fr; }
     }
-    .bottom-nav a {
-      flex: 1; text-align: center; padding: 10px 0 8px; font-size: 11.5px;
-      color: var(--muted); text-decoration: none; font-weight: 600;
-    }
-    .bottom-nav a.active { color: var(--teal-dark); }
-    .bottom-nav a .ico { display: block; font-size: 17px; margin-bottom: 2px; }
-
-    .hidden { display: none; }
-    .muted { color: var(--muted); }
-
-    @media (max-width: 1080px) { .streams { grid-template-columns: 1fr; } .stat-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 980px) { .grid-2 { grid-template-columns: 1fr; } }
-    @media (max-width: 640px) { .stat-grid { grid-template-columns: 1fr 1fr; } .quick-actions { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
+  <!-- शीर्ष पट्टी (Topbar) -->
   <header class="topbar">
-    <div class="brand"><span class="brand-badge"></span><span>भारतीय बाज़ार · Bharatiya Bazaar</span></div>
-    <div class="member-chip"><span>राजेश कुमार · BB10042 · ✓ ACB सदस्य</span><span class="avatar">रा</span></div>
+    <a href="bb-hindi.html" class="brand">
+      <span class="brand-badge"></span>
+      <span>भारतीय बाज़ार · सदस्य पोर्टल</span>
+    </a>
+    <div id="topbarMemberInfo" class="member-chip hidden">
+      <span id="topbarMemberName">सदस्य</span>
+      <span id="topbarCardNumber" class="badge info">MAIN</span>
+      <span id="topbarAvatar" class="avatar">स</span>
+      <a href="bb-dashboard.html" class="btn-ghost" style="text-decoration:none;">English</a>
+      <button class="btn-ghost" onclick="logoutMember()">लॉगआउट</button>
+    </div>
   </header>
 
   <main class="container">
     <section class="page-head">
-      <h1>नमस्ते, राजेश कुमार 🙏</h1>
-      <p>सदस्य: अगस्त 2026 से · सत्यापित नियमों के अनुसार सुधारित डैशबोर्ड</p>
+      <div>
+        <h1 id="hindiWelcome">नमस्ते, आपका स्वागत है!</h1>
+        <p>आपकी सदस्यता, लाइव वॉलेट शेष, और तीन-आयामी कमीशन प्रवाह का पूर्ण विवरण</p>
+      </div>
+      <div class="nav-links">
+        <a href="bb-hindi.html" class="nav-btn active">डैशबोर्ड</a>
+        <a href="bb-setu-kosh.html" class="nav-btn">सेतु कोष</a>
+        <a href="bb-calculator.html" class="nav-btn">निकासी कैलकुलेटर</a>
+        <a href="bb-notifications.html" class="nav-btn">सूचनाएं</a>
+      </div>
     </section>
 
-    <div class="banner">
-      ✓ <strong>ACB प्राप्त।</strong> ACB-सक्षम ID की कमाई और पुष्ट Setu Kosh कमीशन निकासी योग्य हैं।
-      निकासी केवल MAIN ID से संभव है।
+    <!-- सूचना बैनर -->
+    <div id="hindiAcbBanner" class="note hidden">
+      <strong>सूचना:</strong> ऑटोपूल निकासी के लिए 1 बायां + 1 दायां डायरेक्ट रेफरल (ACB स्थिति) अनिवार्य है।
     </div>
 
+    <!-- मुख्य वित्तीय आँकड़े (Wallet & Earnings Grid) -->
     <section class="stat-grid">
       <div class="card stat-card">
-        <div class="label">कुल कमाई</div>
-        <div class="value">₹875.00</div>
-        <div class="sub">सभी 3 स्ट्रीम में · ▲ +₹200 इस सप्ताह</div>
+        <div class="label">निकासी योग्य वॉलेट शेष</div>
+        <div class="value" id="valWithdrawable" style="color:var(--teal);">₹0.00</div>
+        <div class="sub">तुरंत बैंक/वॉलेट निकासी हेतु उपलब्ध</div>
       </div>
       <div class="card stat-card">
-        <div class="label">निकासी योग्य राशि</div>
-        <div class="value" style="color:var(--success);">₹225.00</div>
-        <div class="sub">पुष्ट ₹225 · लंबित ₹75 · लॉक ₹0</div>
+        <div class="label">7-दिवसीय होल्ड राशि (MY SYSTEM)</div>
+        <div class="value" id="valOnHold" style="color:var(--warning);">₹0.00</div>
+        <div class="sub">सत्यापन पश्चात वॉलेट में जुड़ेगी</div>
       </div>
       <div class="card stat-card">
-        <div class="label">AutoPool स्तर</div>
-        <div class="value">स्तर 4</div>
-        <div class="sub">0/16 भरे · पुनर्जन्म ID स्तर 4 पर</div>
+        <div class="label">कुल संचित कमीशन</div>
+        <div class="value" id="valTotalEarned">₹0.00</div>
+        <div class="sub">तीनों आय स्रोतों से कुल कमाई</div>
       </div>
       <div class="card stat-card">
-        <div class="label">पुनर्जन्म ID</div>
-        <div class="value">0</div>
-        <div class="sub">पूल साइकल से उत्पन्न · स्तर 4 पर</div>
+        <div class="label">एसीबी (ACB) स्थिति</div>
+        <div class="value" id="valAcbStatus">
+          <span class="badge warning">अनिर्धारित</span>
+        </div>
+        <div class="sub" id="valAcbSub">1 बायां + 1 दायां रेफरल आवश्यक</div>
       </div>
     </section>
 
+    <!-- 3-आयामी कमीशन प्रवाह (Three Income Streams) -->
     <section class="streams">
+      <!-- 1. ऑटोपूल इनकम -->
       <div class="card stream-card">
-        <h3>अनंत समृद्धि चक्र</h3>
-        <div class="stream-sub">AutoPool · 8-स्तरीय ग्लोबल बाइनरी पूल</div>
-        <div class="stream-metrics">
-          <div class="metric"><div class="m-label">वर्तमान स्तर</div><div class="m-value">L4 भरा जा रहा · 0/16</div></div>
-          <div class="metric"><div class="m-label">कमाई</div><div class="m-value">₹800</div></div>
-          <div class="metric"><div class="m-label">पुनर्जन्म ID</div><div class="m-value">0</div></div>
-          <div class="metric"><div class="m-label">वाउचर</div><div class="m-value">0</div></div>
+        <h3>1. ऑटोपूल ग्लोबल ट्री (AutoPool)</h3>
+        <div class="stream-sub">वैश्विक 2x2 ट्री से नॉन-वर्किंग कमीशन व रीबर्थ</div>
+        <div style="font-size:13.5px; margin-bottom:8px;">
+          <div>अर्जित कमीशन: <strong id="valAutopoolEarned">₹0.00</strong></div>
+          <div>सक्रिय रीबर्थ आईडी: <strong id="valRebirthCount">0 IDs</strong></div>
+          <div>वाउचर लाभ (194R): <strong id="valVouchersEarned">₹0.00</strong></div>
         </div>
-        <div style="margin-top:10px;"><span class="badge success">सक्रिय</span></div>
-        <a class="stream-link" href="bb-autopool.html">पूल ट्री देखें →</a>
+        <a href="bb-autopool.html" style="font-size:12.5px; color:var(--teal); font-weight:700; text-decoration:none;">ऑटोपूल ट्री देखें →</a>
       </div>
 
+      <!-- 2. माय सिस्टम 10-लेवल ट्री -->
       <div class="card stream-card">
-        <h3>माय सिस्टम</h3>
-        <div class="stream-sub">रेफरल नेटवर्क · स्तर 1–3 नकद देते हैं</div>
-        <div class="stream-metrics">
-          <div class="metric"><div class="m-label">स्तर 1</div><div class="m-value">2/2 ✓</div></div>
-          <div class="metric"><div class="m-label">स्तर 2</div><div class="m-value">2/4</div></div>
-          <div class="metric"><div class="m-label">स्तर 3</div><div class="m-value">0/8</div></div>
-          <div class="metric"><div class="m-label">कमाई</div><div class="m-value">₹0</div></div>
+        <h3>2. माय सिस्टम ट्री (MY SYSTEM)</h3>
+        <div class="stream-sub">10-लेवल बाइनरी स्पॉन्सरशिप व डायरेक्ट टीम</div>
+        <div style="font-size:13.5px; margin-bottom:8px;">
+          <div>अर्जित कमीशन: <strong id="valMySystemEarned">₹0.00</strong></div>
+          <div>होल्ड कमीशन (7 दिन): <strong id="valMySystemHold">₹0.00</strong></div>
+          <div>टीम सदस्य संख्या: <strong id="valTeamCount">0</strong></div>
         </div>
-        <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
-          <span class="badge success">✓ ACB प्राप्त</span>
-          <span class="badge blocked">L1 पे-वंस ब्लॉक्ड</span>
-        </div>
-        <div class="note" style="margin-top:10px;">
-          स्तर 1 नकद पहले AutoPool से 26 जुलाई को भुगतान किया गया था — कोई डुप्लिकेट भुगतान नहीं।
-          माय सिस्टम स्तर 1, 2 और 3 बोनस पूर्णता के बाद 7 दिन लंबित रहते हैं।
-        </div>
-        <a class="stream-link" href="bb-tree.html">मेरा नेटवर्क देखें →</a>
+        <a href="bb-tree.html" style="font-size:12.5px; color:var(--teal); font-weight:700; text-decoration:none;">बाइनरी ट्री देखें →</a>
       </div>
 
+      <!-- 3. सेतु कोष शॉपिंग रिवॉर्ड्स -->
       <div class="card stream-card">
-        <h3>सेतु कोश</h3>
-        <div class="stream-sub">शॉपिंग रिवॉर्ड्स · 10-स्तरीय बाइनरी ट्री</div>
-        <div class="stream-metrics">
-          <div class="metric"><div class="m-label">शॉपिंग काउंटर</div><div class="m-value">₹650 / ₹1,000</div></div>
-          <div class="metric"><div class="m-label">सेतु कोश ID</div><div class="m-value">0</div></div>
-          <div class="metric"><div class="m-label">कमीशन</div><div class="m-value">₹75 लंबित</div></div>
-          <div class="metric"><div class="m-label">रेफरल बोनस</div><div class="m-value">₹2.50 लंबित</div></div>
+        <h3>3. सेतु कोष (Setu Kosh Rewards)</h3>
+        <div class="stream-sub">दुकान खरीद मार्जिन व 10-लेवल बोनस</div>
+        <div style="font-size:13.5px; margin-bottom:8px;">
+          <div>काउंटर प्रगति: <strong id="valSetuCounter">₹0.00 / ₹1,000</strong></div>
+          <div>अर्जित सब-आईडी: <strong id="valSetuIds">0 IDs</strong></div>
+          <div>रेफरल बोनस: <strong id="valSetuBonus">₹0.00</strong></div>
         </div>
-        <div style="margin-top:10px;"><span class="badge pending">प्रगति में</span></div>
-        <a class="stream-link" href="bb-setu-kosh.html">शॉपिंग इतिहास देखें →</a>
+        <a href="bb-setu-kosh.html" style="font-size:12.5px; color:var(--teal); font-weight:700; text-decoration:none;">सेतु कोष विवरण →</a>
       </div>
     </section>
 
-    <section class="grid-2">
-      <div class="card panel">
-        <h2>हाल की कमाई</h2>
+    <!-- आईडी कार्ड्स विवरण (Member ID Cards) -->
+    <section class="card panel">
+      <h2>आपके पंजीकृत आईडी कार्ड (My ID Cards)</h2>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">
+        मुख्य कार्ड (MAIN), सेतु कोष सब-कार्ड (SUB) एवं ऑटोपूल रीबर्थ कार्ड (REBIRTH)।
+      </p>
+
+      <div style="overflow-x:auto;">
         <table>
           <thead>
-            <tr><th>दिनांक</th><th>स्ट्रीम</th><th>विवरण</th><th>राशि</th><th>स्थिति</th></tr>
+            <tr>
+              <th>कार्ड नंबर</th>
+              <th>प्रकार (Type)</th>
+              <th>एसीबी स्थिति (ACB)</th>
+              <th>पंजीकरण तिथि</th>
+              <th>स्थिति</th>
+            </tr>
           </thead>
-          <tbody>
+          <tbody id="idCardsTableBody">
             <tr>
-              <td>05 अगस्त 2026</td><td>माय सिस्टम</td>
-              <td>स्तर 1 पूर्ण — पे-वंस ब्लॉक्ड (AutoPool से 26 जुलाई को भुगतान)। ACB अनलॉक।</td>
-              <td>₹0.00</td><td><span class="badge blocked">पे-वंस ब्लॉक्ड</span></td>
-            </tr>
-            <tr>
-              <td>04 अगस्त 2026</td><td>AutoPool</td><td>स्तर 2 — 4 ID भरे</td>
-              <td>+₹300.00</td><td><span class="badge success">पुष्ट</span></td>
-            </tr>
-            <tr>
-              <td>03 अगस्त 2026</td><td>AutoPool</td><td>स्तर 3 — 8 ID भरे</td>
-              <td>+₹200.00</td><td><span class="badge success">पुष्ट</span></td>
-            </tr>
-            <tr>
-              <td>01 अगस्त 2026</td><td>सेतु कोश</td><td>कमीशन — सोमवार सेटलमेंट की प्रतीक्षा में</td>
-              <td>+₹75.00</td><td><span class="badge pending">लंबित</span></td>
-            </tr>
-            <tr>
-              <td>26 जुलाई 2026</td><td>AutoPool</td><td>स्तर 1 — 2 ID भरे · पे-वंस AutoPool से</td>
-              <td>+₹300.00</td><td><span class="badge success">पुष्ट</span></td>
+              <td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">कार्ड विवरण लोड हो रहा है...</td>
             </tr>
           </tbody>
         </table>
-
-        <div class="quick-actions">
-          <button class="qa-btn" type="button"><strong>दोस्त को रेफर करें</strong><span>अपना रेफरल लिंक कॉपी करें</span></button>
-          <button class="qa-btn" type="button"><strong>खरीदें और कमाएं</strong><span>नज़दीकी पार्टनर वेंडर खोजें</span></button>
-          <button class="qa-btn" type="button"><strong>कमाई निकालें</strong><span>बैंक / सदस्य वॉलेट / वाउचर में ट्रांसफर करें</span></button>
-        </div>
-      </div>
-
-      <div class="card panel">
-        <h2>वॉलेट सारांश</h2>
-
-        <div class="wallet-row">
-          <div><div class="name">कैश वॉलेट</div><div class="desc">पुष्ट ₹225 निकासी योग्य · लंबित ₹75 · लॉक ₹0</div></div>
-          <div class="amt">₹300.00</div>
-        </div>
-
-        <div class="wallet-row">
-          <div><div class="name">वाउचर वॉलेट</div><div class="desc">AutoPool स्तर 5, 6, 7 पर वाउचर मिलते हैं</div></div>
-          <div class="amt">₹0.00</div>
-        </div>
-
-        <h2 style="margin-top:16px;">निकासी योग्य विवरण</h2>
-
-        <div class="wallet-row">
-          <div><div class="name">AutoPool — MAIN ID</div><div class="desc">ACB प्राप्त — अनलॉक</div></div>
-          <div class="amt">₹225.00</div>
-        </div>
-        <div class="wallet-row">
-          <div><div class="name">माय सिस्टम</div><div class="desc">L1 पे-वंस ब्लॉक्ड · L2/L3 पूर्णता पर 7 दिन होल्ड</div></div>
-          <div class="amt">₹0.00</div>
-        </div>
-        <div class="wallet-row">
-          <div><div class="name">सेतु कोश</div><div class="desc">₹75 लंबित — सोमवार सेटलमेंट के बाद निकासी योग्य (ACB आवश्यक नहीं)</div></div>
-          <div class="amt">₹0.00</div>
-        </div>
-
-        <div class="note">
-          निकासी केवल MAIN ID से होती है। SUB ID और REBIRTH ID की कमाई निकासी योग्य होने पर
-          स्वचालित रूप से यहाँ स्थानांतरित होती है। REBIRTH ID की कमाई के लिए MAIN ID का ACB आवश्यक है।
-        </div>
       </div>
     </section>
   </main>
 
-  <nav class="bottom-nav">
-    <a href="#" class="active"><span class="ico">🏠</span>डैशबोर्ड</a>
-    <a href="bb-tree.html"><span class="ico">🤝</span>नेटवर्क</a>
-    <a href="bb-wallet.html"><span class="ico">👛</span>वॉलेट</a>
-    <a href="bb-setu-kosh.html"><span class="ico">🛒</span>खरीदारी</a>
-    <a href="#"><span class="ico">👤</span>प्रोफ़ाइल</a>
-  </nav>
+  <script>
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatCurrency(paise) {
+      const rupees = (Number(paise || 0) / 100);
+      return "₹" + rupees.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const d = new Date(dateStr);
+      return d.toLocaleDateString("hi-IN", { day: "numeric", month: "short", year: "numeric" });
+    }
+
+    function getMemberToken() {
+      return localStorage.getItem("bb_token");
+    }
+
+    function logoutMember() {
+      localStorage.removeItem("bb_token");
+      window.location.href = "bb-dashboard.html";
+    }
+
+    async function initHindiDashboard() {
+      const token = getMemberToken();
+      if (!token) {
+        window.location.href = "bb-dashboard.html";
+        return;
+      }
+
+      try {
+        const [profileRes, walletRes, cardsRes, setuRes] = await Promise.all([
+          fetch("/api/members/profile", { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch("/api/wallets/summary", { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch("/api/id-cards/my-cards", { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch("/api/setu-kosh/counter", { headers: { "Authorization": `Bearer ${token}` } })
+        ]);
+
+        if (profileRes.status === 401 || walletRes.status === 401) {
+          logoutMember();
+          return;
+        }
+
+        const profileData = await profileRes.json();
+        const walletData = await walletRes.json();
+        const cardsData = await cardsRes.json();
+        const setData = await setuRes.json();
+
+        if (profileData.success) {
+          renderProfile(profileData.data);
+        }
+        if (walletData.success) {
+          renderWallet(walletData.data);
+        }
+        if (cardsData.success) {
+          renderCards(cardsData.data);
+        }
+        if (setData.success) {
+          renderSetu(setData.data);
+        }
+      } catch (err) {
+        console.error("Hindi dashboard load error:", err);
+      }
+    }
+
+    function renderProfile(member) {
+      document.getElementById("topbarMemberInfo").classList.remove("hidden");
+      document.getElementById("topbarMemberName").textContent = member.name || "सदस्य";
+      document.getElementById("hindiWelcome").textContent = `नमस्ते, ${member.name || 'सदस्य'} जी!`;
+
+      const activeCard = member.activeCard || member.idCards?.[0];
+      if (activeCard) {
+        document.getElementById("topbarCardNumber").textContent = activeCard.cardNumber || "MAIN";
+        if (activeCard.acbStatus) {
+          document.getElementById("valAcbStatus").innerHTML = `<span class="badge success">सक्रिय लाभार्थी (ACB Qualified) ✓</span>`;
+          document.getElementById("valAcbSub").textContent = "निकासी के लिए पूर्णतः योग्य";
+          document.getElementById("hindiAcbBanner").classList.add("hidden");
+        } else {
+          document.getElementById("valAcbStatus").innerHTML = `<span class="badge warning">अनिर्धारित (Pending ACB)</span>`;
+          document.getElementById("valAcbSub").textContent = "1 बायां + 1 दायां रेफरल आवश्यक";
+          document.getElementById("hindiAcbBanner").classList.remove("hidden");
+        }
+      }
+    }
+
+    function renderWallet(wallet) {
+      document.getElementById("valWithdrawable").textContent = formatCurrency(wallet.withdrawableBalancePaise || wallet.balancePaise || 0);
+      document.getElementById("valOnHold").textContent = formatCurrency(wallet.onHoldCommissionsPaise || 0);
+      document.getElementById("valTotalEarned").textContent = formatCurrency(wallet.totalEarnedPaise || (wallet.balancePaise || 0) + (wallet.onHoldCommissionsPaise || 0));
+
+      // Streams breakdown
+      document.getElementById("valAutopoolEarned").textContent = formatCurrency(wallet.autopoolEarningsPaise || 0);
+      document.getElementById("valMySystemEarned").textContent = formatCurrency(wallet.mySystemEarningsPaise || 0);
+      document.getElementById("valMySystemHold").textContent = formatCurrency(wallet.onHoldCommissionsPaise || 0);
+    }
+
+    function renderCards(cardsList) {
+      const list = Array.isArray(cardsList) ? cardsList : (cardsList.idCards || []);
+      const tbody = document.getElementById("idCardsTableBody");
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">कोई आईडी कार्ड नहीं मिला।</td></tr>`;
+        return;
+      }
+
+      let rebirths = 0;
+      tbody.innerHTML = list.map(c => {
+        if (c.type === "REBIRTH") rebirths++;
+        return `
+          <tr>
+            <td><strong>${escapeHtml(c.cardNumber)}</strong></td>
+            <td><span class="badge ${c.type === 'MAIN' ? 'info' : c.type === 'REBIRTH' ? 'purple' : 'warning'}">${escapeHtml(c.type)}</span></td>
+            <td>${c.acbStatus ? '<span class="badge success">ACB सक्रिय ✓</span>' : '<span class="badge warning">लंबित</span>'}</td>
+            <td>${formatDate(c.createdAt)}</td>
+            <td><span class="badge success">${escapeHtml(c.status || 'ACTIVE')}</span></td>
+          </tr>
+        `;
+      }).join("");
+
+      document.getElementById("valRebirthCount").textContent = `${rebirths} IDs`;
+    }
+
+    function renderSetu(setu) {
+      const current = formatCurrency(setu.counterPaise || 0);
+      const threshold = formatCurrency(setu.thresholdPaise || 100000);
+      document.getElementById("valSetuCounter").textContent = `${current} / ${threshold}`;
+      document.getElementById("valSetuIds").textContent = `${setu.idsCreated || 0} IDs`;
+
+      const bonuses = setu.referralBonuses || [];
+      const totalBonus = bonuses.reduce((s, b) => s + (b.bonusPaise || 0), 0);
+      document.getElementById("valSetuBonus").textContent = formatCurrency(totalBonus);
+    }
+
+    window.addEventListener("DOMContentLoaded", initHindiDashboard);
+  </script>
 </body>
 </html>

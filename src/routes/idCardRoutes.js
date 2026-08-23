@@ -44,6 +44,57 @@ router.post("/purchase", async (req, res) => {
   }
 });
 
+// GET /api/id-cards/my-cards
+router.get("/my-cards", async (req, res) => {
+  try {
+    const memberId = req.member.id;
+    const cards = await prisma.memberIdCard.findMany({
+      where: { memberId },
+      include: {
+        mySystemNode: true,
+        autoPoolNode: true
+      },
+      orderBy: { createdAt: "asc" }
+    });
+
+    res.json({
+      success: true,
+      data: cards
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// GET /api/id-cards/commissions
+router.get("/commissions", async (req, res) => {
+  try {
+    const memberId = req.member.id;
+    const commissions = await prisma.commissionEntry.findMany({
+      where: {
+        idCard: { memberId }
+      },
+      include: {
+        idCard: { select: { cardNumber: true, type: true } }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    res.json({
+      success: true,
+      data: commissions
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
 // GET /api/id-cards/tree/:memberId
 router.get("/tree/:memberId", async (req, res) => {
   try {
