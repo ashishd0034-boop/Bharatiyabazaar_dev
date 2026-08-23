@@ -213,6 +213,40 @@ For any member cash withdrawal of Gross Amount $G$ (in paise):
 
 ---
 
+## Admin Settings & Audit Engine
+
+### Role-Based Access Control (RBAC) Permission Matrix
+| Category / Actions | Keys & Operations | ADMIN | SUPER_ADMIN | Unauthorized Response |
+| :--- | :--- | :---: | :---: | :--- |
+| **Operational & Margin Controls** | `CATEGORY_MARGIN_*`, `VENDOR_ADMIN_CHARGE_*`, `ADMIN_CHARGE_*`, `EARLY_SETTLEMENT_FEE_PAISE`, `SETU_KOSH_PIN_GATE_COUNT`, `MAX_PURCHASED_IDS`, `VOLUME_DISCOUNT_*`, `VOUCHER_*` | ✅ | ✅ | 403 `FORBIDDEN` |
+| **Financial TDS Rules** | `TDS_194H_*`, `TDS_194R_*`, `TDS_194C_*` | ❌ | ✅ | 403 `FORBIDDEN` |
+| **System Lifecycle Toggles** | `MY_SYSTEM_7DAY_HOLD`, `AUTOPOOL_LOCKED_BEFORE_ACB`, `REBIRTH_WITHDRAWAL_REQUIRES_MAIN_ACB`, `VENDOR_INACTIVITY_*`, `COMPANY_WALLET_MEMBER_ID` | ❌ | ✅ | 403 `FORBIDDEN` |
+| **Admin User Management** | User registration and role assignments | ❌ | ✅ | 403 `FORBIDDEN` |
+
+### Live Engine Wiring & Caching Architecture
+- **In-Memory Cache:** In-memory setting cache with low-latency TTL $\le$ 60 seconds (`CACHE_TTL_MS = 60000`).
+- **Immediate Invalidation:** Setting updates immediately evict the updated key from the cache.
+- **Engines Wired:**
+  - `idCardService`: `MAX_PURCHASED_IDS` (default 255; rebirth exempt).
+  - `commissionService`: `MY_SYSTEM_7DAY_HOLD`, `AUTOPOOL_LOCKED_BEFORE_ACB`, `REBIRTH_WITHDRAWAL_REQUIRES_MAIN_ACB`.
+  - `rebirthService`: `VOUCHER_FACE_VALUE_PAISE` (20,000 paise / Rs. 200), `VOUCHER_VALIDITY_DAYS` (365 days).
+  - `tdsService`: 194H/194R/194C thresholds and rates, admin charge rates.
+  - `setuKoshService`: `SETU_KOSH_COUNTER_THRESHOLD_PAISE`, `SETU_KOSH_PIN_GATE_COUNT`, `SETU_KOSH_REFERRAL_BONUS_BPS`.
+  - `settlementService`: 5-tier volume discounts (0/50k/1L/2L/5L), early fee (Rs. 250), vendor admin charges (10% Bank / 5% Wallet), inactivity days (31d/91d/181d).
+
+### Category Margin Propagation (`applyToExisting` Toggle)
+- **`applyToExisting: true`:** Updates `PlatformSetting` and updates all existing vendors in that category for future sales. Historical `VendorSale.marginPaise` snapshots remain completely untouched.
+- **`applyToExisting: false`:** Updates `PlatformSetting` only; existing vendors keep their current margin rate, while newly registered vendors inherit the updated rate.
+
+### Immutable Audit Logging
+Every setting change and administrative override writes an immutable `AuditLog` entry with `actorId`, `actorType: "ADMIN"`, `action: "SETTINGS_UPDATED"` (or `"CATEGORY_MARGIN_UPDATED"`), `metadata: { key, oldValue, newValue, reason }`.
+
+### Idempotent Bootstrapping & Startup Seed
+- `src/lib/seedSettings.js` executes automatically on server startup.
+- Bootstraps all default platform settings and provisions the initial `SUPER_ADMIN` account (configured via `SUPERADMIN_EMAIL` and `SUPERADMIN_PASSWORD` env variables) and `COMPANY_WALLET` system member.
+
+---
+
 ## Pay-Once Rule
 
 - One ID can receive Level 1–3 cash **ONLY ONCE** across AutoPool and MY SYSTEM combined.
@@ -257,7 +291,8 @@ For any member cash withdrawal of Gross Amount $G$ (in paise):
 
 ## Background Jobs & Schedulers
 
-- **Scheduler (`src/jobs/scheduler.js`):**
+- **Scheduler (`src/jobs/scheduler.js`) & Startup:**
+  - **Startup Seed (`src/lib/seedSettings.js`):** Idempotently provisions setting defaults, superadmin account, and company reserve wallet.
   - **Hourly 7-Day Hold Expiry Sweep (`0 * * * *`):** Selects `PENDING_7_DAY` commissions older than 7 days $\to$ `WITHDRAWABLE` (if ACB) or `LOCKED_ACB`.
   - **Hourly ACB Sweep (`0 * * * *`):** Evaluates direct referrals $\to$ unlocks ACB and releases `LOCKED_ACB` earnings.
   - **Weekly Monday Settlement Run (`0 0 * * MON`):** Processes vendor settlements for previous Mon–Sun and releases `PENDING_SETTLEMENT` commissions (`settlePending`).
@@ -298,8 +333,8 @@ See `prisma/schema.prisma` for full model definitions:
 16. `VendorSettlement` (`grossSalesPaise`, `postMarginPaise`, `volumeDiscountPaise`, `earlyFeePaise`, `payoutBeforeTdsPaise`, `tdsPaise`, `netPayablePaise`)
 17. `VendorReferralBonus` (`bonusPaise`, `status`)
 18. `PlatformSetting` (`key`, `value`)
-19. `AuditLog` (`actorType`, `action`, `metadata`)
-20. `AdminUser` (`email`, `role`)
+19. `AuditLog` (`actorId`, `actorType`, `action`, `entityType`, `entityId`, `metadata: { key, oldValue, newValue, reason }`, `ipAddress`)
+20. `AdminUser` (`email`, `role: SUPER_ADMIN | ADMIN | SUPPORT`, `name`, `passwordHash`)
 21. `SystemCounter` (`id`, `currentValue`)
 22. `SettlementRun` (`runType`, `periodStart`, `periodEnd`, `vendorCount`, `grossPaise`, `netPaise`, `status`)
 

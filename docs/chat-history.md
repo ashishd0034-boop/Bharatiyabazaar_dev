@@ -158,4 +158,13 @@ Expected:
     - Reconciled specification formula example: Gross Rs. 13,750 @ 7% margin, 9% admin, 1% TDS $\implies$ Net = **Rs. 11,520.27 (1,152,027 paise)**.
     - Daily inactivity lifecycle cron (`0 2 * * *`): 31d $\to$ `INACTIVE`, 91d $\to$ `FROZEN`, 181d $\to$ `CLOSED` (streams redirect to `COMPANY_WALLET`).
     - Admin fraud penalties: `FRAUD` (10x + permanent deactivation), `TAMPERING` (5x), `QR_REFUSAL` (Rs. 1,000) covering member commissions from security deposit first.
+14. **Wave 5 Admin Settings & Audit Engine (`da4c084`):**
+    - Implemented live-wired `PlatformSetting` engine with in-memory caching (TTL $\le$ 60s) and instant cache eviction on update.
+    - Defined strict RBAC permission matrix: `ADMIN` manages operational margins, vendor charges, and caps; `SUPER_ADMIN` exclusively manages financial TDS rates/thresholds, system lifecycle toggles (`MY_SYSTEM_7DAY_HOLD`, `AUTOPOOL_LOCKED_BEFORE_ACB`, `REBIRTH_WITHDRAWAL_REQUIRES_MAIN_ACB`), inactivity days, and admin users. Unauthorized attempts return HTTP 403 `FORBIDDEN`.
+    - Wired live settings into 6 core backend engines (`idCardService`, `commissionService`, `rebirthService`, `tdsService`, `setuKoshService`, `settlementService`).
+    - Implemented `applyToExisting` category margin toggle allowing margin revisions on future vendor sales while preserving immutable historical sale snapshots.
+    - Wired configurable voucher settings (`VOUCHER_FACE_VALUE_PAISE`, `VOUCHER_VALIDITY_DAYS`) and 5-tier volume discount rules.
+    - Added automated startup seed (`src/lib/seedSettings.js`) bootstrapping defaults and provisioning the initial `SUPER_ADMIN` user and `COMPANY_WALLET` member.
+    - Implemented immutable `AuditLog` recording before and after values for all setting mutations.
+
 

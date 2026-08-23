@@ -60,15 +60,18 @@ Status: Phase 1 & Tasks 2,3,4, Wave 1 completed. Active development on backend &
 - [x] Daily inactivity lifecycle (31d/91d/181d) & stream redirection to `COMPANY_WALLET`
 - [x] Admin fraud penalties (10x FRAUD, 5x TAMPERING, Rs.1,000 QR_REFUSAL) with deposit recovery
 
-### Task 8: Admin Settings & Audit ⏳ CURRENT ACTIVE TASK
-- [ ] Dynamic `PlatformSetting` controls with audit logging
-- [ ] Role-based access control (SUPER_ADMIN, ADMIN, SUPPORT)
+### Task 8: Admin Settings & Audit ✅ COMPLETED & VERIFIED (Wave 5 — da4c084)
+- [x] Role-based access control (SUPER_ADMIN vs ADMIN permission matrix)
+- [x] In-memory caching ($\le 60\text{s}$ TTL) with immediate cache eviction
+- [x] Live setting wiring into 6 backend engines (toggles, TDS, margin, voucher, inactivity)
+- [x] Category margin update with `applyToExisting` propagation toggle
+- [x] Idempotent bootstrap seed & immutable audit logging
 
 ---
 
 ## Testing & Quality Assurance
 
-### Task 9: Automated Test Suite 🟡 EXPANDED & VERIFIED
+### Task 9: Automated Test Suite ⏳ CURRENT ACTIVE TASK
 - [x] `tests/scenarios/scenario-a.test.js` (3 IDs flow)
 - [x] `tests/scenarios/scenario-b.test.js` (Sponsor placement flow)
 - [x] `tests/scenarios/scenario-c.test.js` (Rebirth generation)
@@ -78,6 +81,8 @@ Status: Phase 1 & Tasks 2,3,4, Wave 1 completed. Active development on backend &
 - [x] `tests/scenarios/withdrawal-tds.test.js` (Wave 2 full withdrawal & TDS validation)
 - [x] `tests/scenarios/setu-kosh.test.js` (Wave 3 Setu Kosh tree, PIN gate, and counter validation)
 - [x] `tests/scenarios/vendor-settlement.test.js` (Wave 4 vendor settlement, 194C, and lifecycle validation)
+- [x] `tests/scenarios/admin-settings.test.js` (Wave 5 admin settings, RBAC, toggles, audit logs)
+- [ ] Standalone unit test suite (`payonce.test.js`, `tds.test.js`, `withdrawal.test.js`)
 
 ---
 
@@ -96,3 +101,4 @@ Status: Phase 1 & Tasks 2,3,4, Wave 1 completed. Active development on backend &
 - **Wave 2 (`45c01a2`):** Withdrawal & TDS engine (194H/194R/194C, admin charges, hold/reverse, admin auth).
 - **Wave 3 (`e64e015`):** Setu Kosh engine (shopping counter, 10-level tree, integer commissions, PIN gate, vendor auth).
 - **Wave 4 (`aaea48f`):** Vendor settlement engine (Monday cron, 194C marginal, volume discounts, deposits, fraud, inactivity).
+- **Wave 5 (`da4c084`):** Admin settings & audit (RBAC matrix, live-wired PlatformSetting, apply-to-existing, seed defaults).
