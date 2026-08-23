@@ -81,29 +81,27 @@ async function seedSettingsAndSuperAdmin() {
   adminService.invalidateCache();
 
   // 2. Seed / Bootstrap Superadmin
-  const superAdminEmail = process.env.SUPERADMIN_EMAIL || "admin@bharatiyabazaar.com";
+  const superAdminEmail = (process.env.SUPERADMIN_EMAIL || "admin@bharatiyabazaar.com").toLowerCase();
   const rawPassword = process.env.SUPERADMIN_PASSWORD || "Admin@123456";
+  const passwordHash = await bcrypt.hash(rawPassword, 10);
 
-  const existingSuperAdmin = await prisma.adminUser.findFirst({
-    where: { role: "SUPER_ADMIN" }
+  await prisma.adminUser.upsert({
+    where: { email: superAdminEmail },
+    create: {
+      email: superAdminEmail,
+      passwordHash,
+      role: "SUPER_ADMIN",
+      name: "Super Administrator"
+    },
+    update: {
+      role: "SUPER_ADMIN"
+    }
   });
 
-  if (!existingSuperAdmin) {
-    const passwordHash = await bcrypt.hash(rawPassword, 10);
-    await prisma.adminUser.create({
-      data: {
-        email: superAdminEmail,
-        passwordHash,
-        role: "SUPER_ADMIN",
-        name: "Super Administrator"
-      }
-    });
-
-    if (!process.env.SUPERADMIN_PASSWORD) {
-      console.warn("⚠️ [SECURITY WARNING] Default SUPERADMIN bootstrapped with 'admin@bharatiyabazaar.com' / 'Admin@123456'. Please change this password on first login!");
-    } else {
-      console.log(`[BOOTSTRAP] Superadmin account created for ${superAdminEmail}`);
-    }
+  if (!process.env.SUPERADMIN_PASSWORD) {
+    console.warn("⚠️ [SECURITY WARNING] Default SUPERADMIN bootstrapped with 'admin@bharatiyabazaar.com' / 'Admin@123456'. Please change this password on first login!");
+  } else {
+    console.log(`[BOOTSTRAP] Superadmin account created for ${superAdminEmail}`);
   }
 
   // 3. Ensure COMPANY_WALLET system member exists

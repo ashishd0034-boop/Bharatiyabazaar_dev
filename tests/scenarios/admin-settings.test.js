@@ -55,7 +55,7 @@ describe("Wave 5: Admin Settings & Audit Engine Full Validation", () => {
         passwordHash: "superhash123"
       }
     });
-    superAdminToken = jwt.sign({ id: superAdmin.id, role: superAdmin.role }, JWT_SECRET, { expiresIn: "1h" });
+    superAdminToken = jwt.sign({ id: superAdmin.id, type: "ADMIN", role: superAdmin.role }, JWT_SECRET, { expiresIn: "1h" });
 
     // Create Operational Admin
     adminUser = await prisma.adminUser.create({
@@ -66,7 +66,7 @@ describe("Wave 5: Admin Settings & Audit Engine Full Validation", () => {
         passwordHash: "adminhash123"
       }
     });
-    adminToken = jwt.sign({ id: adminUser.id, role: adminUser.role }, JWT_SECRET, { expiresIn: "1h" });
+    adminToken = jwt.sign({ id: adminUser.id, type: "ADMIN", role: adminUser.role }, JWT_SECRET, { expiresIn: "1h" });
   });
 
   afterAll(async () => {
