@@ -1,17 +1,19 @@
 const express = require("express");
 const vendorController = require("../controllers/vendorController");
-const authMiddleware = require("../middleware/authMiddleware");
+const vendorAuthMiddleware = require("../middleware/vendorAuthMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const schemas = require("../validations/schemas");
 
 const router = express.Router();
 
-// Public vendor login endpoint
+// Public vendor registration & login
+router.post("/register", validate(schemas.vendorRegisterSchema), vendorController.register);
 router.post("/login", validate(schemas.loginSchema), vendorController.login);
 
-// Vendor endpoints (accepts member token if vendor, or dedicated vendor token)
-router.post("/sale", authMiddleware, validate(schemas.vendorSaleSchema), vendorController.recordSale);
-router.get("/settlements", authMiddleware, vendorController.getSettlements);
-router.post("/settlement/early", authMiddleware, vendorController.requestEarlySettlement);
+// Protected vendor routes (strictly vendorAuthMiddleware asserting token.type === 'VENDOR')
+router.get("/me", vendorAuthMiddleware, vendorController.getProfile);
+router.post("/sale", vendorAuthMiddleware, validate(schemas.vendorSaleSchema), vendorController.recordSale);
+router.get("/settlements", vendorAuthMiddleware, vendorController.getSettlements);
+router.post("/settlement/early", vendorAuthMiddleware, vendorController.requestEarlySettlement);
 
 module.exports = router;

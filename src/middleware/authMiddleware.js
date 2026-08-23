@@ -14,6 +14,14 @@ async function authMiddleware(req, res, next) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     
+    // Cross-auth protection: Reject VENDOR tokens on member endpoints
+    if (decoded.type === "VENDOR") {
+      return res.status(401).json({
+        success: false,
+        error: { code: "UNAUTHORIZED", message: "Vendor tokens cannot access member endpoints" }
+      });
+    }
+
     // Attach member to request
     const member = await prisma.member.findUnique({ where: { id: decoded.id } });
     if (!member) {

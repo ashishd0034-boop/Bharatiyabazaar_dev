@@ -48,9 +48,31 @@ const withdrawalRequestSchema = z.object({
 
 const vendorSaleSchema = z.object({
   body: z.object({
-    memberId: z.string().min(1, "Member ID is required"),
+    memberId: z.string().optional(),
+    buyerCode: z.string().optional(),
+    cardNumber: z.string().optional(),
+    memberCode: z.string().optional(),
     idCardId: z.string().optional(),
-    amountPaise: z.number().positive("Amount must be positive")
+    amountPaise: z.number().positive("Amount must be positive"),
+    idempotencyKey: z.string().optional()
+  })
+});
+
+const vendorRegisterSchema = z.object({
+  body: z.object({
+    name: z.string().min(2, "Owner name is required"),
+    businessName: z.string().min(2, "Business name is required"),
+    mobile: z.string().length(10, "Mobile must be 10 digits").regex(/^\d+$/),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    category: z.string().optional().default("GENERAL"),
+    entityType: z.enum(["INDIVIDUAL", "COMPANY"]).optional().default("INDIVIDUAL"),
+    panNumber: z.string().min(10, "PAN must be 10 characters").optional(),
+    gstin: z.string().optional(),
+    address: z.string().optional(),
+    pinCode: z.string().optional(),
+    payoutMethod: z.enum(["WALLET", "BANK"]).optional().default("BANK"),
+    referrerCode: z.string().optional(),
+    referrerMemberCode: z.string().optional()
   })
 });
 
@@ -68,5 +90,6 @@ module.exports = {
   kycSchema,
   withdrawalRequestSchema,
   vendorSaleSchema,
+  vendorRegisterSchema,
   settingUpdateSchema
 };

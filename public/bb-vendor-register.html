@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Become a Partner Vendor | Bharatiya Bazaar (भारतीय बाज़ार)</title>
+  <title>Vendor Registration | Bharatiya Bazaar (भारतीय बाज़ार)</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -49,7 +49,7 @@
       display: flex; justify-content: space-between; align-items: center; gap: 12px;
     }
 
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: #fff; }
     .brand-badge {
       width: 34px; height: 34px; border-radius: 50%;
       background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
@@ -57,7 +57,7 @@
 
     .container { width: min(800px, calc(100% - 32px)); margin: 24px auto 40px; }
 
-    .page-head { margin-bottom: 16px; }
+    .page-head { margin-bottom: 20px; text-align: center; }
     .page-head h1 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 4px; }
     .page-head p { color: var(--muted); font-size: 14.5px; }
 
@@ -66,370 +66,431 @@
       border-radius: var(--radius-card); box-shadow: var(--shadow);
     }
 
-    .panel { padding: 22px; margin-bottom: 16px; }
-    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 12px; }
-    .panel h3 { font-size: 15px; color: var(--navy); margin: 14px 0 8px; }
+    .panel { padding: 26px; margin-bottom: 16px; }
+    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 6px; }
+    .panel p.sub { font-size: 13.5px; color: var(--muted); margin-bottom: 16px; }
 
-    .stepper { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stepper { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
     .step-dot {
       display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;
-      color: var(--muted); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border);
+      color: var(--muted); padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border);
+      background: #fff;
     }
     .step-dot.active { background: var(--navy); color: #fff; border-color: var(--navy); }
     .step-dot.done { background: #e8f8ee; color: var(--success); border-color: #b7e4c7; }
 
-    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge { display: inline-flex; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
     .badge.success { background: #e8f8ee; color: var(--success); }
-    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.warning { background: #fff4e0; color: var(--warning); }
     .badge.info { background: #e8f6ff; color: var(--info); }
 
     .note {
       border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
-      padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px;
+      padding: 12px 14px; border-radius: 8px; font-size: 13px; margin: 14px 0;
     }
     .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
     .note.info { border-left-color: var(--info); background: #e8f4fd; color: #0c4a6e; }
+    .note.danger { border-left-color: var(--danger); background: #fee2e2; color: #991b1b; }
+    .note.success { border-left-color: var(--success); background: #ecfdf5; color: #065f46; }
 
-    .field-label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin: 14px 0 6px; }
-    .field-label .hindi { font-weight: 400; color: var(--muted); }
+    .field-group { margin-bottom: 16px; }
+    .field-label { display: block; font-size: 13.5px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+    .field-label .hindi { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: 4px; }
 
     input, select, textarea {
       width: 100%; border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px; font-size: 15px; color: var(--navy); background: #fff; outline: none;
+      padding: 11px 14px; font-size: 14.5px; color: var(--navy); background: #fff; outline: none;
+      transition: border-color 0.2s ease;
     }
-    input:focus, select:focus, textarea:focus { border-color: var(--teal); }
+    input:focus, select:focus, textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(15, 157, 157, 0.12); }
 
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .btn-group { display: flex; gap: 12px; margin-top: 22px; }
     .btn-primary {
-      width: 100%; margin-top: 16px; background: var(--teal); color: #fff; border: none;
-      padding: 14px 16px; border-radius: var(--radius-btn); font-size: 15px; font-weight: 700; cursor: pointer;
+      flex: 1; background: var(--teal); color: #fff; border: none;
+      padding: 13px 18px; border-radius: var(--radius-btn); font-size: 15px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s ease;
     }
     .btn-primary:hover { background: var(--teal-dark); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
 
     .btn-ghost {
-      width: 100%; margin-top: 10px; background: #fff; color: var(--navy);
-      border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-btn);
-      font-size: 14px; font-weight: 700; cursor: pointer;
+      background: transparent; color: var(--navy); border: 1px solid var(--border);
+      padding: 13px 18px; border-radius: var(--radius-btn); font-size: 14px; font-weight: 600; cursor: pointer;
     }
-
-    .file-upload {
-      border: 2px dashed var(--border); border-radius: 10px; padding: 16px;
-      text-align: center; color: var(--muted); font-size: 14px; cursor: pointer;
-      margin-top: 8px;
-    }
-    .file-upload:hover { border-color: var(--teal); }
+    .btn-ghost:hover { background: #f1f5f9; }
 
     .agreement-section {
       border: 1px solid var(--border); border-radius: 10px; padding: 14px;
-      margin-top: 12px; background: #fbfdff;
+      background: #fafcff; margin-bottom: 12px;
     }
-    .agreement-section h4 { color: var(--navy); margin-bottom: 6px; font-size: 14px; }
-    .agreement-section p, .agreement-section li { font-size: 13.5px; color: var(--text); }
-    .agreement-section ul { padding-left: 18px; margin-top: 6px; }
+    .agreement-section h4 { font-size: 14px; color: var(--navy); margin-bottom: 6px; }
+    .agreement-section ul { padding-left: 20px; font-size: 13px; color: var(--muted); }
+    .agreement-section li { margin-bottom: 4px; }
 
-    .check-item {
-      display: flex; gap: 10px; align-items: flex-start; padding: 8px 0;
-      border-bottom: 1px dashed var(--border); font-size: 14px;
-    }
-    .check-item:last-child { border-bottom: none; }
-    .check-icon { color: var(--success); font-weight: 700; }
-
-    .hidden { display: none; }
-    .muted { color: var(--muted); }
+    .hidden { display: none !important; }
 
     @media (max-width: 640px) {
-      .stepper { flex-direction: column; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .btn-group { flex-direction: column-reverse; }
     }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="brand-badge"></span><span>Bharatiya Bazaar · भारतीय बाज़ार · Vendor Registration</span></div>
-    <a href="bb-bharatiya-bazaar-v2.html" style="color:#fff; text-decoration:none; font-size:14px;">← Home</a>
+    <a href="bb-bharatiya-bazaar-v2.html" class="brand">
+      <span class="brand-badge"></span>
+      <span>Bharatiya Bazaar · भारतीय बाज़ार</span>
+    </a>
+    <div>
+      <a href="bb-vendor-dashboard.html" style="color:#fff; text-decoration:none; font-size:13.5px; font-weight:600; padding:6px 12px; border:1px solid rgba(255,255,255,0.3); border-radius:6px;">Vendor Login →</a>
+    </div>
   </header>
 
   <main class="container">
     <section class="page-head">
-      <h1>Become a Partner Vendor</h1>
-      <p>Join Bharatiya Bazaar's vendor network · भारतीय बाज़ार के विक्रेता बनें · Corrected as per validated rules</p>
+      <h1>Partner Vendor Onboarding</h1>
+      <p>विक्रेता पंजीकरण · Join our verified local commerce network</p>
     </section>
 
+    <!-- STEP PROGRESS BAR -->
     <div class="stepper">
-      <span class="step-dot active" id="step1Dot">1 Business Details</span>
-      <span class="step-dot" id="step2Dot">2 Owner KYC</span>
-      <span class="step-dot" id="step3Dot">3 Vendor Agreement</span>
-      <span class="step-dot" id="step4Dot">4 Security Deposit</span>
-      <span class="step-dot" id="step5Dot">5 Training & Activation</span>
+      <div id="step1Dot" class="step-dot active"><span>1</span> Basic Details</div>
+      <div id="step2Dot" class="step-dot"><span>2</span> Business Info</div>
+      <div id="step3Dot" class="step-dot"><span>3</span> Agreement & Deposit</div>
+      <div id="step4Dot" class="step-dot"><span>4</span> Success & Activation</div>
     </div>
 
-    <!-- STEP 1: BUSINESS DETAILS -->
+    <!-- ERROR / ALERT BANNER -->
+    <div id="alertBox" class="note danger hidden"></div>
+
+    <!-- STEP 1: BASIC DETAILS -->
     <section id="step1" class="card panel">
-      <h2>Step 1 — Business Details</h2>
-      <p class="subtitle muted">Tell us about your business · अपने व्यवसाय की जानकारी दें</p>
+      <h2>Step 1 — Owner & Contact Details</h2>
+      <p class="sub">मालिक एवं संपर्क विवरण · Enter your personal and contact information</p>
 
-      <label class="field-label">Business Name <span class="hindi">व्यवसाय का नाम</span></label>
-      <input type="text" placeholder="e.g. Sharma Kirana Store" />
-
-      <label class="field-label">Business Category <span class="hindi">व्यवसाय श्रेणी</span></label>
-      <select>
-        <option value="">Select category…</option>
-        <option>Groceries — 7% platform margin</option>
-        <option>Pharmacy — 20% platform margin</option>
-        <option>Electronics — 10% platform margin</option>
-        <option>Fashion — 15% platform margin</option>
-        <option>Fresh Produce — 7% platform margin</option>
-        <option>Meat/Poultry/Fish — 7% platform margin</option>
-        <option>Bakery — 10% platform margin</option>
-        <option>Clothing — 15% platform margin</option>
-        <option>Footwear — 15% platform margin</option>
-        <option>Household — 10% platform margin</option>
-        <option>Beauty & Wellness — 15% platform margin</option>
-        <option>Repair & Maintenance — 15% platform margin</option>
-        <option>Home Services — 20% platform margin</option>
-        <option>Health & Fitness — 20% platform margin</option>
-        <option>Automotive — 15% platform margin</option>
-        <option>Education — 20% platform margin</option>
-        <option>Events & Photography — 25% platform margin</option>
-        <option>Consulting — 25% platform margin</option>
-        <option>Food & Beverage — 10% platform margin</option>
-        <option>Sweets & Confectionery — 10% platform margin</option>
-      </select>
-
-      <div class="note info">
-        Category margins are fixed by the platform and non-negotiable.
-        Margins are configurable by admin and may be updated from time to time.
-        Current allowed range: 7% to 25%.
+      <div class="grid-2">
+        <div class="field-group">
+          <label class="field-label" for="ownerName">Owner Full Name <span class="hindi">(मालिक का नाम)</span> *</label>
+          <input type="text" id="ownerName" placeholder="e.g. Ramesh Kumar Sharma" required />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="mobile">Mobile Number <span class="hindi">(मोबाइल नंबर)</span> *</label>
+          <input type="tel" id="mobile" placeholder="10-digit mobile number" maxlength="10" required />
+        </div>
       </div>
 
-      <label class="field-label">GSTIN / Business Registration No. <span class="hindi">GSTIN / पंजीकरण संख्या</span></label>
-      <input type="text" placeholder="e.g. 27AAAAA0000A1Z5" />
-
-      <label class="field-label">Business Address <span class="hindi">व्यवसाय का पता</span></label>
-      <textarea rows="3" placeholder="Shop no, street, area, city, state"></textarea>
-
-      <label class="field-label">PIN Code <span class="hindi">पिन कोड</span></label>
-      <input type="text" placeholder="e.g. 401303" />
-
-      <div class="note">
-        Vendor onboarding is available only in PIN codes where the member activation threshold has been reached.
-        If your PIN code is not yet active, you can register but activation will be pending until the threshold is met.
+      <div class="grid-2">
+        <div class="field-group">
+          <label class="field-label" for="password">Account Password <span class="hindi">(पासवर्ड)</span> *</label>
+          <input type="password" id="password" placeholder="Min. 6 characters" required />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="pinCode">Store PIN Code <span class="hindi">(पिन कोड)</span> *</label>
+          <input type="text" id="pinCode" placeholder="6-digit postal PIN" maxlength="6" required />
+        </div>
       </div>
 
-      <button class="btn-primary" onclick="goToStep(2)">Continue</button>
+      <div class="field-group">
+        <label class="field-label" for="address">Full Store Address <span class="hindi">(दुकान का पूरा पता)</span></label>
+        <textarea id="address" rows="2" placeholder="Shop/Building No., Street, Area, City, State"></textarea>
+      </div>
+
+      <div class="btn-group">
+        <button type="button" class="btn-primary" onclick="validateAndGoToStep(2)">Continue to Business Info →</button>
+      </div>
     </section>
 
-    <!-- STEP 2: OWNER KYC -->
+    <!-- STEP 2: BUSINESS & CATEGORY -->
     <section id="step2" class="card panel hidden">
-      <h2>Step 2 — Owner KYC Verification</h2>
-      <p class="subtitle muted">Verify the business owner · मालिक का सत्यापन करें</p>
+      <h2>Step 2 — Business & Category Details</h2>
+      <p class="sub">व्यापार एवं श्रेणी विवरण · Set your business category and commission margin</p>
 
-      <label class="field-label">Owner Full Name <span class="hindi">मालिक का पूरा नाम</span></label>
-      <input type="text" placeholder="e.g. Ramesh Kumar Sharma" />
-
-      <label class="field-label">PAN Card Number <span class="hindi">PAN कार्ड नंबर</span></label>
-      <input type="text" placeholder="e.g. ABCDE1234F" />
-
-      <label class="field-label">Aadhaar Number <span class="hindi">आधार नंबर</span></label>
-      <input type="text" placeholder="e.g. XXXX XXXX XXXX" />
-
-      <label class="field-label">Bank Account Number <span class="hindi">बैंक खाता संख्या</span></label>
-      <input type="text" placeholder="e.g. 50100XXXXXXXX" />
-
-      <label class="field-label">IFSC Code <span class="hindi">IFSC कोड</span></label>
-      <input type="text" placeholder="e.g. HDFC0001234" />
-
-      <h3>Document Upload</h3>
-      <div class="file-upload">📄 Upload PAN Card (PDF/JPG, max 5MB)</div>
-      <div class="file-upload">📄 Upload Aadhaar Card (PDF/JPG, max 5MB)</div>
-      <div class="file-upload">📄 Upload Business Proof (PDF/JPG, max 5MB)</div>
-      <div class="file-upload">📄 Upload Cancelled Cheque (PDF/JPG, max 5MB)</div>
-
-      <div class="note info">
-        <strong>TDS Note:</strong> Your PAN is required for TDS purposes.
-        Settlement payouts are subject to TDS under Section 194C.
-        Vendor referral bonus is subject to TDS under Section 194H.
-        Without PAN, TDS rate is 20% instead of 1% (individual) or 2% (company/firm).
+      <div class="field-group">
+        <label class="field-label" for="businessName">Store / Business Name <span class="hindi">(दुकान / व्यापार का नाम)</span> *</label>
+        <input type="text" id="businessName" placeholder="e.g. Sharma Kirana & General Store" required />
       </div>
 
-      <button class="btn-primary" onclick="goToStep(3)">Continue</button>
-      <button class="btn-ghost" onclick="goToStep(1)">Back</button>
+      <div class="grid-2">
+        <div class="field-group">
+          <label class="field-label" for="category">Business Category <span class="hindi">(व्यापार श्रेणी)</span> *</label>
+          <select id="category" onchange="updateCategoryMarginDisplay()">
+            <option value="GROCERY">Grocery (किराना / राशन) — 7.0% Margin</option>
+            <option value="APPAREL">Apparel / Clothing (कपड़ा / परिधान) — 15.0% Margin</option>
+            <option value="ELECTRONICS">Electronics & Mobile (इलेक्ट्रॉनिक्स) — 10.0% Margin</option>
+            <option value="RESTAURANT">Restaurant & Cafe (खान-पान) — 12.0% Margin</option>
+            <option value="HEALTHCARE">Healthcare & Pharmacy (दवाइयां) — 10.0% Margin</option>
+            <option value="SERVICES">Services (सेवाएं) — 20.0% Margin</option>
+            <option value="GENERAL">General Retail (सामान्य खुदरा) — 10.0% Margin</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="entityType">Entity Type <span class="hindi">(इकाई प्रकार)</span> *</label>
+          <select id="entityType">
+            <option value="INDIVIDUAL">Individual / Proprietorship (व्यक्तिगत)</option>
+            <option value="COMPANY">Company / Partnership / LLP (कंपनी)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="marginPreviewNote" class="note info">
+        <strong>Category Margin Rate: 7.0%</strong><br />
+        Customer purchases fund Setu Kosh commissions through this unified category margin.
+      </div>
+
+      <div class="grid-2">
+        <div class="field-group">
+          <label class="field-label" for="panNumber">PAN Number <span class="hindi">(पैन नंबर)</span> *</label>
+          <input type="text" id="panNumber" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase;" required />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="gstin">GSTIN <span class="hindi">(जीएसटीआईएन - वैकल्पिक)</span></label>
+          <input type="text" id="gstin" placeholder="15-digit GSTIN (optional)" maxlength="15" style="text-transform:uppercase;" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="referrerCode">Referrer Member Code <span class="hindi">(रेफरल सदस्य कोड - वैकल्पिक)</span></label>
+        <input type="text" id="referrerCode" placeholder="Enter Member Code (e.g. M10012) who introduced you" />
+        <div style="font-size:12px; color:var(--muted); margin-top:4px;">
+          The referring member earns a permanent 0.25% referral bonus on all your store sales (First-referrer-wins).
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button type="button" class="btn-ghost" onclick="goToStep(1)">← Back</button>
+        <button type="button" class="btn-primary" onclick="validateAndGoToStep(3)">Continue to Terms & Deposit →</button>
+      </div>
     </section>
 
-    <!-- STEP 3: VENDOR AGREEMENT -->
+    <!-- STEP 3: AGREEMENT & SECURITY DEPOSIT -->
     <section id="step3" class="card panel hidden">
-      <h2>Step 3 — Vendor Agreement</h2>
-      <p class="subtitle muted">Please read and accept the following terms · कृपया निम्नलिखित शर्तें पढ़ें और स्वीकार करें</p>
+      <h2>Step 3 — Vendor Terms & Security Deposit</h2>
+      <p class="sub">शर्तें एवं सुरक्षा जमा · Review operational guidelines and confirm registration</p>
 
       <div class="agreement-section">
-        <h4>1. Platform Margin</h4>
-        <p>
-          The platform margin is fixed for your business category and is non-negotiable.
-          Current margins range from 7% to 25% depending on category.
-          Margins are configurable by the platform admin and may be updated.
-          If updated, you will be notified and can choose whether to continue.
-        </p>
-      </div>
-
-      <div class="agreement-section">
-        <h4>2. Settlement Cycle</h4>
+        <h4>1. Security Deposit Mode & Policy</h4>
         <ul>
-          <li>Settlements are processed weekly on Mondays for the previous week (Monday–Sunday).</li>
-          <li>Settlement amount = Gross sales − Platform margin − Admin charge − TDS (if applicable).</li>
-          <li>Early settlement (before Monday) incurs a flat Rs.250 fee.</li>
+          <li><strong>Mandatory Refundable Deposit:</strong> ₹5,000 (500,000 paise) recorded at platform onboarding.</li>
+          <li><strong>Deposit Protection:</strong> Protects member commissions and covers settlement reconciliation.</li>
+          <li><strong>Freeze Threshold:</strong> If your settlement wallet falls below ₹500, deposit freeze state is engaged until replenished.</li>
         </ul>
       </div>
 
       <div class="agreement-section">
-        <h4>3. Admin Charges</h4>
+        <h4>2. Settlement Cycle & TDS Compliance</h4>
         <ul>
-          <li>Bank transfer settlement: 10% of post-margin amount.</li>
-          <li>Wallet settlement: 5% of post-margin amount.</li>
-          <li>Volume discount tiers reduce the admin charge (not the vendor margin).</li>
-          <li>Current tiers: 0% · 10% · 20% · 30% · 50% discount on admin charge.</li>
+          <li><strong>Weekly Settlement:</strong> Every Monday at 00:00 UTC for previous week's cleared sales.</li>
+          <li><strong>TDS Section 194C:</strong> 1% (Individual) / 2% (Company) on gross sales exceeding ₹30k single or ₹1L aggregate.</li>
+          <li><strong>On-Demand Early Settlement:</strong> Available at any time with flat ₹250 administrative fee.</li>
         </ul>
       </div>
 
       <div class="agreement-section">
-        <h4>4. Tax Deduction (TDS)</h4>
+        <h4>3. Inactivity Lifecycle</h4>
         <ul>
-          <li>Settlement payouts: TDS under Section 194C. Threshold: Rs.30,000 single payment OR Rs.1,00,000 aggregate per FY. Rate: 1% (individual) / 2% (company/firm) / 20% (no PAN).</li>
-          <li>Vendor referral bonus: TDS under Section 194H. Threshold: Rs.20,000 per FY. Rate: 3% (with PAN) / 20% (no PAN).</li>
-          <li>Form 16A is issued quarterly for TDS deducted.</li>
+          <li><strong>31 Days Inactive:</strong> Account marked INACTIVE if no sales recorded.</li>
+          <li><strong>91 Days Inactive:</strong> Account marked FROZEN; settlements halted.</li>
+          <li><strong>181 Days Inactive:</strong> Account permanently CLOSED.</li>
         </ul>
       </div>
 
-      <div class="agreement-section">
-        <h4>5. Security Deposit</h4>
-        <ul>
-          <li>A refundable security deposit of Rs.5,000 is required at activation.</li>
-          <li>The deposit is frozen when your wallet balance falls below Rs.500.</li>
-          <li>In case of fraud deactivation, pending member commissions are covered from the deposit first, then penalties, then remainder is forfeited.</li>
-        </ul>
-      </div>
-
-      <div class="agreement-section">
-        <h4>6. Inactivity</h4>
-        <ul>
-          <li>Vendor accounts become INACTIVE after 31 days of no activity.</li>
-          <li>Vendor accounts become FROZEN after 91 days of continued inactivity.</li>
-          <li>Vendor accounts are CLOSED after 181 days of continued inactivity.</li>
-          <li>Upon closure, the position is inherited by the platform and commissions go to the company wallet.</li>
-        </ul>
-      </div>
-
-      <div class="agreement-section">
-        <h4>7. Vendor Referral Bonus</h4>
-        <ul>
-          <li>You earn 0.25% of ALL sales at vendors you refer — for their lifetime on the platform.</li>
-          <li>Only ONE referrer per vendor — the first recorded referral wins permanently.</li>
-          <li>Referral bonus is subject to TDS under Section 194H.</li>
-        </ul>
-      </div>
-
-      <div class="agreement-section">
-        <h4>8. Fraud & Penalties</h4>
-        <ul>
-          <li>Fraud: 10x transaction value penalty + permanent deactivation.</li>
-          <li>Data tampering: 5x transaction value penalty.</li>
-          <li>QR refusal: Rs.1,000 per incident.</li>
-          <li>Member commissions are covered from security deposit before penalty forfeiture.</li>
-        </ul>
-      </div>
-
-      <div style="margin-top:16px;">
-        <label style="display:flex; gap:10px; align-items:flex-start; font-size:14px;">
-          <input type="checkbox" style="width:auto; margin-top:3px;" />
-          I have read and agree to the Vendor Agreement terms and conditions.
+      <div style="margin:16px 0;">
+        <label style="display:flex; gap:10px; align-items:flex-start; font-size:13.5px; cursor:pointer;">
+          <input type="checkbox" id="agreeTerms" style="width:auto; margin-top:3px;" />
+          <span>I have read, understood, and agree to the Bharatiya Bazaar Vendor Partnership Terms & Conditions.</span>
         </label>
       </div>
 
-      <button class="btn-primary" onclick="goToStep(4)">Accept & Continue</button>
-      <button class="btn-ghost" onclick="goToStep(2)">Back</button>
+      <div class="btn-group">
+        <button type="button" class="btn-ghost" onclick="goToStep(2)">← Back</button>
+        <button type="button" id="btnRegisterSubmit" class="btn-primary" onclick="submitVendorRegistration()">
+          Confirm & Complete Registration (₹5,000 Deposit) ✓
+        </button>
+      </div>
     </section>
 
-    <!-- STEP 4: SECURITY DEPOSIT -->
-    <section id="step4" class="card panel hidden">
-      <h2>Step 4 — Security Deposit</h2>
-      <p class="subtitle muted">Pay the refundable security deposit · सुरक्षा जमा राशि का भुगतान करें</p>
+    <!-- STEP 4: SUCCESS & ACTIVATION -->
+    <section id="step4" class="card panel hidden" style="text-align:center;">
+      <div style="width:64px; height:64px; border-radius:50%; background:#e8f8ee; color:var(--success); font-size:32px; display:grid; place-items:center; margin:0 auto 16px;">
+        ✓
+      </div>
+      <h2>Vendor Registration Complete!</h2>
+      <p class="sub">आपका विक्रेता खाता सफलतापूर्वक पंजीकृत हो गया है</p>
 
-      <div style="font-size:22px; font-weight:700; color:var(--navy); margin:14px 0;">
-        Rs.5,000
+      <div class="note success" style="text-align:left; margin:16px 0;">
+        <strong>Registration Details:</strong><br />
+        • <strong>Store:</strong> <span id="resBusinessName">-</span><br />
+        • <strong>Vendor ID / Code:</strong> <span id="resVendorCode" style="font-family:monospace; font-weight:700;">-</span><br />
+        • <strong>Category Margin:</strong> <span id="resMarginRate">-</span><br />
+        • <strong>Security Deposit:</strong> ₹5,000.00 (Recorded & Confirmed)<br />
+        • <strong>Account Status:</strong> <span class="badge success">ACTIVE</span>
       </div>
 
-      <div class="note">
-        This is a fully refundable security deposit. It will be returned when you exit the platform
-        in good standing. It is used to cover pending member commissions in case of fraud deactivation.
+      <p style="font-size:13.5px; color:var(--muted); margin-bottom:20px;">
+        You can now log in to your Vendor Dashboard to record member purchases, track Setu Kosh counter progress, and view weekly settlements.
+      </p>
+
+      <div class="btn-group">
+        <a href="bb-vendor-dashboard.html" class="btn-primary" style="text-decoration:none;">Go to Vendor Dashboard →</a>
       </div>
-
-      <label class="field-label">Choose payment method</label>
-      <select>
-        <option>UPI — GPay · PhonePe · Paytm</option>
-        <option>Net Banking</option>
-        <option>Debit / Credit Card</option>
-      </select>
-
-      <button class="btn-primary" onclick="goToStep(5)">Pay Rs.5,000</button>
-      <button class="btn-ghost" onclick="goToStep(3)">Back</button>
-    </section>
-
-    <!-- STEP 5: TRAINING & ACTIVATION -->
-    <section id="step5" class="card panel hidden">
-      <h2>Step 5 — Training & Activation</h2>
-      <p class="subtitle muted">Complete vendor training · विक्रेता प्रशिक्षण पूरा करें</p>
-
-      <div class="check-item"><span class="check-icon">✓</span> Vendor dashboard orientation</div>
-      <div class="check-item"><span class="check-icon">✓</span> QR code usage training</div>
-      <div class="check-item"><span class="check-icon">✓</span> Settlement cycle explanation</div>
-      <div class="check-item"><span class="check-icon">✓</span> TDS and compliance overview</div>
-      <div class="check-item"><span class="check-icon">✓</span> Fraud prevention guidelines</div>
-
-      <div class="note success" style="margin-top:14px;">
-        <strong>Training complete ✓</strong><br />
-        Your vendor account is now being reviewed by the admin team.
-        You will receive a notification once activated.
-      </div>
-
-      <div class="note info" style="margin-top:10px;">
-        <strong>Next steps:</strong><br />
-        1. Admin reviews your KYC documents.<br />
-        2. Admin approves your vendor account.<br />
-        3. Your QR code is generated.<br />
-        4. You can start accepting member purchases.<br />
-        5. Setu Kosh commissions are funded from your vendor margin.
-      </div>
-
-      <button class="btn-primary">Go to Vendor Dashboard →</button>
     </section>
   </main>
 
   <script>
-    const steps = {
-      1: document.getElementById("step1"),
-      2: document.getElementById("step2"),
-      3: document.getElementById("step3"),
-      4: document.getElementById("step4"),
-      5: document.getElementById("step5")
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    const marginRates = {
+      GROCERY: 7.0,
+      APPAREL: 15.0,
+      ELECTRONICS: 10.0,
+      RESTAURANT: 12.0,
+      HEALTHCARE: 10.0,
+      SERVICES: 20.0,
+      GENERAL: 10.0
     };
 
-    const dots = {
-      1: document.getElementById("step1Dot"),
-      2: document.getElementById("step2Dot"),
-      3: document.getElementById("step3Dot"),
-      4: document.getElementById("step4Dot"),
-      5: document.getElementById("step5Dot")
-    };
+    function updateCategoryMarginDisplay() {
+      const cat = document.getElementById("category").value;
+      const rate = marginRates[cat] || 10.0;
+      document.getElementById("marginPreviewNote").innerHTML = `
+        <strong>Category Margin Rate: ${escapeHtml(rate.toFixed(1))}%</strong><br />
+        Customer purchases fund Setu Kosh commissions through this unified category margin.
+      `;
+    }
 
-    function goToStep(step) {
-      Object.keys(steps).forEach(key => {
-        const num = Number(key);
-        steps[num].classList.toggle("hidden", num !== step);
-        dots[num].classList.remove("active", "done");
-        if (num < step) dots[num].classList.add("done");
-        if (num === step) dots[num].classList.add("active");
-      });
+    function showAlert(msg) {
+      const box = document.getElementById("alertBox");
+      box.textContent = msg;
+      box.classList.remove("hidden");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    goToStep(1);
+    function clearAlert() {
+      const box = document.getElementById("alertBox");
+      box.textContent = "";
+      box.classList.add("hidden");
+    }
+
+    function goToStep(step) {
+      clearAlert();
+      for (let i = 1; i <= 4; i++) {
+        const panel = document.getElementById(`step${i}`);
+        const dot = document.getElementById(`step${i}Dot`);
+        if (panel) panel.classList.toggle("hidden", i !== step);
+        if (dot) {
+          dot.classList.remove("active", "done");
+          if (i < step) dot.classList.add("done");
+          if (i === step) dot.classList.add("active");
+        }
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function validateAndGoToStep(targetStep) {
+      clearAlert();
+      if (targetStep === 2) {
+        const ownerName = document.getElementById("ownerName").value.trim();
+        const mobile = document.getElementById("mobile").value.trim();
+        const password = document.getElementById("password").value;
+        const pinCode = document.getElementById("pinCode").value.trim();
+
+        if (!ownerName || ownerName.length < 2) {
+          showAlert("Please enter a valid owner name (min. 2 characters).");
+          return;
+        }
+        if (!/^\d{10}$/.test(mobile)) {
+          showAlert("Please enter a valid 10-digit mobile number.");
+          return;
+        }
+        if (!password || password.length < 6) {
+          showAlert("Password must be at least 6 characters.");
+          return;
+        }
+        if (!/^\d{6}$/.test(pinCode)) {
+          showAlert("Please enter a valid 6-digit postal PIN code.");
+          return;
+        }
+        goToStep(2);
+      } else if (targetStep === 3) {
+        const businessName = document.getElementById("businessName").value.trim();
+        const panNumber = document.getElementById("panNumber").value.trim().toUpperCase();
+
+        if (!businessName || businessName.length < 2) {
+          showAlert("Please enter your store/business name.");
+          return;
+        }
+        if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber)) {
+          showAlert("Please enter a valid 10-character PAN number (e.g. ABCDE1234F).");
+          return;
+        }
+        goToStep(3);
+      }
+    }
+
+    async function submitVendorRegistration() {
+      clearAlert();
+      const agree = document.getElementById("agreeTerms").checked;
+      if (!agree) {
+        showAlert("Please accept the Vendor Partnership Terms & Conditions to proceed.");
+        return;
+      }
+
+      const btn = document.getElementById("btnRegisterSubmit");
+      btn.disabled = true;
+      btn.textContent = "Processing Registration...";
+
+      const payload = {
+        name: document.getElementById("ownerName").value.trim(),
+        businessName: document.getElementById("businessName").value.trim(),
+        mobile: document.getElementById("mobile").value.trim(),
+        password: document.getElementById("password").value,
+        pinCode: document.getElementById("pinCode").value.trim(),
+        address: document.getElementById("address").value.trim(),
+        category: document.getElementById("category").value,
+        entityType: document.getElementById("entityType").value,
+        panNumber: document.getElementById("panNumber").value.trim().toUpperCase(),
+        gstin: document.getElementById("gstin").value.trim().toUpperCase() || undefined,
+        referrerCode: document.getElementById("referrerCode").value.trim() || undefined,
+        payoutMethod: "BANK"
+      };
+
+      try {
+        const res = await fetch("/api/vendors/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error?.message || "Registration failed. Please verify details.");
+        }
+
+        const vendor = data.data.vendor;
+        document.getElementById("resBusinessName").textContent = vendor.businessName;
+        document.getElementById("resVendorCode").textContent = vendor.id;
+        document.getElementById("resMarginRate").textContent = `${vendor.marginRatePct}% (${vendor.category})`;
+
+        goToStep(4);
+      } catch (err) {
+        showAlert(err.message || "Network error during registration.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Confirm & Complete Registration (₹5,000 Deposit) ✓";
+      }
+    }
   </script>
 </body>
 </html>

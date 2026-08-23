@@ -50,257 +50,554 @@
       position: sticky; top: 0; z-index: 20;
     }
 
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: #fff; }
     .brand-badge {
       width: 34px; height: 34px; border-radius: 50%;
       background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
     }
 
-    .vendor-chip { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.92); }
+    .vendor-chip { display: flex; align-items: center; gap: 12px; font-size: 13.5px; }
     .avatar {
       width: 34px; height: 34px; border-radius: 50%; background: var(--teal);
-      display: grid; place-items: center; font-weight: 700; color: #fff;
+      display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 13px;
     }
 
     .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
 
-    .page-head { margin-bottom: 16px; }
-    .page-head h1 { font-size: clamp(24px, 3vw, 32px); color: var(--navy); margin-bottom: 4px; }
-    .page-head p { color: var(--muted); font-size: 14.5px; }
+    .page-head {
+      margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;
+    }
+    .page-head h1 { font-size: clamp(22px, 2.5vw, 30px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14px; }
+
+    .nav-links { display: flex; gap: 8px; }
+    .nav-btn {
+      padding: 8px 14px; border-radius: 8px; font-size: 13.5px; font-weight: 600; text-decoration: none;
+      background: #fff; color: var(--navy); border: 1px solid var(--border);
+    }
+    .nav-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 
     .card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius-card); box-shadow: var(--shadow);
     }
 
-    .panel { padding: 18px; margin-bottom: 16px; }
-    .panel h2 { font-size: 19px; color: var(--navy); margin-bottom: 12px; }
-    .panel h3 { font-size: 15px; color: var(--navy); margin: 14px 0 8px; }
+    .panel { padding: 20px; margin-bottom: 16px; }
+    .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 14px; }
 
     .summary-grid {
-      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 14px; margin-bottom: 16px;
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px; margin-bottom: 20px;
     }
 
-    .stat-card { padding: 16px; }
-    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 7px; }
-    .stat-card .value { font-size: 20px; font-weight: 700; color: var(--navy); }
-    .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
+    .stat-card { padding: 18px; }
+    .stat-card .label { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+    .stat-card .value { font-size: 22px; font-weight: 700; color: var(--navy); }
+    .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
     .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
     .badge.success { background: #e8f8ee; color: var(--success); }
-    .badge.pending { background: #fff4e0; color: var(--warning); }
+    .badge.warning { background: #fff4e0; color: var(--warning); }
     .badge.info { background: #e8f6ff; color: var(--info); }
     .badge.danger { background: #fee2e2; color: var(--danger); }
 
     .note {
       border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
-      padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px;
+      padding: 12px 14px; border-radius: 8px; font-size: 13px; margin: 12px 0;
     }
     .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
-    .note.info { border-left-color: var(--info); background: #e8f4fd; color: #0c4a6e; }
-    .note.danger { border-left-color: var(--danger); background: #fee2e2; color: #7f1d1d; }
+    .note.danger { border-left-color: var(--danger); background: #fee2e2; color: #991b1b; }
+    .note.success { border-left-color: var(--success); background: #ecfdf5; color: #065f46; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid var(--border); padding: 9px 10px; text-align: left; font-size: 13px; vertical-align: top; }
-    th { background: #f8fafc; color: var(--navy); }
+    .field-group { margin-bottom: 14px; }
+    .field-label { display: block; font-size: 13.5px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+    .field-label .hindi { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: 4px; }
+
+    input, select {
+      width: 100%; border: 1px solid var(--border); border-radius: 10px;
+      padding: 11px 14px; font-size: 14.5px; color: var(--navy); background: #fff; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(15, 157, 157, 0.12); }
+
+    .btn-primary {
+      background: var(--teal); color: #fff; border: none;
+      padding: 12px 18px; border-radius: var(--radius-btn); font-size: 14.5px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+      transition: background 0.2s ease;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    .btn-ghost {
+      background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
     .preview-box {
       border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px; background: #fbfdff; margin-top: 12px;
+      padding: 14px; background: #fafcff; margin: 14px 0;
     }
     .preview-row {
       display: flex; justify-content: space-between; gap: 10px;
-      padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 14px;
+      padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 13.5px;
     }
     .preview-row:last-child { border-bottom: none; }
     .preview-row strong { color: var(--navy); }
 
-    .btn-primary {
-      width: 100%; margin-top: 14px; background: var(--teal); color: #fff; border: none;
-      padding: 13px 16px; border-radius: var(--radius-btn); font-size: 15px; font-weight: 700; cursor: pointer;
+    .progress-bar-wrap {
+      background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; margin: 8px 0;
     }
-    .btn-primary:hover { background: var(--teal-dark); }
+    .progress-bar-fill {
+      background: var(--teal); height: 100%; border-radius: 999px; width: 0%;
+      transition: width 0.4s ease;
+    }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    /* LOGIN MODAL OVERLAY */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(13, 27, 42, 0.7); backdrop-filter: blur(4px);
+      display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px;
+    }
+    .modal-card {
+      width: min(440px, 100%); background: #fff; border-radius: 16px; padding: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
 
-    .hidden { display: none; }
-    .muted { color: var(--muted); }
+    .hidden { display: none !important; }
 
-    @media (max-width: 1080px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 980px) { .grid-2 { grid-template-columns: 1fr; } }
-    @media (max-width: 640px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .summary-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
+  <!-- TOPBAR -->
   <header class="topbar">
-    <div class="brand"><span class="brand-badge"></span><span>Bharatiya Bazaar · भारतीय बाज़ार · Vendor</span></div>
-    <div class="vendor-chip"><span>Ramesh Kumar Sharma · BBV10089 · ✓ VERIFIED</span><span class="avatar">RK</span></div>
+    <a href="bb-bharatiya-bazaar-v2.html" class="brand">
+      <span class="brand-badge"></span>
+      <span>Bharatiya Bazaar · Vendor Portal</span>
+    </a>
+    <div id="topbarVendorInfo" class="vendor-chip hidden">
+      <span id="topbarName">Vendor Store</span>
+      <span id="topbarAvatar" class="avatar">V</span>
+      <button class="btn-ghost" onclick="logoutVendor()">Logout</button>
+    </div>
   </header>
 
-  <main class="container">
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div style="text-align:center; margin-bottom:18px;">
+        <span class="brand-badge" style="display:inline-block; margin-bottom:8px;"></span>
+        <h2>Vendor Login</h2>
+        <p style="font-size:13.5px; color:var(--muted);">विक्रेता लॉगिन · Enter your vendor credentials</p>
+      </div>
+
+      <div id="loginAlert" class="note danger hidden"></div>
+
+      <form onsubmit="handleVendorLogin(event)">
+        <div class="field-group">
+          <label class="field-label" for="loginMobile">Mobile Number / Member Code *</label>
+          <input type="text" id="loginMobile" placeholder="e.g. 9876543210 or M10012" required />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="loginPassword">Password *</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required />
+        </div>
+        <button type="submit" id="btnLoginSubmit" class="btn-primary" style="margin-top:16px;">
+          Log In to Vendor Portal →
+        </button>
+      </form>
+
+      <div style="text-align:center; margin-top:16px; font-size:13px; color:var(--muted);">
+        Not registered yet? <a href="bb-vendor-register.html" style="color:var(--teal); font-weight:700; text-decoration:none;">Register as Partner Vendor</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main id="dashboardContent" class="container hidden">
     <section class="page-head">
-      <h1>Vendor Dashboard</h1>
-      <p>Sharma Kirana Store · Vendor ID: BBV10089 · Corrected as per validated rules</p>
+      <div>
+        <h1 id="vendorStoreTitle">Vendor Store</h1>
+        <p id="vendorSubTitle">Vendor ID: - · Status: -</p>
+      </div>
+      <div class="nav-links">
+        <a href="bb-vendor-dashboard.html" class="nav-btn active">Dashboard</a>
+        <a href="bb-settlement.html" class="nav-btn">Settlements & Payouts</a>
+      </div>
     </section>
 
-    <!-- SUMMARY CARDS -->
+    <!-- LIVE NOTIFICATION / FREEZE BANNER -->
+    <div id="statusBanner" class="note hidden"></div>
+
+    <!-- SUMMARY METRICS -->
     <section class="summary-grid">
       <div class="card stat-card">
-        <div class="label">Today's Sales</div>
-        <div class="value">Rs.4,850</div>
-        <div class="sub">12 transactions</div>
+        <div class="label">Vendor Status (स्थिति)</div>
+        <div class="value" id="valStatus"><span class="badge success">ACTIVE</span></div>
+        <div class="sub" id="valCategory">Category: -</div>
       </div>
+
       <div class="card stat-card">
-        <div class="label">This Week</div>
-        <div class="value">Rs.13,500</div>
-        <div class="sub">Aug 4–10</div>
+        <div class="label">Wallet Balance (वॉलेट शेष)</div>
+        <div class="value" id="valWallet">₹0.00</div>
+        <div class="sub">Cleared payouts available</div>
       </div>
+
       <div class="card stat-card">
-        <div class="label">Next Settlement</div>
-        <div class="value" style="color:var(--warning);">Monday</div>
-        <div class="sub">Rs.11,311 expected</div>
+        <div class="label">Category Margin Rate (मार्जिन दर)</div>
+        <div class="value" id="valMarginRate">0.0%</div>
+        <div class="sub" id="valMarginNote">Auto-deducted for Setu Kosh</div>
       </div>
+
       <div class="card stat-card">
-        <div class="label">Admin Charge Rate</div>
-        <div class="value">9%</div>
-        <div class="sub">Base 10% · Tier 1 discount 10%</div>
-      </div>
-      <div class="card stat-card">
-        <div class="label">Security Deposit</div>
-        <div class="value" style="color:var(--danger);">Rs.350</div>
-        <div class="sub"><span class="badge danger">⚠ LOW — below Rs.5,000</span></div>
+        <div class="label">Security Deposit (सुरक्षा जमा)</div>
+        <div class="value" id="valDeposit">₹5,000.00</div>
+        <div class="sub" id="valDepositStatus">Admin-Confirmed · Active</div>
       </div>
     </section>
 
-    <div class="note danger">
-      <strong>Security Deposit Alert:</strong> Your security deposit balance (Rs.350) is below the required Rs.5,000.
-      Please replenish your deposit to avoid service disruption. The deposit is frozen when wallet balance falls below Rs.500.
-    </div>
-
     <div class="grid-2">
-      <!-- LEFT: EARNINGS OVERVIEW -->
-      <div class="card panel">
-        <h2>Earnings Overview</h2>
+      <!-- RECORD SALE CARD -->
+      <section class="card panel">
+        <h2>Record Member Purchase (बिक्री दर्ज करें)</h2>
+        <p style="font-size:13.5px; color:var(--muted); margin-bottom:14px;">
+          Scan buyer ID or enter member details to fund Setu Kosh tree and credit your store.
+        </p>
 
-        <h3>Sales Revenue</h3>
-        <div class="preview-box">
-          <div class="preview-row"><span>Gross Sales (all time)</span><strong>Rs.1,24,320</strong></div>
-          <div class="preview-row"><span>Platform Margin Paid (7%)</span><strong>Rs.8,702.40</strong></div>
-          <div class="preview-row"><span>Net Sales Revenue</span><strong>Rs.1,15,617.60</strong></div>
+        <div id="saleAlert" class="note hidden"></div>
+
+        <form id="recordSaleForm" onsubmit="handleRecordSale(event)">
+          <div class="field-group">
+            <label class="field-label" for="buyerCode">
+              Buyer ID / Member Code / Card Number <span class="hindi">(खरीदार का कार्ड / कोड)</span> *
+            </label>
+            <input type="text" id="buyerCode" placeholder="e.g. F10001, M10012, or 9876543210" required />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="saleAmount">
+              Total Bill Amount (₹) <span class="hindi">(कुल बिल राशि)</span> *
+            </label>
+            <input type="number" id="saleAmount" placeholder="e.g. 1000" min="1" step="any" oninput="calculateSalePreview()" required />
+          </div>
+
+          <div class="preview-box">
+            <div class="preview-row">
+              <span>Gross Bill Amount:</span>
+              <strong id="prevGross">₹0.00</strong>
+            </div>
+            <div class="preview-row">
+              <span id="prevMarginLabel">Category Margin Deduction:</span>
+              <strong id="prevMargin" style="color:var(--warning);">-₹0.00</strong>
+            </div>
+            <div class="preview-row">
+              <span>Store Net Credited in Settlement:</span>
+              <strong id="prevNet" style="color:var(--success);">₹0.00</strong>
+            </div>
+          </div>
+
+          <button type="submit" id="btnRecordSale" class="btn-primary">
+            Record Sale & Credit Setu Kosh ✓
+          </button>
+        </form>
+      </section>
+
+      <!-- BUYER SETU KOSH PROGRESS CARD -->
+      <section class="card panel">
+        <h2>Setu Kosh Buyer Progress (सेतु कोष प्रगति)</h2>
+        <p style="font-size:13.5px; color:var(--muted); margin-bottom:14px;">
+          Live status of buyer's accumulation towards the ₹1,000 threshold for automatic Setu Kosh node placement.
+        </p>
+
+        <div id="buyerProgressBox" class="note info">
+          Record a purchase on the left to see the buyer's real-time Setu Kosh counter accumulation and generated node positions.
         </div>
 
-        <h3>Admin Charge Savings</h3>
-        <div class="preview-box">
-          <div class="preview-row"><span>Base Rate</span><strong>10%</strong></div>
-          <div class="preview-row"><span>Your Rate (Tier 1 discount)</span><strong>9%</strong></div>
-          <div class="preview-row"><span>Total Saved</span><strong>Rs.1,840</strong></div>
-          <div class="preview-row"><span>Next tier saving</span><strong>Rs.2,760 (at Tier 2)</strong></div>
+        <div id="buyerProgressDetails" class="preview-box hidden">
+          <div class="preview-row">
+            <span>Buyer Member / Card:</span>
+            <strong id="bpMemberCode">-</strong>
+          </div>
+          <div class="preview-row">
+            <span>Accumulated Balance:</span>
+            <strong id="bpAccumulated">₹0.00 / ₹1,000.00</strong>
+          </div>
+          <div class="progress-bar-wrap">
+            <div id="bpProgressBar" class="progress-bar-fill"></div>
+          </div>
+          <div class="preview-row">
+            <span>Setu Kosh Nodes Created:</span>
+            <strong id="bpNodesCount" style="color:var(--teal);">0 Nodes</strong>
+          </div>
+          <div class="preview-row">
+            <span>Referred Vendor Sponsor:</span>
+            <strong id="bpReferrerName">Bound Permanently</strong>
+          </div>
         </div>
 
-        <h3>194C TDS Progress</h3>
-        <div class="preview-box">
-          <div class="preview-row"><span>Cumulative FY Payout</span><strong>Rs.1,02,250</strong></div>
-          <div class="preview-row"><span>Aggregate Threshold</span><strong>Rs.1,00,000</strong></div>
-          <div class="preview-row"><span>Status</span><strong><span class="badge pending">EXCEEDED</span></strong></div>
-          <div class="preview-row"><span>TDS Rate (Individual + PAN)</span><strong>1%</strong></div>
-          <div class="preview-row"><span>TDS Deducted So Far</span><strong>Rs.136.75</strong></div>
+        <!-- SETTLEMENT QUICK LINK -->
+        <div style="margin-top:20px; padding:14px; border:1px solid var(--border); border-radius:10px; background:#fff;">
+          <div style="font-size:14px; font-weight:700; color:var(--navy); margin-bottom:4px;">Weekly Settlement & Payouts</div>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:10px;">
+            Settlements run every Monday at 00:00 UTC with automated Section 194C TDS and volume discount calculations.
+          </p>
+          <a href="bb-settlement.html" class="nav-btn" style="display:inline-block;">View Settlement History & Request Early Payout →</a>
         </div>
-
-        <div class="note info" style="margin-top:12px;">
-          <strong>TDS Rules:</strong><br />
-          • Settlement payouts: Section 194C. Threshold: Rs.30,000 single / Rs.1,00,000 aggregate FY.<br />
-          • Vendor referral bonus: Section 194H. Threshold: Rs.20,000 FY.<br />
-          • Form 16A issued quarterly for TDS deducted.
-        </div>
-      </div>
-
-      <!-- RIGHT: RECENT SETTLEMENTS + EARLY SETTLEMENT -->
-      <div class="card panel">
-        <h2>Recent Settlements</h2>
-
-        <table>
-          <thead>
-            <tr><th>Period</th><th>Net</th><th>Status</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Aug 4–10</td><td>Rs.11,311</td><td><span class="badge pending">PENDING</span></td></tr>
-            <tr><td>Jul 28–Aug 3</td><td>Rs.11,614</td><td><span class="badge success">✓ PAID</span></td></tr>
-            <tr><td>Jul 21–27</td><td>Rs.9,479</td><td><span class="badge success">✓ PAID</span></td></tr>
-            <tr><td>Jul 14–20</td><td>Rs.8,294</td><td><span class="badge success">✓ PAID</span></td></tr>
-            <tr><td>Jul 7–13</td><td>Rs.10,409</td><td><span class="badge success">✓ PAID</span></td></tr>
-          </tbody>
-        </table>
-
-        <div class="note" style="margin-top:12px;">
-          Full settlement history with deduction breakdown is available on the
-          <a href="bb-settlement.html" style="color:var(--teal-dark); font-weight:700;">Settlements & Earnings</a> page.
-        </div>
-
-        <h3 style="margin-top:18px;">Early Settlement Calculator</h3>
-        <p class="muted" style="font-size:13.5px;">Request settlement before Monday. Flat Rs.250 fee applies.</p>
-
-        <div class="preview-box">
-          <div class="preview-row"><span>Gross Sales (this week)</span><strong>Rs.13,500</strong></div>
-          <div class="preview-row"><span>Platform Margin (7%)</span><strong>-Rs.945</strong></div>
-          <div class="preview-row"><span>Post-Margin Amount</span><strong>Rs.12,555</strong></div>
-          <div class="preview-row"><span>Admin Charge (9%)</span><strong>-Rs.1,130</strong></div>
-          <div class="preview-row"><span>Early Settlement Fee</span><strong>-Rs.250</strong></div>
-          <div class="preview-row"><span>194C TDS (1%)</span><strong>-Rs.114</strong></div>
-          <div class="preview-row" style="border-bottom:none;"><span><strong>Net Payable</strong></span><strong style="color:var(--success);">Rs.11,111</strong></div>
-        </div>
-
-        <button class="btn-primary" type="button">Request Early Settlement</button>
-      </div>
-    </div>
-
-    <!-- TODAY'S TRANSACTIONS -->
-    <div class="card panel">
-      <h2>Today's Transactions</h2>
-
-      <table>
-        <thead>
-          <tr><th>Time</th><th>Member</th><th>Amount</th><th>Payment</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>10:45 AM</td><td>BB10055 — Amit Shah</td><td>Rs.450</td><td>UPI</td><td><span class="badge success">✓ COMPLETED</span></td></tr>
-          <tr><td>11:20 AM</td><td>BB10061 — Sunita Devi</td><td>Rs.320</td><td>Cash</td><td><span class="badge success">✓ COMPLETED</span></td></tr>
-          <tr><td>12:05 PM</td><td>BB10078 — Mohan Lal</td><td>Rs.680</td><td>UPI</td><td><span class="badge success">✓ COMPLETED</span></td></tr>
-          <tr><td>12:30 PM</td><td>BB10042 — Rajesh Kumar</td><td>Rs.200</td><td>UPI</td><td><span class="badge success">✓ COMPLETED</span></td></tr>
-          <tr><td>01:15 PM</td><td>BB10090 — Priya Nair</td><td>Rs.550</td><td>Card</td><td><span class="badge success">✓ COMPLETED</span></td></tr>
-          <tr><td>02:40 PM</td><td>BB10102 — Patel Medical</td><td>Rs.1,200</td><td>UPI</td><td><span class="badge pending">PROCESSING</span></td></tr>
-        </tbody>
-      </table>
-
-      <div class="note" style="margin-top:12px;">
-        Each member purchase triggers Setu Kosh commissions for the member's upline network.
-        These commissions are funded from your vendor margin and become CONFIRMED after Monday settlement.
-      </div>
-    </div>
-
-    <!-- VENDOR PROFILE SUMMARY -->
-    <div class="card panel">
-      <h2>Vendor Profile</h2>
-
-      <div class="preview-box">
-        <div class="preview-row"><span>Business Name</span><strong>Sharma Kirana Store</strong></div>
-        <div class="preview-row"><span>Category</span><strong>Groceries — 7% margin</strong></div>
-        <div class="preview-row"><span>Owner</span><strong>Ramesh Kumar Sharma</strong></div>
-        <div class="preview-row"><span>Member ID (linked)</span><strong>BB10042</strong></div>
-        <div class="preview-row"><span>Status</span><strong><span class="badge success">✓ VERIFIED</span></strong></div>
-        <div class="preview-row"><span>Joined</span><strong>15 May 2026</strong></div>
-        <div class="preview-row"><span>PIN Code</span><strong>401303 — Virar West (ACTIVE)</strong></div>
-        <div class="preview-row"><span>Inactivity Status</span><strong><span class="badge success">ACTIVE</span></strong></div>
-      </div>
-
-      <div class="note info" style="margin-top:12px;">
-        <strong>Inactivity Rules:</strong><br />
-        • INACTIVE after 31 days of no activity.<br />
-        • FROZEN after 91 days of continued inactivity.<br />
-        • CLOSED after 181 days of continued inactivity.<br />
-        • Upon closure, position is inherited by the platform.
-      </div>
+      </section>
     </div>
   </main>
+
+  <script>
+    let currentVendor = null;
+    let currentCategoryMarginPct = 10.0;
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatCurrency(paise) {
+      const rupees = (Number(paise || 0) / 100);
+      return "₹" + rupees.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function getVendorToken() {
+      return localStorage.getItem("bb_vendor_token");
+    }
+
+    function setVendorToken(token) {
+      localStorage.setItem("bb_vendor_token", token);
+    }
+
+    function logoutVendor() {
+      localStorage.removeItem("bb_vendor_token");
+      window.location.reload();
+    }
+
+    async function initDashboard() {
+      const token = getVendorToken();
+      if (!token) {
+        document.getElementById("loginModal").classList.remove("hidden");
+        document.getElementById("dashboardContent").classList.add("hidden");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/vendors/me", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (res.status === 401) {
+          logoutVendor();
+          return;
+        }
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error?.message || "Failed to load vendor profile.");
+        }
+
+        renderDashboard(data.data);
+      } catch (err) {
+        document.getElementById("loginModal").classList.remove("hidden");
+        document.getElementById("dashboardContent").classList.add("hidden");
+      }
+    }
+
+    function renderDashboard(data) {
+      currentVendor = data.vendor;
+      const member = data.member;
+      currentCategoryMarginPct = Number(currentVendor.marginRatePct || 10.0);
+
+      document.getElementById("loginModal").classList.add("hidden");
+      document.getElementById("dashboardContent").classList.remove("hidden");
+
+      // Topbar
+      document.getElementById("topbarVendorInfo").classList.remove("hidden");
+      document.getElementById("topbarName").textContent = `${currentVendor.businessName} (${member.name})`;
+      document.getElementById("topbarAvatar").textContent = (member.name || "V").slice(0, 2).toUpperCase();
+
+      // Page Head
+      document.getElementById("vendorStoreTitle").textContent = currentVendor.businessName;
+      document.getElementById("vendorSubTitle").innerHTML = `
+        Vendor ID: <strong>${escapeHtml(currentVendor.id)}</strong> · 
+        Category: <strong>${escapeHtml(currentVendor.category)}</strong> · 
+        Owner: <strong>${escapeHtml(member.name)} (${escapeHtml(member.mobile)})</strong>
+      `;
+
+      // Status
+      const status = currentVendor.status || "ACTIVE";
+      const statusBadge = document.getElementById("valStatus");
+      if (status === "ACTIVE" || status === "VERIFIED") {
+        statusBadge.innerHTML = `<span class="badge success">${escapeHtml(status)}</span>`;
+      } else if (status === "FROZEN") {
+        statusBadge.innerHTML = `<span class="badge danger">${escapeHtml(status)}</span>`;
+      } else {
+        statusBadge.innerHTML = `<span class="badge warning">${escapeHtml(status)}</span>`;
+      }
+      document.getElementById("valCategory").textContent = `Category: ${currentVendor.category}`;
+
+      // Wallet
+      document.getElementById("valWallet").textContent = formatCurrency(data.walletBalancePaise);
+
+      // Margin
+      document.getElementById("valMarginRate").textContent = `${currentCategoryMarginPct.toFixed(1)}%`;
+      document.getElementById("prevMarginLabel").textContent = `Category Margin Deduction (${currentCategoryMarginPct.toFixed(1)}%):`;
+
+      // Security Deposit & Freeze Status
+      document.getElementById("valDeposit").textContent = formatCurrency(currentVendor.securityDepositPaise || 500000);
+      const isFrozen = currentVendor.isDepositFrozen || (data.walletBalancePaise < 50000 && data.walletBalancePaise > 0);
+      const depStatusEl = document.getElementById("valDepositStatus");
+      if (isFrozen) {
+        depStatusEl.innerHTML = `<span style="color:var(--danger); font-weight:700;">⚠️ Deposit Frozen (< ₹500 balance)</span>`;
+      } else {
+        depStatusEl.textContent = "Admin-Confirmed · Active";
+      }
+
+      calculateSalePreview();
+    }
+
+    async function handleVendorLogin(e) {
+      e.preventDefault();
+      const alertBox = document.getElementById("loginAlert");
+      alertBox.classList.add("hidden");
+      alertBox.textContent = "";
+
+      const mobile = document.getElementById("loginMobile").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      const btn = document.getElementById("btnLoginSubmit");
+
+      btn.disabled = true;
+      btn.textContent = "Authenticating...";
+
+      try {
+        const res = await fetch("/api/vendors/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error?.message || "Invalid vendor credentials.");
+        }
+
+        setVendorToken(data.data.token);
+        initDashboard();
+      } catch (err) {
+        alertBox.textContent = err.message || "Login error occurred.";
+        alertBox.classList.remove("hidden");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Log In to Vendor Portal →";
+      }
+    }
+
+    function calculateSalePreview() {
+      const grossRs = parseFloat(document.getElementById("saleAmount").value) || 0;
+      const marginRs = (grossRs * currentCategoryMarginPct) / 100;
+      const netRs = Math.max(0, grossRs - marginRs);
+
+      document.getElementById("prevGross").textContent = "₹" + grossRs.toFixed(2);
+      document.getElementById("prevMargin").textContent = "-₹" + marginRs.toFixed(2);
+      document.getElementById("prevNet").textContent = "₹" + netRs.toFixed(2);
+    }
+
+    async function handleRecordSale(e) {
+      e.preventDefault();
+      const alertBox = document.getElementById("saleAlert");
+      alertBox.className = "note hidden";
+      alertBox.textContent = "";
+
+      const buyerCode = document.getElementById("buyerCode").value.trim();
+      const saleAmountRs = parseFloat(document.getElementById("saleAmount").value);
+      if (!buyerCode || !saleAmountRs || saleAmountRs <= 0) {
+        alertBox.className = "note danger";
+        alertBox.textContent = "Please enter a valid buyer code and positive sale amount.";
+        return;
+      }
+
+      const amountPaise = Math.round(saleAmountRs * 100);
+      const idempotencyKey = "sale_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9);
+      const btn = document.getElementById("btnRecordSale");
+
+      btn.disabled = true;
+      btn.textContent = "Recording Sale & Distributing Splits...";
+
+      try {
+        const token = getVendorToken();
+        const res = await fetch("/api/vendors/sale", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            buyerCode,
+            amountPaise,
+            idempotencyKey
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error?.message || "Failed to record sale.");
+        }
+
+        const saleResult = data.data;
+        alertBox.className = "note success";
+        alertBox.innerHTML = `
+          <strong>Purchase Recorded Successfully! ✓</strong><br />
+          • Gross Sale: ₹${saleAmountRs.toFixed(2)} | Margin: ₹${((saleAmountRs * currentCategoryMarginPct) / 100).toFixed(2)}<br />
+          • IDs Created: <strong>${escapeHtml(saleResult.idsCreated || 0)}</strong> Setu Kosh IDs
+        `;
+
+        // Update buyer progress display
+        renderBuyerProgress(buyerCode, saleResult);
+
+        // Reset sale input
+        document.getElementById("saleAmount").value = "";
+        calculateSalePreview();
+      } catch (err) {
+        alertBox.className = "note danger";
+        alertBox.textContent = err.message || "Failed to process sale.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Record Sale & Credit Setu Kosh ✓";
+      }
+    }
+
+    function renderBuyerProgress(buyerCode, saleResult) {
+      const box = document.getElementById("buyerProgressBox");
+      const details = document.getElementById("buyerProgressDetails");
+      box.classList.add("hidden");
+      details.classList.remove("hidden");
+
+      document.getElementById("bpMemberCode").textContent = buyerCode;
+      const currentPaise = saleResult.currentCounterPaise || 0;
+      const currentRs = currentPaise / 100;
+      const pct = Math.min(100, Math.round((currentPaise / 100000) * 100));
+
+      document.getElementById("bpAccumulated").textContent = `₹${currentRs.toFixed(2)} / ₹1,000.00 (${pct}%)`;
+      document.getElementById("bpProgressBar").style.width = `${pct}%`;
+      document.getElementById("bpNodesCount").textContent = `${saleResult.idsCreated || 0} Nodes Created in this purchase`;
+    }
+
+    window.addEventListener("DOMContentLoaded", initDashboard);
+  </script>
 </body>
 </html>
