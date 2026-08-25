@@ -280,18 +280,20 @@
     }
 
     function getMemberToken() {
-      return localStorage.getItem("bb_token");
+      return localStorage.getItem("jwt_token") || localStorage.getItem("bb_token");
     }
 
     function logoutMember() {
+      localStorage.removeItem("jwt_token");
       localStorage.removeItem("bb_token");
-      window.location.href = "bb-dashboard.html";
+      localStorage.removeItem("member");
+      window.location.href = "bb-register.html";
     }
 
     async function initSetuKoshPage() {
       const token = getMemberToken();
       if (!token) {
-        window.location.href = "bb-dashboard.html";
+        window.location.href = "bb-register.html";
         return;
       }
 
