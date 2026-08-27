@@ -524,12 +524,12 @@
 
     function initReferral() {
       const urlParams = new URLSearchParams(window.location.search);
-      const ref = urlParams.get('ref');
-      const side = urlParams.get('side') || 'LEFT';
+      const ref = urlParams.get('ref') || urlParams.get('sponsor') || urlParams.get('sponsorCode');
+      const side = (urlParams.get('side') || 'LEFT').toUpperCase();
       
       if (ref) {
-        currentSide = side;
-        validateSponsorFromUrl(ref);
+        currentSide = (side === 'RIGHT' ? 'RIGHT' : 'LEFT');
+        validateSponsorFromUrl(ref.trim().toUpperCase());
       } else {
         const manualEl = document.getElementById('sponsor-manual');
         if(manualEl) manualEl.style.display = 'block';
@@ -537,6 +537,7 @@
     }
 
     async function validateSponsorFromUrl(code) {
+      const cleanCode = (code || '').trim().toUpperCase();
       const loadingEl = document.getElementById('sponsor-loading');
       const successEl = document.getElementById('sponsor-success');
       const errorEl = document.getElementById('sponsor-error');
@@ -544,11 +545,11 @@
 
       if(loadingEl) loadingEl.style.display = 'block';
       try {
-        const res = await fetch(`${API_BASE}/auth/validate-referral?code=${code}`);
+        const res = await fetch(`${API_BASE}/auth/validate-referral?code=${encodeURIComponent(cleanCode)}`);
         const data = await res.json();
         
         if (res.ok && data.success) {
-          currentReferralCode = code;
+          currentReferralCode = cleanCode;
           const nameEl = document.getElementById('display-sponsor-name');
           const codeEl = document.getElementById('display-sponsor-code');
           const placeEl = document.getElementById('display-placement');
@@ -572,13 +573,13 @@
     async function validateSponsor() {
       const inputEl = document.getElementById('reg-sponsor-manual');
       if(!inputEl) return;
-      const code = inputEl.value.trim();
+      const code = inputEl.value.trim().toUpperCase();
       const err = document.getElementById('manual-error');
       if (!code) return;
       
       if(err) err.style.display = 'none';
       try {
-        const res = await fetch(`${API_BASE}/auth/validate-referral?code=${code}`);
+        const res = await fetch(`${API_BASE}/auth/validate-referral?code=${encodeURIComponent(code)}`);
         const data = await res.json();
         if (res.ok && data.success) {
           currentReferralCode = code;

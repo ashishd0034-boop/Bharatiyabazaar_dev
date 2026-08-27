@@ -4,10 +4,12 @@
   "description": "Bharatiya Bazaar backend",
   "main": "src/server.js",
   "scripts": {
+    "pretest": "node scripts/prepare-test-db.js",
     "test": "jest tests/scenarios tests/unit --runInBand --forceExit",
     "test:unit": "jest tests/unit --runInBand --forceExit",
     "test:scenarios": "jest tests/scenarios --runInBand --forceExit",
     "test:integration": "jest tests/integration --runInBand --detectOpenHandles --coverage --collectCoverageFrom='src/services/**/*.js'",
+    "seed:dev": "node scratch/seed_full_production_state.js",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "prisma:migrate": "prisma migrate dev",
@@ -43,6 +45,7 @@
     "supertest": "^7.2.2"
   },
   "jest": {
+    "setupFiles": ["<rootDir>/tests/jest.setup.js"],
     "coverageThreshold": {
       "global": {
         "branches": 70,

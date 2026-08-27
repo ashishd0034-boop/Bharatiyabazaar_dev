@@ -7,9 +7,21 @@ const JWT_SECRET = process.env.JWT_SECRET;
 async function validateReferral(req, res, next) {
   try {
     const { code } = req.query;
-    if (!code) return res.status(400).json({ success: false, error: { message: "Code required" } });
+    const cleanCode = (code || "").trim().toUpperCase();
+    if (!cleanCode) return res.status(400).json({ success: false, error: { message: "Code required" } });
 
-    const sponsor = await prisma.member.findUnique({ where: { memberCode: code } });
+    const sponsor = await prisma.member.findFirst({
+      where: {
+        OR: [
+          { memberCode: cleanCode },
+          { idCards: { some: { cardNumber: cleanCode } } }
+        ]
+      },
+      include: {
+        idCards: true
+      }
+    });
+
     if (!sponsor) {
       return res.status(404).json({ success: false, error: { message: "Sponsor not found" } });
     }
@@ -32,6 +44,31 @@ async function register(req, res, next) {
       return res.status(409).json({ success: false, error: { code: "CONFLICT", message: "Mobile number already registered" } });
     }
 
+    let sponsorIdCardId = null;
+
+    if (referralCode && referralCode.trim()) {
+      const cleanRef = referralCode.trim().toUpperCase();
+      const sponsor = await prisma.member.findFirst({
+        where: {
+          OR: [
+            { memberCode: cleanRef },
+            { idCards: { some: { cardNumber: cleanRef } } }
+          ]
+        },
+        include: {
+          idCards: true
+        }
+      });
+
+      if (!sponsor) {
+        return res.status(400).json({ success: false, error: { code: "BAD_REQUEST", message: "Invalid sponsor code" } });
+      }
+
+      // Find sponsor's MAIN ID card to place the new member under them
+      const sponsorMainCard = sponsor.idCards?.find(c => c.type === "MAIN") || sponsor.idCards?.[0];
+      if (sponsorMainCard) sponsorIdCardId = sponsorMainCard.id;
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     const { createMember } = require("../services/memberService");
@@ -47,19 +84,6 @@ async function register(req, res, next) {
 
     // === NEW: Trigger ID Card Creation & Tree Placement ===
     const { purchaseIds } = require("../services/idCardService");
-    let sponsorIdCardId = null;
-
-    if (referralCode) {
-      const sponsor = await prisma.member.findUnique({ where: { memberCode: referralCode } });
-      if (sponsor) {
-        // Find sponsor's MAIN ID card to place the new member under them
-        const sponsorMainCard = await prisma.memberIdCard.findFirst({
-          where: { memberId: sponsor.id, type: "MAIN" }
-        });
-        if (sponsorMainCard) sponsorIdCardId = sponsorMainCard.id;
-      }
-    }
-
     const sponsorSide = (side === "LEFT" || side === "RIGHT") ? side : "LEFT"; // Default to LEFT
     const newCards = await purchaseIds(member.id, 1, sponsorIdCardId, sponsorSide);
     // =====================================================
