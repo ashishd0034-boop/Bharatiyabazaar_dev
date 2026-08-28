@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setu Kosh Pool Visualizer | Bharatiya Bazaar Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/admin-sidebar.css" />
+  <script src="js/admin-sidebar.js"></script>
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --purple: #7c3aed;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head {
+      margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;
+    }
+    .page-head h1 { font-size: clamp(22px, 2.5vw, 30px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 22px; margin-bottom: 20px; }
+    .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 12px; }
+
+    .badge { display: inline-flex; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .badge.pool { background: #e0f2fe; color: var(--info); }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+
+    .stat-row {
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .stat-card { padding: 16px; }
+    .stat-card .label { font-size: 11.5px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+    .stat-card .value { font-size: 20px; font-weight: 700; color: var(--navy); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 12.5px; vertical-align: middle; }
+    th { background: #f8fafc; color: var(--navy); font-weight: 700; }
+
+    .nav-btn {
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
+      background: #fff; color: var(--navy); border: 1px solid var(--border); cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body class="admin-body">
+  <div class="admin-main">
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="sb-toggle-btn" onclick="toggleSidebar()">☰</button>
+        <div class="admin-breadcrumbs">
+          <span>Finance &amp; MLM</span> / <strong>Setu Kosh (Stream 3) Visualizer</strong>
+        </div>
+      </div>
+      <div class="admin-topbar-right">
+        <span class="admin-pill role-super">
+          🌐 5-Pool Matrix Engine
+        </span>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="page-head">
+        <div>
+          <h1>Stream 3: Setu Kosh 5-Pool Visualizer</h1>
+          <p>सेतु कोष पूल निरीक्षक · Monitor universal pool progressions (Pool 1..5), 10,000 ID thresholds, and multi-tier payouts</p>
+        </div>
+        <div>
+          <button class="nav-btn" onclick="loadSetuKoshData()">🔄 Refresh Setu Kosh</button>
+        </div>
+      </section>
+
+      <!-- 5-POOL STATS -->
+      <section class="stat-row">
+        <div class="card stat-card">
+          <div class="label">Pool 1 (Silver)</div>
+          <div class="value" id="kpiPool1">0 IDs</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label">Pool 2 (Gold)</div>
+          <div class="value" id="kpiPool2" style="color:var(--amber);">0 IDs</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label">Pool 3 (Diamond)</div>
+          <div class="value" id="kpiPool3" style="color:var(--teal);">0 IDs</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label">Pool 4 (Crown)</div>
+          <div class="value" id="kpiPool4" style="color:var(--purple);">0 IDs</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label">Pool 5 (Universal)</div>
+          <div class="value" id="kpiPool5" style="color:var(--success);">0 IDs</div>
+        </div>
+      </section>
+
+      <!-- SETU KOSH NODES -->
+      <section class="card panel">
+        <h2>Live Setu Kosh Matrix Nodes</h2>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+          Active nodes across 5 pools with automatic advancement upon pool completion.
+        </p>
+
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Node ID</th>
+                <th>Pool Level</th>
+                <th>Card Number</th>
+                <th>Member Identity</th>
+                <th>Matrix Position</th>
+                <th>Status</th>
+                <th>Joined At</th>
+              </tr>
+            </thead>
+            <tbody id="setuTableBody">
+              <tr><td colspan="7" style="text-align:center; padding:20px; color:var(--muted);">Loading Setu Kosh matrix...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const d = new Date(dateStr);
+      return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    async function loadSetuKoshData() {
+      const tbody = document.getElementById("setuTableBody");
+      const token = getAdminToken();
+
+      try {
+        const [counterRes, treeRes] = await Promise.all([
+          fetch("/api/setu-kosh/counter"),
+          fetch("/api/setu-kosh/tree")
+        ]);
+
+        const counterData = await counterRes.json();
+        const treeData = await treeRes.json();
+
+        if (counterData && counterData.data) {
+          const c = counterData.data;
+          document.getElementById("kpiPool1").textContent = `${c.pool1Count || c.totalActiveIdCards || 0} IDs`;
+          document.getElementById("kpiPool2").textContent = `${c.pool2Count || 0} IDs`;
+          document.getElementById("kpiPool3").textContent = `${c.pool3Count || 0} IDs`;
+          document.getElementById("kpiPool4").textContent = `${c.pool4Count || 0} IDs`;
+          document.getElementById("kpiPool5").textContent = `${c.pool5Count || 0} IDs`;
+        }
+
+        const nodes = (treeData && treeData.data) ? treeData.data : [];
+        if (!nodes || nodes.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--muted);">No active Setu Kosh nodes yet. Active registrations will seed the matrix.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = nodes.map(n => `
+          <tr>
+            <td><strong style="font-family:monospace; color:var(--navy);">${escapeHtml(n.id ? n.id.slice(-8) : '-')}</strong></td>
+            <td><span class="badge pool">Pool ${n.poolNumber || 1}</span></td>
+            <td><span style="font-family:monospace; color:var(--teal); font-weight:600;">${escapeHtml(n.idCard?.cardNumber || n.cardNumber || '-')}</span></td>
+            <td>
+              <div><strong>${escapeHtml(n.idCard?.member?.name || n.memberName || 'Member')}</strong></div>
+              <div style="font-size:11px; color:var(--muted); font-family:monospace;">${escapeHtml(n.idCard?.member?.memberCode || n.memberCode || '-')}</div>
+            </td>
+            <td><strong>#${n.position || 1}</strong></td>
+            <td><span class="badge success">${escapeHtml(n.status || 'ACTIVE')}</span></td>
+            <td>${formatDate(n.createdAt)}</td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", loadSetuKoshData);
+  </script>
+</body>
+</html>

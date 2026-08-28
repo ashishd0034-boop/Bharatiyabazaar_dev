@@ -36,6 +36,20 @@ router.post("/vendors/:id/freeze", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"])
 router.get("/pins", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.listPinsReq);
 router.post("/pins/revoke/:id", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.revokePinReq);
 
+// Member & Vendor Management (ADMIN & SUPER_ADMIN)
+router.get("/members", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.listMembersReq);
+router.get("/vendors", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.listVendorsReq);
+
+// KYC & Compliance (ADMIN & SUPER_ADMIN)
+router.get("/kyc", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.listKycReq);
+router.post("/kyc/:id/verify", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.verifyKycReq);
+
+// Broadcast & Notifications (ADMIN & SUPER_ADMIN)
+router.post("/broadcast", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.broadcastNotificationReq);
+
+// Live MLM Tree Visualizers (ADMIN & SUPER_ADMIN)
+router.get("/autopool/tree", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.getAutoPoolTreeReq);
+
 // SUPER_ADMIN Exclusives: Audit Logs & Admin User Management
 router.get("/audit-logs", adminAuthMiddleware(["SUPER_ADMIN"]), adminController.getLogs);
 router.get("/users", adminAuthMiddleware(["SUPER_ADMIN"]), adminController.listAdminUsers);

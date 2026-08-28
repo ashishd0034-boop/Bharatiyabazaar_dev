@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Staff &amp; Roles | Bharatiya Bazaar Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/admin-sidebar.css" />
+  <script src="js/admin-sidebar.js"></script>
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --purple: #7c3aed;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head {
+      margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;
+    }
+    .page-head h1 { font-size: clamp(22px, 2.5vw, 30px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14px; }
+
+    .grid-layout {
+      display: grid; grid-template-columns: 360px 1fr; gap: 20px;
+    }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 22px; }
+    .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 12px; }
+
+    .badge { display: inline-flex; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .badge.super { background: #ede9fe; color: var(--purple); }
+    .badge.admin { background: #e0f2fe; color: var(--info); }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.danger { background: #fee2e2; color: var(--danger); }
+
+    .note {
+      padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;
+    }
+    .note.danger { background: #fee2e2; border: 1px solid #fecaca; color: var(--danger); }
+    .note.success { background: #ecfdf5; border: 1px solid #bbf7d0; color: var(--success); }
+    .note.hidden { display: none; }
+
+    .field-group { margin-bottom: 14px; }
+    .field-label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+
+    input, select {
+      width: 100%; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; font-size: 14px; background: #fff; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--teal); }
+
+    .btn-primary {
+      background: var(--teal); color: #fff; border: none;
+      padding: 11px 16px; border-radius: var(--radius-btn); font-size: 14px; font-weight: 700; cursor: pointer;
+      width: 100%;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 12.5px; vertical-align: middle; }
+    th { background: #f8fafc; color: var(--navy); font-weight: 700; }
+
+    .role-btn {
+      padding: 4px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer;
+      background: #f8fafc; border: 1px solid var(--border); color: var(--navy);
+    }
+    .role-btn:hover { background: #ede9fe; color: var(--purple); border-color: #c4b5fd; }
+
+    @media (max-width: 900px) {
+      .grid-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="admin-body">
+  <div class="admin-main">
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="sb-toggle-btn" onclick="toggleSidebar()">☰</button>
+        <div class="admin-breadcrumbs">
+          <span>Management</span> / <strong>Admin Staff &amp; RBAC Roles</strong>
+        </div>
+      </div>
+      <div class="admin-topbar-right">
+        <span class="admin-pill role-super">
+          🛡️ Super Admin Control
+        </span>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="page-head">
+        <div>
+          <h1>Administrative Staff &amp; Permissions</h1>
+          <p>प्रशासक खाता प्रबंधन · Create new executive credentials and manage Super Admin / Admin RBAC role levels</p>
+        </div>
+      </section>
+
+      <div class="grid-layout">
+        <!-- CREATE ADMIN FORM -->
+        <section class="card panel">
+          <h2>Create New Administrator</h2>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+            Provision a new administrative account with customized operational authority.
+          </p>
+
+          <div id="userAlert" class="note hidden"></div>
+
+          <form onsubmit="handleCreateUser(event)">
+            <div class="field-group">
+              <label class="field-label" for="newName">Full Name *</label>
+              <input type="text" id="newName" placeholder="e.g. Anand Vardhan" required />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="newEmail">Executive Email *</label>
+              <input type="email" id="newEmail" placeholder="e.g. anand@bharatiyabazaar.com" required />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="newPassword">Initial Password *</label>
+              <input type="password" id="newPassword" placeholder="Min. 6 characters" required />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="newRole">Assigned Role Level *</label>
+              <select id="newRole">
+                <option value="ADMIN">ADMIN (Operations, Withdrawals &amp; PINs)</option>
+                <option value="SUPER_ADMIN">SUPER_ADMIN (Full Governance, TDS &amp; Staff)</option>
+              </select>
+            </div>
+
+            <button type="submit" id="btnSubmitUser" class="btn-primary">
+              Create Admin Account ✓
+            </button>
+          </form>
+        </section>
+
+        <!-- ADMIN LIST -->
+        <section class="card panel">
+          <h2>Active Platform Administrators</h2>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+            Review authorized personnel and switch role permissions.
+          </p>
+
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Administrator</th>
+                  <th>Email</th>
+                  <th>Role Level</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th style="text-align:center;">Role Switch</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">Loading administrators...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const d = new Date(dateStr);
+      return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    async function loadUsersList() {
+      const tbody = document.getElementById("usersTableBody");
+      const token = getAdminToken();
+      if (!token) return;
+
+      try {
+        const res = await fetch("/api/admin/users", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to load admin users.");
+
+        const users = data.data || [];
+        if (users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">No administrative accounts found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = users.map(u => `
+          <tr>
+            <td><strong>${escapeHtml(u.name)}</strong></td>
+            <td><span style="font-family:monospace; color:var(--navy);">${escapeHtml(u.email)}</span></td>
+            <td>
+              <span class="badge ${u.role === 'SUPER_ADMIN' ? 'super' : 'admin'}">
+                ${escapeHtml(u.role)}
+              </span>
+            </td>
+            <td><span class="badge success">${escapeHtml(u.status || 'ACTIVE')}</span></td>
+            <td>${formatDate(u.createdAt)}</td>
+            <td style="text-align:center;">
+              ${u.role === 'ADMIN' ? `<button class="role-btn" onclick="handleRoleChange('${u.id}', 'SUPER_ADMIN')">Promote to SUPER_ADMIN ⚡</button>` : `<button class="role-btn" onclick="handleRoleChange('${u.id}', 'ADMIN')">Demote to ADMIN</button>`}
+            </td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    async function handleCreateUser(event) {
+      event.preventDefault();
+      const name = document.getElementById("newName").value.trim();
+      const email = document.getElementById("newEmail").value.trim();
+      const password = document.getElementById("newPassword").value;
+      const role = document.getElementById("newRole").value;
+      const alertBox = document.getElementById("userAlert");
+      const token = getAdminToken();
+
+      try {
+        const res = await fetch("/api/admin/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ name, email, password, role })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to create user");
+
+        alertBox.className = "note success";
+        alertBox.textContent = `✓ Admin account ${name} (${role}) created successfully!`;
+        alertBox.classList.remove("hidden");
+
+        document.getElementById("newName").value = "";
+        document.getElementById("newEmail").value = "";
+        document.getElementById("newPassword").value = "";
+
+        await loadUsersList();
+      } catch (err) {
+        alertBox.className = "note danger";
+        alertBox.textContent = err.message;
+        alertBox.classList.remove("hidden");
+      }
+    }
+
+    async function handleRoleChange(userId, newRole) {
+      if (!confirm(`Are you sure you want to change this administrator's role to ${newRole}?`)) return;
+      const token = getAdminToken();
+
+      try {
+        const res = await fetch(`/api/admin/users/${userId}/role`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ role: newRole })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to update role");
+
+        await loadUsersList();
+      } catch (err) {
+        alert("Error updating role: " + err.message);
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", loadUsersList);
+  </script>
+</body>
+</html>

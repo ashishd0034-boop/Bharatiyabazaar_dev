@@ -70,10 +70,28 @@ async function register(req, res, next) {
     }
 
     // Determine activation PIN vs postal code
-    let activationPinCode = activationPin || pin;
-    let postalPinCode = pinCode;
-    if (!activationPinCode && typeof pinCode === "string" && pinCode.trim().toUpperCase().startsWith("PIN-")) {
+    let activationPinCode = null;
+    if (typeof activationPin === "string" && activationPin.trim()) {
+      activationPinCode = activationPin.trim().toUpperCase();
+    } else if (typeof pin === "string" && pin.trim()) {
+      activationPinCode = pin.trim().toUpperCase();
+    } else if (typeof pinCode === "string" && pinCode.trim().toUpperCase().startsWith("PIN-")) {
       activationPinCode = pinCode.trim().toUpperCase();
+    }
+
+    // Enforce mandatory PIN requirement in dev/production
+    if (!activationPinCode && process.env.NODE_ENV !== "test") {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: "PIN_REQUIRED",
+          message: "Activation PIN is required for registration."
+        }
+      });
+    }
+
+    let postalPinCode = pinCode;
+    if (typeof pinCode === "string" && pinCode.trim().toUpperCase().startsWith("PIN-")) {
       postalPinCode = req.body.postalCode || null;
     }
 

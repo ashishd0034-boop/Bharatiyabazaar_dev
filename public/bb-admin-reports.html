@@ -12,6 +12,9 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="css/admin-sidebar.css" />
+  <script src="js/admin-sidebar.js"></script>
+
   <style>
     :root {
       --navy: #0d1b2a;
@@ -38,30 +41,12 @@
 
     body {
       font-family: "Inter", "Noto Sans Devanagari", sans-serif;
-      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      background: var(--bg);
       color: var(--text);
       line-height: 1.5;
     }
 
     h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
-
-    .topbar {
-      background: var(--navy); color: #fff; padding: 14px 22px;
-      display: flex; justify-content: space-between; align-items: center; gap: 12px;
-      position: sticky; top: 0; z-index: 20;
-    }
-
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: #fff; }
-    .brand-badge {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
-    }
-
-    .admin-chip { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
-    .avatar {
-      width: 34px; height: 34px; border-radius: 50%; background: var(--purple);
-      display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 13px;
-    }
 
     .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
 
@@ -70,13 +55,6 @@
     }
     .page-head h1 { font-size: clamp(22px, 2.5vw, 30px); color: var(--navy); margin-bottom: 4px; }
     .page-head p { color: var(--muted); font-size: 14px; }
-
-    .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
-    .nav-btn {
-      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
-      background: #fff; color: var(--navy); border: 1px solid var(--border);
-    }
-    .nav-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 
     .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
     .tab-btn {
@@ -124,8 +102,13 @@
     .btn-action:hover { opacity: 0.9; }
 
     .btn-ghost {
-      background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3);
+      background: transparent; color: var(--navy); border: 1px solid var(--border);
       padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+
+    .nav-btn {
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
+      background: #fff; color: var(--navy); border: 1px solid var(--border); cursor: pointer;
     }
 
     /* RECONCILIATION SUMMARY BOX */
@@ -139,7 +122,7 @@
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(13, 27, 42, 0.7); backdrop-filter: blur(4px);
-      display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px;
+      display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
     }
     .modal-card {
       width: min(440px, 100%); background: #fff; border-radius: 16px; padding: 24px;
@@ -153,33 +136,30 @@
     }
   </style>
 </head>
-<body>
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <a href="bb-admin.html" class="brand">
-      <span class="brand-badge"></span>
-      <span>Bharatiya Bazaar · Financial Reports</span>
-    </a>
-    <div id="topbarAdminInfo" class="admin-chip">
-      <span id="topbarName">Admin User</span>
-      <span id="topbarRoleBadge" class="badge admin">ADMIN</span>
-      <span id="topbarAvatar" class="avatar">A</span>
-      <button class="btn-ghost" onclick="logoutAdmin()">Logout</button>
-    </div>
-  </header>
+<body class="admin-body">
+  <div class="admin-main">
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="sb-toggle-btn" onclick="toggleSidebar()">☰</button>
+        <div class="admin-breadcrumbs">
+          <span>Finance &amp; MLM</span> / <strong>Financial Reports &amp; Queues</strong>
+        </div>
+      </div>
+      <div class="admin-topbar-right">
+        <span class="admin-pill role-super">
+          📊 Reports Control
+        </span>
+      </div>
+    </header>
 
-  <main class="container">
-    <section class="page-head">
-      <div>
-        <h1>Reports, Queues &amp; Statutory Compliance</h1>
-        <p>प्रशासनिक रिपोर्ट एवं वित्तीय समाधान · Real-time ledger balances, withdrawal queue, and compliance logs</p>
-      </div>
-      <div class="nav-links">
-        <a href="bb-admin.html" class="nav-btn">← Dashboard</a>
-        <a href="bb-admin-settings.html" class="nav-btn">Settings</a>
-        <a href="bb-admin-reports.html" class="nav-btn active">Reports</a>
-      </div>
-    </section>
+    <main class="container">
+      <section class="page-head">
+        <div>
+          <h1>Reports, Queues &amp; Statutory Compliance</h1>
+          <p>प्रशासनिक रिपोर्ट एवं वित्तीय समाधान · Real-time ledger balances, withdrawal queue, and compliance logs</p>
+        </div>
+      </section>
 
     <!-- TABS -->
     <div class="tabs">
@@ -334,6 +314,7 @@
       </div>
     </section>
   </main>
+  </div>
 
   <!-- REJECT WITHDRAWAL MODAL -->
   <div id="rejectModal" class="modal-overlay hidden">

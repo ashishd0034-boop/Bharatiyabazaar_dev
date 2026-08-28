@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Broadcast &amp; Notifications | Bharatiya Bazaar Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/admin-sidebar.css" />
+  <script src="js/admin-sidebar.js"></script>
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --purple: #7c3aed;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head {
+      margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;
+    }
+    .page-head h1 { font-size: clamp(22px, 2.5vw, 30px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14px; }
+
+    .grid-layout {
+      display: grid; grid-template-columns: 480px 1fr; gap: 20px;
+    }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 22px; }
+    .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 12px; }
+
+    .badge { display: inline-flex; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .badge.super { background: #ede9fe; color: var(--purple); }
+    .badge.admin { background: #e0f2fe; color: var(--info); }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+
+    .note {
+      padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px;
+    }
+    .note.danger { background: #fee2e2; border: 1px solid #fecaca; color: var(--danger); }
+    .note.success { background: #ecfdf5; border: 1px solid #bbf7d0; color: var(--success); }
+    .note.hidden { display: none; }
+
+    .field-group { margin-bottom: 14px; }
+    .field-label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+
+    input, select, textarea {
+      width: 100%; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; font-size: 14px; background: #fff; outline: none; font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--teal); }
+
+    .btn-primary {
+      background: var(--teal); color: #fff; border: none;
+      padding: 12px 18px; border-radius: var(--radius-btn); font-size: 14px; font-weight: 700; cursor: pointer;
+      width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+
+    .preview-card {
+      border: 1px solid var(--border); border-radius: 10px; padding: 16px;
+      background: #fafcff; margin-top: 14px;
+    }
+    .preview-card h4 { color: var(--navy); margin-bottom: 4px; font-size: 15px; }
+    .preview-card p { font-size: 13.5px; color: var(--muted); line-height: 1.4; }
+
+    @media (max-width: 900px) {
+      .grid-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="admin-body">
+  <div class="admin-main">
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="sb-toggle-btn" onclick="toggleSidebar()">☰</button>
+        <div class="admin-breadcrumbs">
+          <span>System</span> / <strong>Broadcast &amp; Notifications</strong>
+        </div>
+      </div>
+      <div class="admin-topbar-right">
+        <span class="admin-pill role-super">
+          📢 Communication Center
+        </span>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="page-head">
+        <div>
+          <h1>Platform Broadcast &amp; Alerts Dispatcher</h1>
+          <p>प्रसारण संदेश एवं सूचनाएं · Deliver direct notifications, maintenance alerts, or festive greetings to all active members</p>
+        </div>
+      </section>
+
+      <div class="grid-layout">
+        <!-- COMPOSE FORM -->
+        <section class="card panel">
+          <h2>Compose Broadcast Announcement</h2>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+            Broadcasts appear in members' dashboard notifications drawer immediately.
+          </p>
+
+          <div id="broadcastAlert" class="note hidden"></div>
+
+          <form onsubmit="handleSendBroadcast(event)">
+            <div class="field-group">
+              <label class="field-label" for="bcTarget">Broadcast Audience *</label>
+              <select id="bcTarget">
+                <option value="ALL">All Active Platform Members (सभी सक्रिय सदस्य)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="bcType">Notification Category *</label>
+              <select id="bcType">
+                <option value="SYSTEM">SYSTEM (सिस्टम सूचना / Platform Update)</option>
+                <option value="COMMISSION">COMMISSION (कमीशन अलर्ट)</option>
+                <option value="PROMOTION">PROMOTION (प्रमोशन एवं ऑफ़र)</option>
+                <option value="ALERT">URGENT (महत्वपूर्ण चेतावनी)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="bcTitle">Notification Title *</label>
+              <input type="text" id="bcTitle" placeholder="e.g. Weekly Commission Settlement Complete" required oninput="updatePreview()" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="bcMessage">Announcement Message *</label>
+              <textarea id="bcMessage" rows="4" placeholder="Enter message body..." required oninput="updatePreview()"></textarea>
+            </div>
+
+            <button type="submit" id="btnSendBroadcast" class="btn-primary">
+              Send Broadcast Notification 📢
+            </button>
+          </form>
+        </section>
+
+        <!-- LIVE PREVIEW & GUIDANCE -->
+        <section class="card panel">
+          <h2>Live Member View Preview</h2>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+            Real-time preview of how this message will render on the member dashboard notification dropdown.
+          </p>
+
+          <div class="preview-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span id="previewBadge" class="badge admin">SYSTEM</span>
+              <span style="font-size:11px; color:var(--muted);">Just now</span>
+            </div>
+            <h4 id="previewTitle">Notification Title will appear here...</h4>
+            <p id="previewMessage">Your detailed message content will be formatted and shown here to members.</p>
+          </div>
+
+          <div style="margin-top:24px; padding:16px; border-radius:10px; background:#f8fafc; border:1px solid var(--border);">
+            <h4 style="font-size:14px; color:var(--navy); margin-bottom:8px;">💡 Best Practices for Platform Broadcasts:</h4>
+            <ul style="font-size:12.5px; color:var(--muted); line-height:1.6; padding-left:18px;">
+              <li>Keep titles concise and action-oriented (under 60 characters).</li>
+              <li>Include relevant dates and timeframes for system maintenance schedules.</li>
+              <li>Every broadcast is permanently audited in the system audit log with actor ID.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function updatePreview() {
+      const title = document.getElementById("bcTitle").value.trim() || "Notification Title will appear here...";
+      const message = document.getElementById("bcMessage").value.trim() || "Your detailed message content will be formatted and shown here to members.";
+      const type = document.getElementById("bcType").value;
+
+      document.getElementById("previewTitle").textContent = title;
+      document.getElementById("previewMessage").textContent = message;
+      document.getElementById("previewBadge").textContent = type;
+    }
+
+    async function handleSendBroadcast(event) {
+      event.preventDefault();
+      const title = document.getElementById("bcTitle").value.trim();
+      const message = document.getElementById("bcMessage").value.trim();
+      const type = document.getElementById("bcType").value;
+      const alertBox = document.getElementById("broadcastAlert");
+      const token = getAdminToken();
+
+      if (!confirm(`Are you sure you want to broadcast "${title}" to all active members?`)) return;
+
+      try {
+        const res = await fetch("/api/admin/broadcast", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ title, message, type })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to send broadcast");
+
+        alertBox.className = "note success";
+        alertBox.textContent = `✓ Broadcast delivered to ${data.count || 'all'} recipient(s) successfully!`;
+        alertBox.classList.remove("hidden");
+
+        document.getElementById("bcTitle").value = "";
+        document.getElementById("bcMessage").value = "";
+        updatePreview();
+      } catch (err) {
+        alertBox.className = "note danger";
+        alertBox.textContent = err.message;
+        alertBox.classList.remove("hidden");
+      }
+    }
+  </script>
+</body>
+</html>

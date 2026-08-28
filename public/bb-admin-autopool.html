@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoPool Live Visualizer | Bharatiya Bazaar Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/admin-sidebar.css" />
+  <script src="js/admin-sidebar.js"></script>
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --purple: #7c3aed;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head {
+      margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;
+    }
+    .page-head h1 { font-size: clamp(22px, 2.5vw, 30px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 22px; margin-bottom: 20px; }
+    .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 12px; }
+
+    .badge { display: inline-flex; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .badge.level { background: #ede9fe; color: var(--purple); }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.admin { background: #e0f2fe; color: var(--info); }
+
+    .stat-row {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .stat-card { padding: 18px; }
+    .stat-card .label { font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+    .stat-card .value { font-size: 22px; font-weight: 700; color: var(--navy); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 12.5px; vertical-align: middle; }
+    th { background: #f8fafc; color: var(--navy); font-weight: 700; }
+
+    .nav-btn {
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
+      background: #fff; color: var(--navy); border: 1px solid var(--border); cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .stat-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body class="admin-body">
+  <div class="admin-main">
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="sb-toggle-btn" onclick="toggleSidebar()">☰</button>
+        <div class="admin-breadcrumbs">
+          <span>Finance &amp; MLM</span> / <strong>AutoPool (Stream 1) Visualizer</strong>
+        </div>
+      </div>
+      <div class="admin-topbar-right">
+        <span class="admin-pill role-super">
+          🌳 Binary Tree Engine
+        </span>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="page-head">
+        <div>
+          <h1>Stream 1: Universal AutoPool Visualizer</h1>
+          <p>ऑटोपूल ट्री निरीक्षक · Top-to-bottom, left-to-right universal binary tree placements with 6-level spillover tracking</p>
+        </div>
+        <div>
+          <button class="nav-btn" onclick="loadAutoPoolTree()">🔄 Refresh AutoPool</button>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <section class="stat-row">
+        <div class="card stat-card">
+          <div class="label">Total Placed Nodes</div>
+          <div class="value" id="kpiTotalNodes">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label">Max Depth Level</div>
+          <div class="value" id="kpiMaxLevel" style="color:var(--purple);">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label">Next Insertion Position</div>
+          <div class="value" id="kpiNextPosition" style="color:var(--teal);">#1</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label">Fill Efficiency</div>
+          <div class="value" style="color:var(--success);">100% (Strict FIFO)</div>
+        </div>
+      </section>
+
+      <!-- TREE TABLE -->
+      <section class="card panel">
+        <h2>Global AutoPool Placement Registry</h2>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+          Chronological global positions (Level 1..6) assigned sequentially to every activated ID card.
+        </p>
+
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Global Pos #</th>
+                <th>Card Number</th>
+                <th>Member Identity</th>
+                <th>Level Depth</th>
+                <th>Parent Pos #</th>
+                <th>Left Child Pos</th>
+                <th>Right Child Pos</th>
+                <th>Placed At</th>
+              </tr>
+            </thead>
+            <tbody id="autopoolTableBody">
+              <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--muted);">Loading AutoPool tree...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const d = new Date(dateStr);
+      return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    async function loadAutoPoolTree() {
+      const tbody = document.getElementById("autopoolTableBody");
+      const token = getAdminToken();
+      if (!token) return;
+
+      try {
+        const res = await fetch("/api/admin/autopool/tree", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to load AutoPool tree.");
+
+        const nodes = data.data || [];
+        document.getElementById("kpiTotalNodes").textContent = nodes.length;
+        const maxLvl = nodes.reduce((max, n) => Math.max(max, n.level || 1), 1);
+        document.getElementById("kpiMaxLevel").textContent = `Level ${maxLvl}`;
+        document.getElementById("kpiNextPosition").textContent = `#${nodes.length + 1}`;
+
+        if (nodes.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--muted);">No AutoPool nodes generated yet. Activate member ID cards to begin placement.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = nodes.map(n => {
+          const parentPos = n.globalPosition > 1 ? Math.floor(n.globalPosition / 2) : '-';
+          const leftChild = n.globalPosition * 2;
+          const rightChild = n.globalPosition * 2 + 1;
+          const memberName = n.idCard?.member?.name || 'Member';
+          const memberCode = n.idCard?.member?.memberCode || '-';
+          const cardNumber = n.idCard?.cardNumber || n.idCardId?.slice(-8) || '-';
+
+          return `
+            <tr>
+              <td><strong style="font-family:monospace; color:var(--navy); font-size:14px;">#${n.globalPosition}</strong></td>
+              <td><span style="font-family:monospace; color:var(--teal); font-weight:600;">${escapeHtml(cardNumber)}</span></td>
+              <td>
+                <div><strong>${escapeHtml(memberName)}</strong></div>
+                <div style="font-size:11px; color:var(--muted); font-family:monospace;">${escapeHtml(memberCode)}</div>
+              </td>
+              <td><span class="badge level">Level ${n.level || 1}</span></td>
+              <td><span style="font-family:monospace;">${parentPos === '-' ? '👑 ROOT' : '#' + parentPos}</span></td>
+              <td><span style="font-family:monospace; color:var(--muted);">#${leftChild}</span></td>
+              <td><span style="font-family:monospace; color:var(--muted);">#${rightChild}</span></td>
+              <td>${formatDate(n.createdAt)}</td>
+            </tr>
+          `;
+        }).join("");
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", loadAutoPoolTree);
+  </script>
+</body>
+</html>

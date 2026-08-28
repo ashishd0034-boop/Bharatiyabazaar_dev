@@ -12,6 +12,9 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="css/admin-sidebar.css" />
+  <script src="js/admin-sidebar.js"></script>
+
   <style>
     :root {
       --navy: #0d1b2a;
@@ -38,30 +41,12 @@
 
     body {
       font-family: "Inter", "Noto Sans Devanagari", sans-serif;
-      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      background: var(--bg);
       color: var(--text);
       line-height: 1.5;
     }
 
     h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
-
-    .topbar {
-      background: var(--navy); color: #fff; padding: 14px 22px;
-      display: flex; justify-content: space-between; align-items: center; gap: 12px;
-      position: sticky; top: 0; z-index: 20;
-    }
-
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: #fff; }
-    .brand-badge {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
-    }
-
-    .admin-chip { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
-    .avatar {
-      width: 34px; height: 34px; border-radius: 50%; background: var(--purple);
-      display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 13px;
-    }
 
     .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
 
@@ -142,10 +127,10 @@
     .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
 
     .btn-ghost {
-      background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3);
+      background: transparent; color: var(--navy); border: 1px solid var(--border);
       padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
-    .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+    .btn-ghost:hover { background: #f1f5f9; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border: 1px solid var(--border); padding: 9px 10px; text-align: left; font-size: 12.5px; vertical-align: top; }
@@ -154,7 +139,7 @@
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(13, 27, 42, 0.7); backdrop-filter: blur(4px);
-      display: flex; justify-content: center; align-items: center; z-index: 100; padding: 20px;
+      display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
     }
     .modal-card {
       width: min(540px, 100%); background: #fff; border-radius: 16px; padding: 26px;
@@ -173,65 +158,34 @@
     }
   </style>
 </head>
-<body>
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <a href="bb-admin.html" class="brand">
-      <span class="brand-badge"></span>
-      <span>Bharatiya Bazaar · Admin Control</span>
-    </a>
-    <div id="topbarAdminInfo" class="admin-chip hidden">
-      <span id="topbarName">Admin User</span>
-      <span id="topbarRoleBadge" class="badge admin">ADMIN</span>
-      <span id="topbarAvatar" class="avatar">A</span>
-      <button id="btnManageUsers" class="btn-ghost hidden" onclick="openUsersModal()">Manage Admins</button>
-      <button class="btn-ghost" onclick="logoutAdmin()">Logout</button>
-    </div>
-  </header>
-
-  <!-- LOGIN MODAL -->
-  <div id="loginModal" class="modal-overlay hidden">
-    <div class="modal-card" style="width:min(420px, 100%);">
-      <div style="text-align:center; margin-bottom:18px;">
-        <span class="brand-badge" style="display:inline-block; margin-bottom:8px;"></span>
-        <h2>Admin Authentication</h2>
-        <p style="font-size:13.5px; color:var(--muted);">प्रशासक लॉगिन · Sign in with administrative credentials</p>
-      </div>
-
-      <div id="loginAlert" class="note danger hidden"></div>
-
-      <form onsubmit="handleAdminLogin(event)">
-        <div class="field-group">
-          <label class="field-label" for="loginEmail">Email Address *</label>
-          <input type="email" id="loginEmail" placeholder="admin@bharatiyabazaar.com" required />
+<body class="admin-body">
+  <div class="admin-main">
+    <!-- TOP HEADER -->
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="sb-toggle-btn" onclick="toggleSidebar()">☰</button>
+        <div class="admin-breadcrumbs">
+          <span>Admin Portal</span> / <strong>Dashboard Overview</strong>
         </div>
-        <div class="field-group">
-          <label class="field-label" for="loginPassword">Password *</label>
-          <input type="password" id="loginPassword" placeholder="Enter administrative password" required />
+      </div>
+      <div class="admin-topbar-right">
+        <span id="topbarAdminInfo" class="admin-pill role-super">
+          🛡️ <span id="topbarRoleBadge">SUPER ADMIN</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- MAIN ADMIN DASHBOARD CONTENT -->
+    <main id="adminContent" class="container">
+      <section class="page-head">
+        <div>
+          <h1 id="welcomeTitle">Platform Operations Command</h1>
+          <p id="welcomeSub">Administrative governance, live reconciliation, and engine parameters</p>
         </div>
-        <button type="submit" id="btnLoginSubmit" class="btn-primary" style="width:100%; margin-top:14px;">
-          Log In to Admin Portal →
-        </button>
-      </form>
-    </div>
-  </div>
+      </section>
 
-  <!-- MAIN ADMIN DASHBOARD -->
-  <main id="adminContent" class="container hidden">
-    <section class="page-head">
-      <div>
-        <h1 id="welcomeTitle">Platform Operations Command</h1>
-        <p id="welcomeSub">Administrative governance, live reconciliation, and engine parameters</p>
-      </div>
-      <div class="nav-links">
-        <a href="bb-admin.html" class="nav-btn active">Dashboard</a>
-        <a href="bb-admin-settings.html" class="nav-btn">Platform Settings</a>
-        <a href="bb-admin-reports.html" class="nav-btn">Reports & Reconciliations</a>
-      </div>
-    </section>
-
-    <!-- METRICS GRID -->
-    <section class="summary-grid">
+      <!-- METRICS GRID -->
+      <section class="summary-grid">
       <div class="card stat-card">
         <div class="label">Total Members</div>
         <div class="value" id="valTotalMembers">0</div>
@@ -323,6 +277,7 @@
       </div>
     </section>
   </main>
+  </div>
 
   <!-- USERS MANAGEMENT MODAL (SUPER_ADMIN ONLY) -->
   <div id="usersModal" class="modal-overlay hidden">
@@ -572,55 +527,55 @@
           currentAdmin = { name: "Administrator", role: "ADMIN" };
         }
 
-        renderDashboard(data.data);
+        renderDashboard(data.data || {});
       } catch (err) {
-        document.getElementById("loginModal").classList.remove("hidden");
-        document.getElementById("adminContent").classList.add("hidden");
+        console.error("Dashboard error:", err);
       }
     }
 
     function renderDashboard(stats) {
-      document.getElementById("loginModal").classList.add("hidden");
-      document.getElementById("adminContent").classList.remove("hidden");
+      if (!stats) return;
 
-      // Topbar
-      document.getElementById("topbarAdminInfo").classList.remove("hidden");
-      document.getElementById("topbarName").textContent = currentAdmin.name || "Admin User";
-      const isSuper = currentAdmin.role === "SUPER_ADMIN";
-      const badge = document.getElementById("topbarRoleBadge");
-      badge.textContent = currentAdmin.role || "ADMIN";
-      badge.className = isSuper ? "badge super" : "badge admin";
-
-      if (isSuper) {
-        document.getElementById("btnManageUsers").classList.remove("hidden");
+      // Safe update of topbar role badge
+      const roleBadge = document.getElementById("topbarRoleBadge");
+      if (roleBadge && currentAdmin) {
+        roleBadge.textContent = currentAdmin.role || "ADMIN";
       }
 
+      // Safe helper to set text content
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+
       // Metrics
-      document.getElementById("valTotalMembers").textContent = String(stats.totalMembers || 0);
-      document.getElementById("valTotalIds").textContent = String(stats.totalIdCards || 0);
-      document.getElementById("valAutopoolGlobal").textContent = `#${stats.autopoolGlobalPosition || 0}`;
-      document.getElementById("valActiveVendors").textContent = String(stats.activeVendors || 0);
+      setVal("valTotalMembers", String(stats.totalMembers || 0));
+      setVal("valTotalIds", String(stats.totalIdCards || 0));
+      setVal("valAutopoolGlobal", `#${stats.autopoolGlobalPosition || 0}`);
+      setVal("valActiveVendors", String(stats.activeVendors || 0));
 
-      document.getElementById("valPendingWithdrawals").textContent = formatCurrency(stats.pendingWithdrawalsAmountPaise);
-      document.getElementById("valPendingWithdrawalsCount").textContent = `${stats.pendingWithdrawalsCount || 0} requests queued`;
+      setVal("valPendingWithdrawals", formatCurrency(stats.pendingWithdrawalsAmountPaise));
+      setVal("valPendingWithdrawalsCount", `${stats.pendingWithdrawalsCount || 0} requests queued`);
 
-      document.getElementById("valPending194R").textContent = formatCurrency(stats.pending194RPaise);
+      setVal("valPending194R", formatCurrency(stats.pending194RPaise));
 
       // Audit Trail
       const tbody = document.getElementById("auditTrailBody");
-      const logs = stats.recentLogs || [];
-      if (logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">No audit logs recorded yet.</td></tr>`;
-      } else {
-        tbody.innerHTML = logs.map(l => `
-          <tr>
-            <td>${formatDate(l.createdAt)}</td>
-            <td><strong>${escapeHtml(l.action)}</strong></td>
-            <td><span class="badge admin">${escapeHtml(l.entityType)}</span></td>
-            <td><span style="font-family:monospace;">${escapeHtml(l.actorId || 'SYSTEM')}</span></td>
-            <td><pre style="font-size:11.5px; color:var(--muted); margin:0; white-space:pre-wrap;">${escapeHtml(JSON.stringify(l.metadata || {}, null, 2))}</pre></td>
-          </tr>
-        `).join("");
+      if (tbody) {
+        const logs = stats.recentLogs || [];
+        if (logs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">No audit logs recorded yet.</td></tr>`;
+        } else {
+          tbody.innerHTML = logs.map(l => `
+            <tr>
+              <td>${formatDate(l.createdAt)}</td>
+              <td><strong>${escapeHtml(l.action)}</strong></td>
+              <td><span class="badge admin">${escapeHtml(l.entityType)}</span></td>
+              <td><span style="font-family:monospace;">${escapeHtml(l.actorId || 'SYSTEM')}</span></td>
+              <td><pre style="font-size:11.5px; color:var(--muted); margin:0; white-space:pre-wrap;">${escapeHtml(JSON.stringify(l.metadata || {}, null, 2))}</pre></td>
+            </tr>
+          `).join("");
+        }
       }
     }
 

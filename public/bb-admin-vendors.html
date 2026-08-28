@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendor Management | Bharatiya Bazaar Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/admin-sidebar.css" />
+  <script src="js/admin-sidebar.js"></script>
+
+  <style>
+    :root {
+      --navy: #0d1b2a;
+      --navy-2: #14263b;
+      --teal: #0f9d9d;
+      --teal-dark: #0b7c7c;
+      --amber: #f5a623;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #17233a;
+      --muted: #64748b;
+      --border: #dbe4ef;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --info: #0369a1;
+      --purple: #7c3aed;
+      --radius-card: 12px;
+      --radius-btn: 8px;
+      --shadow: 0 10px 30px rgba(13, 27, 42, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", "Noto Sans Devanagari", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
+
+    .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
+
+    .page-head {
+      margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;
+    }
+    .page-head h1 { font-size: clamp(22px, 2.5vw, 30px); color: var(--navy); margin-bottom: 4px; }
+    .page-head p { color: var(--muted); font-size: 14px; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-card); box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 22px; margin-bottom: 20px; }
+    .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 12px; }
+
+    .badge { display: inline-flex; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.admin { background: #e0f2fe; color: var(--info); }
+    .badge.warning { background: #fff4e0; color: var(--warning); }
+    .badge.danger { background: #fee2e2; color: var(--danger); }
+
+    .note {
+      border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e;
+      padding: 12px 14px; border-radius: 8px; font-size: 13px; margin: 12px 0;
+    }
+    .note.danger { border-left-color: var(--danger); background: #fee2e2; color: #991b1b; }
+    .note.success { border-left-color: var(--success); background: #ecfdf5; color: #065f46; }
+
+    .search-bar {
+      display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1; min-width: 240px; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; font-size: 14px; background: #fff; outline: none;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 12.5px; vertical-align: middle; }
+    th { background: #f8fafc; color: var(--navy); font-weight: 700; }
+
+    .table-wrap { overflow-x: auto; }
+
+    .btn-action {
+      padding: 5px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; border: 1px solid transparent;
+    }
+    .btn-action.penalty { background: #fee2e2; color: var(--danger); border-color: #fca5a5; }
+    .btn-action.penalty:hover { background: var(--danger); color: #fff; }
+    .btn-action.freeze { background: #f1f5f9; color: var(--navy); border-color: var(--border); }
+    .btn-action.freeze:hover { background: #e2e8f0; }
+
+    .nav-btn {
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
+      background: #fff; color: var(--navy); border: 1px solid var(--border); cursor: pointer;
+    }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(13, 27, 42, 0.7); backdrop-filter: blur(4px);
+      display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
+    }
+    .modal-card {
+      width: min(460px, 100%); background: #fff; border-radius: 16px; padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="admin-body">
+  <div class="admin-main">
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="sb-toggle-btn" onclick="toggleSidebar()">☰</button>
+        <div class="admin-breadcrumbs">
+          <span>Management</span> / <strong>Vendor &amp; Store Governance</strong>
+        </div>
+      </div>
+      <div class="admin-topbar-right">
+        <span class="admin-pill role-super" id="vendorCountBadge">
+          🏪 0 Registered Stores
+        </span>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="page-head">
+        <div>
+          <h1>Vendor Registry &amp; Anti-Fraud Governance</h1>
+          <p>विक्रेता प्रबंधन · Monitor partner merchant stores, security deposits, commission rates, and enforce fraud penalties</p>
+        </div>
+        <div>
+          <button class="nav-btn" onclick="loadVendors()">🔄 Refresh Vendors</button>
+        </div>
+      </section>
+
+      <div id="vendorAlert" class="note hidden"></div>
+
+      <section class="card panel">
+        <h2>Merchant Stores Registry</h2>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+          Search across merchant business names, email, category, or contact phone.
+        </p>
+
+        <div class="search-bar">
+          <input
+            type="text"
+            id="vendorSearchInput"
+            class="search-input"
+            placeholder="🔍 Search vendor store, category, phone, or email..."
+            oninput="searchVendors()"
+          />
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Store / Business</th>
+                <th>Category</th>
+                <th>Commission Margin</th>
+                <th>Security Deposit</th>
+                <th>Recent Sales</th>
+                <th>Status</th>
+                <th>Registered</th>
+                <th style="text-align:center;">Governance Actions</th>
+              </tr>
+            </thead>
+            <tbody id="vendorsTableBody">
+              <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--muted);">Loading vendors...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- PENALTY MODAL -->
+  <div id="penaltyModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3 style="font-size:18px; color:var(--danger); margin-bottom:6px;">Enforce Off-Platform Fraud Penalty</h3>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+        As per platform merchant agreements, off-platform sales evasion triggers a <strong>10x transaction value penalty</strong> debited directly from the security deposit.
+      </p>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px; font-weight:700; color:var(--navy); margin-bottom:6px; display:block;" for="penalizedAmount">
+          Original Evaded Sale Amount (₹) *
+        </label>
+        <input type="number" id="penalizedAmount" placeholder="e.g. 500" min="1" step="any" />
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px; font-weight:700; color:var(--navy); margin-bottom:6px; display:block;" for="penaltyReason">
+          Audit &amp; Incident Notes *
+        </label>
+        <textarea id="penaltyReason" rows="2" style="width:100%; border:1px solid var(--border); border-radius:8px; padding:10px; font-size:13.5px;" placeholder="e.g. Customer reported QR direct payment bypass at counter"></textarea>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="nav-btn" style="flex:1;" onclick="closePenaltyModal()">Cancel</button>
+        <button class="btn-action penalty" style="flex:1; padding:10px; justify-content:center;" onclick="submitPenalty()">
+          Apply 10x Penalty ⚡
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeVendorId = null;
+    let searchTimeout = null;
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatCurrency(paise) {
+      const rupees = (Number(paise || 0) / 100);
+      return "₹" + rupees.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const d = new Date(dateStr);
+      return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function searchVendors() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(loadVendors, 300);
+    }
+
+    async function loadVendors() {
+      const tbody = document.getElementById("vendorsTableBody");
+      const query = (document.getElementById("vendorSearchInput").value || "").trim();
+      const token = getAdminToken();
+      if (!token) return;
+
+      try {
+        const res = await fetch(`/api/admin/vendors?search=${encodeURIComponent(query)}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to load vendors.");
+
+        const vendors = data.data || [];
+        document.getElementById("vendorCountBadge").textContent = `🏪 ${vendors.length} Registered Stores`;
+
+        if (vendors.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--muted);">No merchant stores found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = vendors.map(v => `
+          <tr>
+            <td>
+              <div style="font-weight:700; color:var(--navy); font-size:13.5px;">${escapeHtml(v.storeName)}</div>
+              <div style="font-size:11px; color:var(--muted);">${escapeHtml(v.email || v.phone || '-')}</div>
+            </td>
+            <td><span class="badge admin">${escapeHtml(v.category || 'RETAIL')}</span></td>
+            <td><strong>${(Number(v.commissionMarginPct || 0)).toFixed(1)}%</strong></td>
+            <td><strong style="color:var(--teal);">${formatCurrency(v.securityDepositPaise || 0)}</strong></td>
+            <td>${(v.sales || []).length} recent sale(s)</td>
+            <td>
+              <span class="badge ${v.status === 'ACTIVE' ? 'success' : 'danger'}">
+                ${escapeHtml(v.status || 'ACTIVE')}
+              </span>
+            </td>
+            <td>${formatDate(v.createdAt)}</td>
+            <td style="text-align:center; white-space:nowrap;">
+              <button class="btn-action penalty" onclick="openPenaltyModal('${v.id}')">10x Penalize</button>
+              <button class="btn-action freeze" style="margin-left:4px;" onclick="handleFreezeVendor('${v.id}')">Freeze</button>
+            </td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    function openPenaltyModal(vendorId) {
+      activeVendorId = vendorId;
+      document.getElementById("penalizedAmount").value = "";
+      document.getElementById("penaltyReason").value = "";
+      document.getElementById("penaltyModal").classList.remove("hidden");
+    }
+
+    function closePenaltyModal() {
+      document.getElementById("penaltyModal").classList.add("hidden");
+      activeVendorId = null;
+    }
+
+    async function submitPenalty() {
+      const amountRupees = parseFloat(document.getElementById("penalizedAmount").value);
+      const reason = document.getElementById("penaltyReason").value.trim();
+      const alertBox = document.getElementById("vendorAlert");
+      const token = getAdminToken();
+
+      if (isNaN(amountRupees) || amountRupees <= 0) {
+        alert("Please enter a valid positive sale amount.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/admin/vendors/${activeVendorId}/penalize`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            amountPaise: Math.round(amountRupees * 100),
+            reason
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to penalize vendor");
+
+        closePenaltyModal();
+        alertBox.className = "note success";
+        alertBox.textContent = `✓ 10x penalty applied! ₹${(data.data.penaltyPaise/100).toFixed(2)} debited from security deposit.`;
+        alertBox.classList.remove("hidden");
+        await loadVendors();
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    async function handleFreezeVendor(vendorId) {
+      if (!confirm("Freeze this vendor's security deposit?")) return;
+      const alertBox = document.getElementById("vendorAlert");
+      const token = getAdminToken();
+
+      try {
+        const res = await fetch(`/api/admin/vendors/${vendorId}/freeze`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ reason: "Administrative security freeze" })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to freeze vendor");
+
+        alertBox.className = "note success";
+        alertBox.textContent = `✓ Vendor deposit frozen.`;
+        alertBox.classList.remove("hidden");
+        await loadVendors();
+      } catch (err) {
+        alertBox.className = "note danger";
+        alertBox.textContent = err.message;
+        alertBox.classList.remove("hidden");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", loadVendors);
+  </script>
+</body>
+</html>

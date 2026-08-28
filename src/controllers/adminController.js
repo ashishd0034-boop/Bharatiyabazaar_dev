@@ -576,6 +576,206 @@ async function revokePinReq(req, res, next) {
   }
 }
 
+/**
+ * List Members with IdCards & Wallets
+ */
+async function listMembersReq(req, res, next) {
+  try {
+    const { search, status, kycStatus, limit = 50, offset = 0 } = req.query;
+    const where = {};
+    if (status) where.status = status;
+    if (kycStatus) where.kycStatus = kycStatus;
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { memberCode: { contains: search, mode: "insensitive" } },
+        { mobile: { contains: search } }
+      ];
+    }
+    const members = await prisma.member.findMany({
+      where,
+      include: {
+        idCards: true,
+        mainWallet: true
+      },
+      orderBy: { createdAt: "desc" },
+      take: parseInt(limit, 10),
+      skip: parseInt(offset, 10)
+    });
+    const total = await prisma.member.count({ where });
+    res.json({ success: true, data: { members, total } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * List Vendors with Sales & Settlements
+ */
+async function listVendorsReq(req, res, next) {
+  try {
+    const { search, status } = req.query;
+    const where = {};
+    if (status) where.status = status;
+    if (search) {
+      where.OR = [
+        { storeName: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+        { phone: { contains: search } }
+      ];
+    }
+    const vendors = await prisma.vendor.findMany({
+      where,
+      include: {
+        sales: { orderBy: { createdAt: "desc" }, take: 5 },
+        settlements: { orderBy: { createdAt: "desc" }, take: 5 }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    res.json({ success: true, data: vendors });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Send System Notification Broadcast
+ */
+async function broadcastNotificationReq(req, res, next) {
+  try {
+    const { title, message, type = "SYSTEM", targetMemberId } = req.body;
+    if (!title || !message) {
+      return res.status(400).json({ success: false, error: { code: "VALIDATION_ERROR", message: "Title and message are required." } });
+    }
+    let count = 0;
+    if (targetMemberId) {
+      await prisma.notification.create({
+        data: {
+          memberId: targetMemberId,
+          title,
+          message,
+          type,
+          status: "UNREAD"
+        }
+      });
+      count = 1;
+    } else {
+      const members = await prisma.member.findMany({ where: { status: "ACTIVE" }, select: { id: true } });
+      const notificationsData = members.map(m => ({
+        memberId: m.id,
+        title,
+        message,
+        type,
+        status: "UNREAD"
+      }));
+      if (notificationsData.length > 0) {
+        const result = await prisma.notification.createMany({ data: notificationsData });
+        count = result.count;
+      }
+    }
+    await prisma.auditLog.create({
+      data: {
+        actorId: req.admin.id,
+        actorType: "ADMIN",
+        action: "BROADCAST_SENT",
+        entityType: "Notification",
+        entityId: "BROADCAST",
+        metadata: { title, targetMemberId: targetMemberId || "ALL_ACTIVE", recipientsCount: count }
+      }
+    });
+    res.json({ success: true, message: `Notification delivered to ${count} recipient(s).`, count });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * KYC Review & Document Queue
+ */
+async function listKycReq(req, res, next) {
+  try {
+    const { status } = req.query;
+    const where = status ? { kycStatus: status } : {};
+    const members = await prisma.member.findMany({
+      where,
+      select: {
+        id: true,
+        memberCode: true,
+        name: true,
+        mobile: true,
+        panNumber: true,
+        panVerified: true,
+        kycTier: true,
+        kycStatus: true,
+        createdAt: true,
+        updatedAt: true
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 100
+    });
+    res.json({ success: true, data: members });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function verifyKycReq(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { approved, panNumber } = req.body;
+    const member = await prisma.member.findUnique({ where: { id } });
+    if (!member) {
+      return res.status(404).json({ success: false, error: { message: "Member not found" } });
+    }
+    const updated = await prisma.member.update({
+      where: { id },
+      data: {
+        kycStatus: approved ? "APPROVED" : "REJECTED",
+        panVerified: approved ? true : false,
+        panNumber: panNumber || member.panNumber,
+        kycTier: approved ? "TIER_2" : member.kycTier
+      }
+    });
+    await prisma.auditLog.create({
+      data: {
+        actorId: req.admin.id,
+        actorType: "ADMIN",
+        action: approved ? "KYC_APPROVED" : "KYC_REJECTED",
+        entityType: "Member",
+        entityId: id,
+        metadata: { memberCode: member.memberCode, panNumber: updated.panNumber }
+      }
+    });
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * AutoPool Live Tree Data
+ */
+async function getAutoPoolTreeReq(req, res, next) {
+  try {
+    const nodes = await prisma.autoPoolNode.findMany({
+      include: {
+        idCard: {
+          include: {
+            member: {
+              select: { id: true, name: true, memberCode: true }
+            }
+          }
+        }
+      },
+      orderBy: { globalPosition: "asc" },
+      take: 200
+    });
+    res.json({ success: true, data: nodes });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   listSettings,
   getSingleSetting,
@@ -596,6 +796,12 @@ module.exports = {
   createAdminUser,
   updateAdminUserRole,
   listPinsReq,
-  revokePinReq
+  revokePinReq,
+  listMembersReq,
+  listVendorsReq,
+  broadcastNotificationReq,
+  listKycReq,
+  verifyKycReq,
+  getAutoPoolTreeReq
 };
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Member Explorer | Bharatiya Bazaar Admin</title>
+  <title>Audit Trail &amp; Logs | Bharatiya Bazaar Admin</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -65,9 +65,9 @@
     .panel h2 { font-size: 18px; color: var(--navy); margin-bottom: 12px; }
 
     .badge { display: inline-flex; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
-    .badge.success { background: #e8f8ee; color: var(--success); }
+    .badge.super { background: #ede9fe; color: var(--purple); }
     .badge.admin { background: #e0f2fe; color: var(--info); }
-    .badge.warning { background: #fff4e0; color: var(--warning); }
+    .badge.success { background: #e8f8ee; color: var(--success); }
     .badge.danger { background: #fee2e2; color: var(--danger); }
 
     .search-bar {
@@ -77,17 +77,23 @@
       flex: 1; min-width: 240px; border: 1px solid var(--border); border-radius: 8px;
       padding: 10px 14px; font-size: 14px; background: #fff; outline: none;
     }
-    .search-input:focus { border-color: var(--teal); }
 
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 12.5px; vertical-align: middle; }
+    th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 12.5px; vertical-align: top; }
     th { background: #f8fafc; color: var(--navy); font-weight: 700; }
 
-    .table-wrap { overflow-x: auto; }
+    .meta-code {
+      font-family: monospace; font-size: 11.5px; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;
+      color: #334155; word-break: break-all; max-width: 400px; display: inline-block;
+    }
 
     .nav-btn {
       padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
       background: #fff; color: var(--navy); border: 1px solid var(--border); cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .meta-code { max-width: 200px; }
     }
   </style>
 </head>
@@ -98,12 +104,12 @@
       <div class="admin-topbar-left">
         <button class="sb-toggle-btn" onclick="toggleSidebar()">☰</button>
         <div class="admin-breadcrumbs">
-          <span>Management</span> / <strong>Member Explorer</strong>
+          <span>System</span> / <strong>Immutable Audit Trail</strong>
         </div>
       </div>
       <div class="admin-topbar-right">
-        <span class="admin-pill role-super" id="membersCountBadge">
-          👥 0 Total Members
+        <span class="admin-pill role-super">
+          📜 Security &amp; Compliance
         </span>
       </div>
     </header>
@@ -111,46 +117,43 @@
     <main class="container">
       <section class="page-head">
         <div>
-          <h1>Member Registry &amp; Explorer</h1>
-          <p>सदस्य अन्वेषक · Inspect registered accounts, verify multi-IDs, check wallet balances, and audit tree placements</p>
+          <h1>Platform Governance Audit Trail</h1>
+          <p>प्रशासनिक ऑडिट लॉग · Immutable record of all system parameter updates, settlement sweeps, and staff operations</p>
         </div>
         <div>
-          <button class="nav-btn" onclick="loadMembers()">🔄 Refresh Members</button>
+          <button class="nav-btn" onclick="loadAuditLogs()">🔄 Refresh Audit Trail</button>
         </div>
       </section>
 
       <section class="card panel">
-        <h2>Registered Platform Members</h2>
+        <h2>Live Audit Event Feed</h2>
         <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
-          Search across member names, mobile numbers, or member codes.
+          Captured with before/after state differentials and authenticated actor IDs.
         </p>
 
         <div class="search-bar">
           <input
             type="text"
-            id="memberSearchInput"
+            id="auditSearchInput"
             class="search-input"
-            placeholder="🔍 Search member name, mobile number, or BB Code..."
-            oninput="searchMembers()"
+            placeholder="🔍 Filter by Action (e.g. SETTING_UPDATE), Entity, or Actor ID..."
+            oninput="filterAuditTable()"
           />
         </div>
 
-        <div class="table-wrap">
+        <div style="overflow-x:auto;">
           <table>
             <thead>
               <tr>
-                <th>Member Code</th>
-                <th>Full Name</th>
-                <th>Mobile Number</th>
-                <th>KYC Tier &amp; Status</th>
-                <th>Cards Count</th>
-                <th>Wallet Balance</th>
-                <th>Account Status</th>
-                <th>Joined At</th>
+                <th>Timestamp</th>
+                <th>Action Type</th>
+                <th>Target Entity</th>
+                <th>Actor Identity</th>
+                <th>Audit Metadata / State Change</th>
               </tr>
             </thead>
-            <tbody id="membersTableBody">
-              <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--muted);">Loading members...</td></tr>
+            <tbody id="auditTableBody">
+              <tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">Loading audit logs...</td></tr>
             </tbody>
           </table>
         </div>
@@ -159,7 +162,7 @@
   </div>
 
   <script>
-    let searchTimeout = null;
+    let allLogs = [];
 
     function escapeHtml(str) {
       if (str === null || str === undefined) return "";
@@ -171,67 +174,75 @@
         .replace(/'/g, "&#039;");
     }
 
-    function formatCurrency(paise) {
-      const rupees = (Number(paise || 0) / 100);
-      return "₹" + rupees.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
     function formatDate(dateStr) {
       if (!dateStr) return "-";
       const d = new Date(dateStr);
-      return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+      return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" });
     }
 
-    function searchMembers() {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(loadMembers, 300);
-    }
-
-    async function loadMembers() {
-      const tbody = document.getElementById("membersTableBody");
-      const query = (document.getElementById("memberSearchInput").value || "").trim();
+    async function loadAuditLogs() {
+      const tbody = document.getElementById("auditTableBody");
       const token = getAdminToken();
       if (!token) return;
 
       try {
-        const res = await fetch(`/api/admin/members?search=${encodeURIComponent(query)}&limit=100`, {
+        const res = await fetch("/api/admin/audit-logs?limit=100", {
           headers: { "Authorization": `Bearer ${token}` }
         });
         const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to load members.");
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to load audit logs.");
 
-        const members = data.data.members || [];
-        const total = data.data.total || members.length;
-
-        document.getElementById("membersCountBadge").textContent = `👥 ${total} Total Members`;
-
-        if (members.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--muted);">No members found.</td></tr>';
-          return;
-        }
-
-        tbody.innerHTML = members.map(m => `
-          <tr>
-            <td><strong style="font-family:monospace; color:var(--navy); font-size:13.5px;">${escapeHtml(m.memberCode || m.id.slice(-8))}</strong></td>
-            <td><strong>${escapeHtml(m.name)}</strong></td>
-            <td><span style="font-family:monospace;">+91 ${escapeHtml(m.mobile || '-')}</span></td>
-            <td>
-              <span class="badge ${m.kycStatus === 'APPROVED' ? 'success' : (m.kycStatus === 'REJECTED' ? 'danger' : 'warning')}">
-                ${escapeHtml(m.kycTier || 'TIER_1')} · ${escapeHtml(m.kycStatus || 'PENDING')}
-              </span>
-            </td>
-            <td><span class="badge admin">${(m.idCards || []).length} ID(s)</span></td>
-            <td><strong style="color:var(--teal);">${formatCurrency(m.mainWallet?.balancePaise || 0)}</strong></td>
-            <td><span class="badge ${m.status === 'ACTIVE' ? 'success' : 'danger'}">${escapeHtml(m.status || 'ACTIVE')}</span></td>
-            <td>${formatDate(m.createdAt)}</td>
-          </tr>
-        `).join("");
+        allLogs = data.data || [];
+        filterAuditTable();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
       }
     }
 
-    window.addEventListener("DOMContentLoaded", loadMembers);
+    function filterAuditTable() {
+      const query = (document.getElementById("auditSearchInput").value || "").trim().toLowerCase();
+      const tbody = document.getElementById("auditTableBody");
+
+      const filtered = allLogs.filter(l => {
+        const actionStr = (l.action || "").toLowerCase();
+        const entityStr = `${l.entityType || ''} ${l.entityId || ''}`.toLowerCase();
+        const actorStr = (l.actorId || "").toLowerCase();
+        return !query || actionStr.includes(query) || entityStr.includes(query) || actorStr.includes(query);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--muted);">No audit logs match current search.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(l => {
+        let metaHtml = "—";
+        if (l.metadata) {
+          try {
+            const parsed = typeof l.metadata === "string" ? JSON.parse(l.metadata) : l.metadata;
+            metaHtml = `<span class="meta-code">${escapeHtml(JSON.stringify(parsed))}</span>`;
+          } catch (e) {
+            metaHtml = `<span class="meta-code">${escapeHtml(String(l.metadata))}</span>`;
+          }
+        }
+
+        return `
+          <tr>
+            <td style="white-space:nowrap; font-size:12px;">${formatDate(l.createdAt)}</td>
+            <td>
+              <span class="badge ${l.action.includes('SETTING') ? 'admin' : (l.action.includes('REJECT') ? 'danger' : 'success')}">
+                ${escapeHtml(l.action)}
+              </span>
+            </td>
+            <td><strong>${escapeHtml(l.entityType || 'SYSTEM')}</strong> <span style="font-family:monospace; color:var(--muted); font-size:11px;">(${escapeHtml(l.entityId || 'N/A')})</span></td>
+            <td><span style="font-family:monospace; color:var(--navy);">${escapeHtml(l.actorId || 'SYSTEM')}</span></td>
+            <td>${metaHtml}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    window.addEventListener("DOMContentLoaded", loadAuditLogs);
   </script>
 </body>
 </html>

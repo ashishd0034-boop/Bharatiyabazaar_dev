@@ -12,6 +12,9 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="css/admin-sidebar.css" />
+  <script src="js/admin-sidebar.js"></script>
+
   <style>
     :root {
       --navy: #0d1b2a;
@@ -38,30 +41,12 @@
 
     body {
       font-family: "Inter", "Noto Sans Devanagari", sans-serif;
-      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      background: var(--bg);
       color: var(--text);
       line-height: 1.5;
     }
 
     h1, h2, h3, h4 { font-family: "Poppins", "Noto Sans Devanagari", sans-serif; }
-
-    .topbar {
-      background: var(--navy); color: #fff; padding: 14px 22px;
-      display: flex; justify-content: space-between; align-items: center; gap: 12px;
-      position: sticky; top: 0; z-index: 20;
-    }
-
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: #fff; }
-    .brand-badge {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: radial-gradient(circle at center, var(--amber) 0 26%, var(--teal) 27% 54%, var(--navy-2) 55% 100%);
-    }
-
-    .admin-chip { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
-    .avatar {
-      width: 34px; height: 34px; border-radius: 50%; background: var(--purple);
-      display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 13px;
-    }
 
     .container { width: min(1200px, calc(100% - 32px)); margin: 24px auto 40px; }
 
@@ -142,33 +127,30 @@
     }
   </style>
 </head>
-<body>
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <a href="bb-admin.html" class="brand">
-      <span class="brand-badge"></span>
-      <span>Bharatiya Bazaar · Platform Settings</span>
-    </a>
-    <div id="topbarAdminInfo" class="admin-chip">
-      <span id="topbarName">Admin User</span>
-      <span id="topbarRoleBadge" class="badge admin">ADMIN</span>
-      <span id="topbarAvatar" class="avatar">A</span>
-      <button class="btn-ghost" onclick="logoutAdmin()">Logout</button>
-    </div>
-  </header>
+<body class="admin-body">
+  <div class="admin-main">
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="admin-topbar-left">
+        <button class="sb-toggle-btn" onclick="toggleSidebar()">☰</button>
+        <div class="admin-breadcrumbs">
+          <span>System</span> / <strong>Platform Settings &amp; Margins</strong>
+        </div>
+      </div>
+      <div class="admin-topbar-right">
+        <span class="admin-pill role-super">
+          ⚙️ Live Parameter Engine
+        </span>
+      </div>
+    </header>
 
-  <main class="container">
-    <section class="page-head">
-      <div>
-        <h1>Live Engine Settings & Governance</h1>
-        <p>प्लेटफ़ॉर्म सेटिंग्स · Live parameter configuration across all commission and compliance engines</p>
-      </div>
-      <div class="nav-links">
-        <a href="bb-admin.html" class="nav-btn">← Dashboard</a>
-        <a href="bb-admin-settings.html" class="nav-btn active">Settings</a>
-        <a href="bb-admin-reports.html" class="nav-btn">Reports</a>
-      </div>
-    </section>
+    <main class="container">
+      <section class="page-head">
+        <div>
+          <h1>Live Engine Settings &amp; Governance</h1>
+          <p>प्लेटफ़ॉर्म सेटिंग्स · Live parameter configuration across all commission and compliance engines</p>
+        </div>
+      </section>
 
     <!-- LIVE NOTIFICATION BOX -->
     <div id="settingsAlert" class="note hidden"></div>
@@ -225,6 +207,7 @@
       </div>
     </section>
   </main>
+  </div>
 
   <script>
     let currentRole = "ADMIN";
