@@ -453,7 +453,19 @@
     }
 
     function getAdminToken() {
-      return localStorage.getItem("bb_admin_token");
+      return sessionStorage.getItem("admin_token") || localStorage.getItem("bb_admin_token");
+    }
+
+    function setAdminToken(token) {
+      sessionStorage.setItem("admin_token", token);
+      localStorage.setItem("bb_admin_token", token);
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem("admin_token");
+      sessionStorage.removeItem("admin_user");
+      localStorage.removeItem("bb_admin_token");
+      window.location.href = "bb-admin-login.html";
     }
 
     function openPinsModal() {
@@ -526,20 +538,10 @@
       }
     }
 
-    function setAdminToken(token) {
-      localStorage.setItem("bb_admin_token", token);
-    }
-
-    function logoutAdmin() {
-      localStorage.removeItem("bb_admin_token");
-      window.location.reload();
-    }
-
     async function initAdminDashboard() {
       const token = getAdminToken();
       if (!token) {
-        document.getElementById("loginModal").classList.remove("hidden");
-        document.getElementById("adminContent").classList.add("hidden");
+        window.location.href = "bb-admin-login.html";
         return;
       }
 

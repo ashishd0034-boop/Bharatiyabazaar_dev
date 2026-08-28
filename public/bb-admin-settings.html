@@ -241,18 +241,20 @@
     }
 
     function getAdminToken() {
-      return localStorage.getItem("bb_admin_token");
+      return sessionStorage.getItem("admin_token") || localStorage.getItem("bb_admin_token");
     }
 
     function logoutAdmin() {
+      sessionStorage.removeItem("admin_token");
+      sessionStorage.removeItem("admin_user");
       localStorage.removeItem("bb_admin_token");
-      window.location.href = "bb-admin.html";
+      window.location.href = "bb-admin-login.html";
     }
 
     async function initSettingsPage() {
       const token = getAdminToken();
       if (!token) {
-        window.location.href = "bb-admin.html";
+        window.location.href = "bb-admin-login.html";
         return;
       }
 
