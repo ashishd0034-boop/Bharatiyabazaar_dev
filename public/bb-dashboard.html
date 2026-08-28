@@ -839,6 +839,47 @@
             </div>
           </div>
         </section>
+
+        <!-- 🔑 Activation PIN Management Widget -->
+        <section class="card panel" style="margin-top: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <h2 style="margin: 0; font-size: 18px; color: var(--navy);">🔑 Buy & Manage Activation PINs</h2>
+              <p style="font-size: 13px; color: var(--muted); margin-top: 2px;">Purchase PINs with your wallet balance to activate downline referral IDs</p>
+            </div>
+            <span class="badge" style="background:#e0f5f5; color:var(--teal-dark); font-weight:700; font-size:12px;">₹600 / ID</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;" class="grid-2">
+            <!-- Purchase Widget -->
+            <div style="padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: #fbfdff;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">Select Number of IDs (1 - 10)</label>
+              <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+                <input type="number" id="pinBuyQty" min="1" max="10" value="1" style="width: 100px; padding: 10px; font-size: 16px; font-weight: 700; border: 1px solid var(--border); border-radius: 8px; text-align: center;" oninput="updatePinCostPreview()" />
+                <div style="font-size: 14px; font-weight: 600; color: var(--navy);" id="pinCostPreview">Total: ₹600.00</div>
+              </div>
+              <button class="btn-confirm" id="btnBuyPin" style="width: 100%;" onclick="handleBuyPin()">Buy PIN with Wallet Balance</button>
+              <div id="pinBuyAlert" class="note info hidden" style="margin-top: 10px;"></div>
+
+              <!-- Output Box for Newly Generated PIN -->
+              <div id="newPinOutput" class="hidden" style="margin-top: 14px; padding: 12px; background: #e8f8ee; border: 1px solid #b7e4c7; border-radius: 8px;">
+                <div style="font-size: 12px; color: var(--success); font-weight: 700; margin-bottom: 4px;">🎉 PIN GENERATED SUCCESSFULLY:</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                  <span id="newPinCodeDisplay" style="font-family: monospace; font-size: 18px; font-weight: 800; color: var(--navy); letter-spacing: 1px;">PIN-XXXX</span>
+                  <button class="btn-ghost" style="padding: 6px 12px; font-size: 12px;" onclick="copyGeneratedPin()">Copy</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- PINs History List -->
+            <div style="padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: #fff;">
+              <h3 style="font-size: 14px; color: var(--navy); margin-bottom: 8px;">Your Purchased PINs</h3>
+              <div id="myPinsList" style="max-height: 220px; overflow-y: auto;">
+                <div style="color: var(--muted); font-size: 13px; text-align: center; padding: 16px;">Loading your PINs...</div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -1159,11 +1200,138 @@
     }));
 
     // ==========================================
+    // 🔑 PIN MANAGEMENT WIDGET LOGIC
+    // ==========================================
+    let lastGeneratedPin = '';
+
+    function updatePinCostPreview() {
+      const qtyInput = document.getElementById('pinBuyQty');
+      const preview = document.getElementById('pinCostPreview');
+      let qty = parseInt(qtyInput?.value || 1, 10);
+      if (isNaN(qty) || qty < 1) qty = 1;
+      if (qty > 10) qty = 10;
+      if (preview) preview.textContent = `Total: ₹${(qty * 600).toFixed(2)}`;
+    }
+
+    async function handleBuyPin() {
+      const qtyInput = document.getElementById('pinBuyQty');
+      const alertBox = document.getElementById('pinBuyAlert');
+      const btn = document.getElementById('btnBuyPin');
+      const outBox = document.getElementById('newPinOutput');
+      const codeDisplay = document.getElementById('newPinCodeDisplay');
+
+      let qty = parseInt(qtyInput?.value || 1, 10);
+      if (isNaN(qty) || qty < 1 || qty > 10) {
+        if (alertBox) {
+          alertBox.textContent = 'Please enter a valid quantity between 1 and 10.';
+          alertBox.className = 'note error';
+          alertBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (btn) { btn.disabled = true; btn.textContent = 'Processing Purchase...'; }
+      if (alertBox) alertBox.classList.add('hidden');
+      if (outBox) outBox.classList.add('hidden');
+
+      const token = getToken();
+      try {
+        const res = await fetch(`${API_BASE}/pins/purchase`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ quantity: qty })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success && data.data?.pinCode) {
+          lastGeneratedPin = data.data.pinCode;
+          if (codeDisplay) codeDisplay.textContent = lastGeneratedPin;
+          if (outBox) outBox.classList.remove('hidden');
+          if (alertBox) {
+            alertBox.textContent = `✓ Purchased PIN for ${data.data.quantity} ID(s)! ₹${(data.data.pricePaise/100).toFixed(2)} debited from wallet.`;
+            alertBox.className = 'note success';
+            alertBox.classList.remove('hidden');
+          }
+          // Refresh wallet balance and pins list
+          loadDashboard();
+          loadMyPins();
+        } else {
+          if (alertBox) {
+            alertBox.textContent = data.error?.message || data.message || 'PIN purchase failed.';
+            alertBox.className = 'note error';
+            alertBox.classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        if (alertBox) {
+          alertBox.textContent = 'Network error while purchasing PIN.';
+          alertBox.className = 'note error';
+          alertBox.classList.remove('hidden');
+        }
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Buy PIN with Wallet Balance'; }
+      }
+    }
+
+    function copyGeneratedPin() {
+      if (!lastGeneratedPin) return;
+      navigator.clipboard.writeText(lastGeneratedPin).then(() => {
+        alert(`✅ Copied PIN code: ${lastGeneratedPin}`);
+      }).catch(() => {
+        prompt('Copy PIN Code:', lastGeneratedPin);
+      });
+    }
+
+    async function loadMyPins() {
+      const listEl = document.getElementById('myPinsList');
+      if (!listEl) return;
+
+      const token = getToken();
+      if (!token) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/pins/my-pins`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.data)) {
+          const pins = data.data;
+          if (pins.length === 0) {
+            listEl.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center; padding:16px;">No PINs purchased yet.</div>';
+            return;
+          }
+
+          listEl.innerHTML = pins.map(p => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px;">
+              <div>
+                <strong style="font-family:monospace; font-size:13.5px; color:var(--navy);">${p.pinCode}</strong>
+                <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+                  ${p.quantity} ID(s) · ₹${(p.pricePaise/100).toFixed(2)} · ${new Date(p.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+              <div>
+                <span class="badge ${p.status === 'AVAILABLE' ? 'success' : (p.status === 'REDEEMED' ? 'pending' : 'danger')}" style="font-size:11px;">
+                  ${p.status}
+                </span>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        listEl.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center; padding:16px;">Failed to load PINs.</div>';
+      }
+    }
+
+    // ==========================================
     // LOAD EVERYTHING
     // ==========================================
     loadDashboard();
     loadPlacement();    // 🆕 Sponsor + Placement card
     loadStreamStats();  // 🆕 Live AutoPool + MY SYSTEM numbers
+    loadMyPins();       // 🔑 Load purchased activation PINs
   </script>
 </body>
 </html>

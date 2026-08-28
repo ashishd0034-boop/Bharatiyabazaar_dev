@@ -32,6 +32,10 @@ router.post("/settlements/run", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), a
 router.post("/vendors/:id/penalize", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.penalizeVendorReq);
 router.post("/vendors/:id/freeze", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.freezeVendorReq);
 
+// PIN Management Endpoints (ADMIN & SUPER_ADMIN)
+router.get("/pins", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.listPinsReq);
+router.post("/pins/revoke/:id", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.revokePinReq);
+
 // SUPER_ADMIN Exclusives: Audit Logs & Admin User Management
 router.get("/audit-logs", adminAuthMiddleware(["SUPER_ADMIN"]), adminController.getLogs);
 router.get("/users", adminAuthMiddleware(["SUPER_ADMIN"]), adminController.listAdminUsers);

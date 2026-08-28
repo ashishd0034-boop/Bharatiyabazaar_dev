@@ -21,6 +21,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const setuKoshRoutes = require("./routes/setuKoshRoutes");
 const healthRoutes = require("./routes/healthRoutes");
 const idCardRoutes = require("./routes/idCardRoutes"); // Legacy from before, keeping it
+const pinRoutes = require("./routes/pinRoutes");
 
 // Middleware
 const errorHandler = require("./middleware/errorMiddleware");
@@ -73,6 +74,7 @@ app.use("/api/withdrawals", withdrawalRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api/setu-kosh", setuKoshRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/pins", pinRoutes);
 app.use("/api/id-cards", auth, idCardRoutes);
 
 // Background Jobs & Startup Seeds

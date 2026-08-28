@@ -4,8 +4,9 @@ const acbService = require("./acbService");
 const rebirthService = require("./rebirthService");
 const adminService = require("./adminService");
 
-async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide = null) {
-  const existingCards = await prisma.memberIdCard.findMany({ where: { memberId } });
+async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide = null, externalTx = null) {
+  const db = externalTx || prisma;
+  const existingCards = await db.memberIdCard.findMany({ where: { memberId } });
 
   // Enforce MAX_PURCHASED_IDS (rebirths are exempt)
   const maxPurchasedIds = await adminService.getSetting("MAX_PURCHASED_IDS", 255, "integer");
@@ -21,7 +22,7 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
   const bulkMode = count > 1;
 
   // Snapshot the member's existing MY SYSTEM tree ONCE (pure JS state from here on)
-  const existingNodes = await prisma.mySystemNode.findMany({ where: { idCard: { memberId } } });
+  const existingNodes = await db.mySystemNode.findMany({ where: { idCard: { memberId } } });
   const childrenMap = {};
   const nodeCardMap = {};
   for (const n of existingNodes) {
@@ -42,7 +43,7 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
   const newCards = [];
   let firstMySystemNodeId = existingMainNodeId;
 
-  await prisma.$transaction(async (tx) => {
+  const runLogic = async (tx) => {
     let counterExists = await tx.systemCounter.findUnique({ where: { id: "AUTOPOOL_GLOBAL" } });
     if (!counterExists) {
       const maxNode = await tx.autoPoolNode.findFirst({ orderBy: { globalPosition: "desc" } });
@@ -136,7 +137,13 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
       if (rebirths.length > 0) queue.unshift(...rebirths);
       newCards.push(idCard);
     }
-  }, { timeout: 30000 });
+  };
+
+  if (externalTx) {
+    await runLogic(externalTx);
+  } else {
+    await prisma.$transaction(runLogic, { timeout: 30000 });
+  }
 
   return newCards;
 }

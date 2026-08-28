@@ -290,6 +290,10 @@
         <h3>⚖️ Vendor Violations & Penalties</h3>
         <p>Manage store fraud penalties (10x transaction value) and security deposit freezes.</p>
       </a>
+      <div class="card hub-card" style="cursor:pointer;" onclick="openPinsModal()">
+        <h3>🔑 PIN & Activation Management</h3>
+        <p>Audit generated activation PINs, track sponsor purchases, inspect redemption records, and revoke keys.</p>
+      </div>
     </section>
 
     <!-- RECENT ACTIVITY FEED (AUDIT TRAIL TAIL) -->
@@ -387,6 +391,43 @@
     </div>
   </div>
 
+  <!-- PIN MANAGEMENT MODAL (ADMIN & SUPER_ADMIN) -->
+  <div id="pinsModal" class="modal-overlay hidden">
+    <div class="modal-card" style="width: min(840px, 100%);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-size:18px; color:var(--navy); margin:0;">🔑 Activation PINs Management</h3>
+        <button class="btn-ghost" style="color:var(--navy); border-color:var(--border);" onclick="closePinsModal()">✕ Close</button>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">Review all system-generated activation keys, purchaser wallets, and redemption records.</p>
+
+      <div id="pinsAlert" class="note hidden"></div>
+
+      <div style="max-height: 400px; overflow-x: auto; overflow-y: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>PIN Code</th>
+              <th>Qty</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Purchaser</th>
+              <th>Redeemer</th>
+              <th>Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminPinsTableBody">
+            <tr><td colspan="8" style="text-align:center; padding:16px; color:var(--muted);">Loading PINs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="text-align:right; margin-top:16px;">
+        <button class="nav-btn" onclick="closePinsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let currentAdmin = null;
 
@@ -413,6 +454,76 @@
 
     function getAdminToken() {
       return localStorage.getItem("bb_admin_token");
+    }
+
+    function openPinsModal() {
+      document.getElementById("pinsModal").classList.remove("hidden");
+      loadAdminPins();
+    }
+
+    function closePinsModal() {
+      document.getElementById("pinsModal").classList.add("hidden");
+    }
+
+    async function loadAdminPins() {
+      const tbody = document.getElementById("adminPinsTableBody");
+      const alertBox = document.getElementById("pinsAlert");
+      const token = getAdminToken();
+
+      try {
+        const res = await fetch("/api/admin/pins", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to load PINs");
+
+        const pins = data.data || [];
+        if (pins.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:16px; color:var(--muted);">No PINs generated yet.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = pins.map(p => `
+          <tr>
+            <td><strong style="font-family:monospace; font-size:13px; color:var(--navy);">${escapeHtml(p.pinCode)}</strong></td>
+            <td>${p.quantity}</td>
+            <td>${formatCurrency(p.pricePaise)}</td>
+            <td>
+              <span class="badge ${p.status === 'AVAILABLE' ? 'success' : (p.status === 'REDEEMED' ? 'admin' : 'danger')}">
+                ${p.status}
+              </span>
+            </td>
+            <td>${p.purchasedByMember ? `${escapeHtml(p.purchasedByMember.name)} (${escapeHtml(p.purchasedByMember.memberCode || '-')})` : '-'}</td>
+            <td>${p.redeemedByMember ? `${escapeHtml(p.redeemedByMember.name)} (${escapeHtml(p.redeemedByMember.memberCode || '-')})` : '-'}</td>
+            <td>${formatDate(p.createdAt)}</td>
+            <td>
+              ${p.status === 'AVAILABLE' ? `<button class="btn-ghost" style="color:var(--danger); border-color:var(--danger); padding:4px 8px; font-size:11.5px;" onclick="handleRevokePin('${p.id}', '${p.pinCode}')">Revoke</button>` : '—'}
+            </td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:16px; color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    async function handleRevokePin(pinId, pinCode) {
+      if (!confirm(`Are you sure you want to revoke PIN ${pinCode}? This action is irreversible.`)) return;
+      const token = getAdminToken();
+      try {
+        const res = await fetch(`/api/admin/pins/revoke/${pinId}`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ reason: "Revoked by Administrator" })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error?.message || "Failed to revoke PIN");
+        await loadAdminPins();
+      } catch (err) {
+        alert("Error revoking PIN: " + err.message);
+      }
     }
 
     function setAdminToken(token) {

@@ -337,6 +337,19 @@
           <div class="ptotal" id="totalPrice">₹600.00</div>
         </div>
 
+        <!-- 🔑 Activation PIN Card -->
+        <div style="margin-top: 14px; padding: 14px; border: 1px dashed var(--border); border-radius: 10px; background: #fbfdff;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="field-label" style="margin: 0; font-size: 13px;">Have an Activation PIN? <span class="hindi">पिन से सक्रिय करें</span></label>
+            <span id="pinBadge" class="badge success hidden">✓ Valid PIN</span>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <input type="text" id="reg-activation-pin" placeholder="e.g. PIN-A1B2C3D4" style="text-transform:uppercase; font-family:monospace; font-weight:700; flex:1;" oninput="onPinInputChanged()" />
+            <button type="button" class="btn-ghost" style="width:auto; margin:0; padding:10px 16px;" onclick="verifyActivationPin()" id="btnVerifyPin">Verify</button>
+          </div>
+          <div id="pin-feedback" class="note info hidden" style="margin-top: 8px; font-size: 12.5px;"></div>
+        </div>
+
         <div id="step4-error" class="note error hidden"></div>
 
         <button class="btn-primary" id="payBtn" onclick="submitRegistration()">
@@ -608,6 +621,8 @@
       const address = document.getElementById('reg-address')?.value.trim() || '';
       const pinCode = document.getElementById('reg-pincode')?.value.trim() || '';
 
+      const pinVal = verifiedPin ? verifiedPin.pinCode : (document.getElementById('reg-activation-pin')?.value.trim() || undefined);
+
       const payload = {
         name: document.getElementById('reg-name').value.trim(),
         mobile: mobile,
@@ -616,11 +631,12 @@
         address: address || undefined,
         pinCode: pinCode || undefined,
         referralCode: currentReferralCode || undefined,
-        side: currentSide
+        side: currentSide,
+        activationPin: pinVal
       };
 
       try {
-        // ===== STEP 1: Register MAIN ID =====
+        // ===== STEP 1: Register MAIN ID (+ all PIN IDs if PIN provided) =====
         const regRes = await fetch(`${API_BASE}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -643,12 +659,21 @@
         document.getElementById('confirm-name').textContent = member.name || '-';
         document.getElementById('confirm-mobile').textContent = member.mobile || '-';
 
-        // Build result list starting with MAIN ID
-        const mainCard = (member.idCards || []).find(c => c.type === 'MAIN');
+        // Build result list from created cards
         const allCards = [];
-        if (mainCard) {
+        if (Array.isArray(member.idCards) && member.idCards.length > 0) {
+          member.idCards.forEach((c, idx) => {
+            allCards.push({
+              cardNumber: c.cardNumber,
+              type: c.type,
+              placedUnder: c.type === 'MAIN' ? 'ROOT' : 'MY SYSTEM',
+              side: currentSide,
+              poolPosition: null
+            });
+          });
+        } else {
           allCards.push({
-            cardNumber: mainCard.cardNumber,
+            cardNumber: member.memberCode || member.id || 'MAIN',
             type: 'MAIN',
             placedUnder: 'ROOT',
             side: currentSide,
@@ -656,10 +681,10 @@
           });
         }
 
-        // ===== STEP 2: Create extra SUB IDs if qty > 1 =====
-        if (qty > 1 && btn) btn.textContent = `Creating ${qty - 1} extra ID(s)...`;
+        // ===== STEP 2: Create extra SUB IDs if qty > 1 AND not using PIN =====
+        if (!pinVal && qty > 1 && btn) btn.textContent = `Creating ${qty - 1} extra ID(s)...`;
         
-        if (qty > 1) {
+        if (!pinVal && qty > 1) {
           try {
             const subRes = await fetch(`${API_BASE}${PURCHASE_ENDPOINT}`, {
               method: 'POST',
@@ -721,6 +746,69 @@
           btn.disabled = false;
           setQty(qty);
         }
+      }
+    }
+
+    // 🔑 PIN verification logic
+    let verifiedPin = null;
+
+    async function verifyActivationPin() {
+      const pinInput = document.getElementById('reg-activation-pin');
+      const feedback = document.getElementById('pin-feedback');
+      const badge = document.getElementById('pinBadge');
+      const code = (pinInput?.value || '').trim().toUpperCase();
+
+      if (!code) {
+        if (feedback) { feedback.textContent = 'Please enter a PIN code.'; feedback.className = 'note error'; feedback.classList.remove('hidden'); }
+        return;
+      }
+
+      if (feedback) { feedback.textContent = 'Verifying PIN...'; feedback.className = 'note info'; feedback.classList.remove('hidden'); }
+      try {
+        const res = await fetch(`${API_BASE}/pins/validate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pinCode: code })
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.data?.valid) {
+          verifiedPin = data.data;
+          setQty(verifiedPin.quantity);
+          if (badge) badge.classList.remove('hidden');
+          if (feedback) {
+            feedback.textContent = `✓ Valid PIN for ${verifiedPin.quantity} ID(s) (₹${(verifiedPin.pricePaise/100).toFixed(2)} prepaid). Payment waived.`;
+            feedback.className = 'note success';
+            feedback.classList.remove('hidden');
+          }
+          const payBtn = document.getElementById('payBtn');
+          if (payBtn) payBtn.textContent = `Activate with PIN (${verifiedPin.quantity} ID${verifiedPin.quantity > 1 ? 's' : ''})`;
+        } else {
+          verifiedPin = null;
+          if (badge) badge.classList.add('hidden');
+          if (feedback) {
+            feedback.textContent = data.error?.message || 'Invalid or expired PIN.';
+            feedback.className = 'note error';
+            feedback.classList.remove('hidden');
+          }
+          setQty(qty);
+        }
+      } catch (e) {
+        if (feedback) {
+          feedback.textContent = 'Network error while verifying PIN.';
+          feedback.className = 'note error';
+          feedback.classList.remove('hidden');
+        }
+      }
+    }
+
+    function onPinInputChanged() {
+      const badge = document.getElementById('pinBadge');
+      const feedback = document.getElementById('pin-feedback');
+      if (verifiedPin) {
+        verifiedPin = null;
+        if (badge) badge.classList.add('hidden');
+        if (feedback) feedback.classList.add('hidden');
+        setQty(qty);
       }
     }
 

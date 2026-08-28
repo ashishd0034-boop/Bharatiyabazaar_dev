@@ -33,6 +33,8 @@ model Member {
   vouchers        Voucher[]
   mainWallet      Wallet?
   withdrawals     Withdrawal[]
+  purchasedPins   ActivationPin[]       @relation("PurchasedPins")
+  redeemedPins    ActivationPin[]       @relation("RedeemedPins")
 
   @@map("members")
 }
@@ -361,4 +363,24 @@ model SettlementRun {
   completedAt  DateTime?
 
   @@map("settlement_runs")
+}
+
+model ActivationPin {
+  id                  String    @id @default(cuid())
+  pinCode             String    @unique
+  quantity            Int       @default(1)
+  pricePaise          Int
+  status              String    @default("AVAILABLE") // AVAILABLE, REDEEMED, REVOKED
+  purchasedByMemberId String?
+  purchasedByMember   Member?   @relation("PurchasedPins", fields: [purchasedByMemberId], references: [id])
+  redeemedByMemberId  String?
+  redeemedByMember    Member?   @relation("RedeemedPins", fields: [redeemedByMemberId], references: [id])
+  redeemedAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([purchasedByMemberId])
+  @@index([redeemedByMemberId])
+  @@index([status])
+  @@map("activation_pins")
 }

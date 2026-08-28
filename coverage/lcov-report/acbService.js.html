@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">45% </span>
+                <span class="strong">31.57% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>9/20</span>
+                <span class='fraction'>6/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">33.33% </span>
+                <span class="strong">16.66% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/6</span>
+                <span class='fraction'>1/6</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">52.94% </span>
+                <span class="strong">37.5% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>9/17</span>
+                <span class='fraction'>6/16</span>
             </div>
         
             
@@ -122,29 +122,23 @@
 <a name='L57'></a><a href='#L57'>57</a>
 <a name='L58'></a><a href='#L58'>58</a>
 <a name='L59'></a><a href='#L59'>59</a>
-<a name='L60'></a><a href='#L60'>60</a>
-<a name='L61'></a><a href='#L61'>61</a>
-<a name='L62'></a><a href='#L62'>62</a>
-<a name='L63'></a><a href='#L63'>63</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<a name='L60'></a><a href='#L60'>60</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">54x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">54x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">54x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">54x</span>
-<span class="cline-any cline-yes">54x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">54x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -191,22 +185,19 @@
 const walletService = require("./walletService");
 &nbsp;
 async function checkAcbStatus(tx, idCardId) {
-  const mySystemNode = await tx.mySystemNode.findUnique({
-    where: { idCardId }
+  // Query nodes directly sponsored by this ID card (direct referrals)
+  const sponsoredNodes = await tx.mySystemNode.findMany({
+    where: { sponsorIdCardId: idCardId }
   });
 &nbsp;
-  <span class="missing-if-branch" title="if path not taken" >I</span>if (!mySystemNode) {
-<span class="cstat-no" title="statement not covered" >    return false;</span>
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (sponsoredNodes.length === 0) {
+    return false;
   }
 &nbsp;
-  const children = await tx.mySystemNode.findMany({
-    where: { parentNodeId: mySystemNode.id }
-  });
+  const hasLeft = <span class="cstat-no" title="statement not covered" >sponsoredNodes.some(<span class="fstat-no" title="function not covered" >n </span>=&gt; <span class="cstat-no" title="statement not covered" >n.side === "LEFT")</span>;</span>
+  const hasRight = <span class="cstat-no" title="statement not covered" >sponsoredNodes.some(<span class="fstat-no" title="function not covered" >n </span>=&gt; <span class="cstat-no" title="statement not covered" >n.side === "RIGHT")</span>;</span>
 &nbsp;
-  const hasLeft = children.some(<span class="fstat-no" title="function not covered" >c </span>=&gt; <span class="cstat-no" title="statement not covered" >c.side === "LEFT")</span>;
-  const hasRight = children.some(<span class="fstat-no" title="function not covered" >c </span>=&gt; <span class="cstat-no" title="statement not covered" >c.side === "RIGHT")</span>;
-&nbsp;
-  return hasLeft &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >hasRight;</span>
+<span class="cstat-no" title="statement not covered" >  return hasLeft &amp;&amp; hasRight;</span>
 }
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >unlockAcb(</span>tx, idCardId) {
@@ -256,7 +247,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-08-14T07:09:59.160Z
+                at 2026-08-28T06:27:15.098Z
             </div>
         <script src="prettify.js"></script>
         <script>

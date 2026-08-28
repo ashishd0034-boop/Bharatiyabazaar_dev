@@ -25,15 +25,17 @@ async function generateMemberCode() {
 
 // Creates a new member with a temporary placeholder memberCode.
 // The permanent memberCode is assigned in idCardService.purchaseIds matching the MAIN card number (BBxxxxx).
-async function createMember(args) {
+async function createMember(args, tx = null) {
+  const db = tx || prisma;
   const tempCode = `TEMP_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
   // Create member
-  const member = await prisma.member.create({
+  const member = await db.member.create({
     data: {
       name: args.name,
       mobile: args.mobile,
       email: args.email,
+      passwordHash: args.passwordHash,
       address: args.address,
       pinCode: args.pinCode,
       memberCode: tempCode,
@@ -44,7 +46,7 @@ async function createMember(args) {
   });
 
   // Create wallet for member
-  await prisma.wallet.create({
+  await db.wallet.create({
     data: {
       memberId: member.id,
       balancePaise: 0

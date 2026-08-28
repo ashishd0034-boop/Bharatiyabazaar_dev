@@ -2,6 +2,7 @@ const prisma = require("./prisma");
 const bcrypt = require("bcrypt");
 
 const DEFAULT_SETTINGS = [
+  { key: "ID_PRICE_PAISE", value: "60000", description: "Standard price per ID card activation in paise (Rs. 600)" },
   { key: "MAX_PURCHASED_IDS", value: "255", description: "Maximum purchased IDs per member (rebirths exempt)" },
   { key: "MY_SYSTEM_7DAY_HOLD", value: "true", description: "Enforce 7-day fraud hold on MY SYSTEM commissions" },
   { key: "AUTOPOOL_LOCKED_BEFORE_ACB", value: "true", description: "Require ACB to withdraw AutoPool commissions" },
@@ -105,16 +106,20 @@ async function seedSettingsAndSuperAdmin() {
   }
 
   // 3. Ensure COMPANY_WALLET system member exists
-  await prisma.member.upsert({
-    where: { id: "COMPANY_WALLET" },
-    create: {
-      id: "COMPANY_WALLET",
-      name: "Company Reserve Wallet",
-      mobile: "0000000000",
-      status: "SYSTEM"
-    },
-    update: {}
-  });
+  try {
+    await prisma.member.upsert({
+      where: { id: "COMPANY_WALLET" },
+      create: {
+        id: "COMPANY_WALLET",
+        name: "Company Reserve Wallet",
+        mobile: "0000000000",
+        status: "SYSTEM"
+      },
+      update: {}
+    });
+  } catch (e) {
+    // Ignore concurrent race during test cleans
+  }
 }
 
 module.exports = {

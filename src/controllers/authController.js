@@ -37,7 +37,7 @@ async function validateReferral(req, res, next) {
 
 async function register(req, res, next) {
   try {
-    const { name, mobile, email, address, pinCode, password, referralCode, side } = req.body;
+    const { name, mobile, email, address, pinCode, password, referralCode, side, activationPin, pin } = req.body;
 
     const existingMember = await prisma.member.findUnique({ where: { mobile } });
     if (existingMember) {
@@ -69,32 +69,59 @@ async function register(req, res, next) {
       if (sponsorMainCard) sponsorIdCardId = sponsorMainCard.id;
     }
 
+    // Determine activation PIN vs postal code
+    let activationPinCode = activationPin || pin;
+    let postalPinCode = pinCode;
+    if (!activationPinCode && typeof pinCode === "string" && pinCode.trim().toUpperCase().startsWith("PIN-")) {
+      activationPinCode = pinCode.trim().toUpperCase();
+      postalPinCode = req.body.postalCode || null;
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
-
     const { createMember } = require("../services/memberService");
-    
-    const member = await createMember({
-      name, mobile, email, address, pinCode, kycStatus: "PENDING"
-    });
-
-    await prisma.member.update({
-      where: { id: member.id },
-      data: { passwordHash }
-    });
-
-    // === NEW: Trigger ID Card Creation & Tree Placement ===
     const { purchaseIds } = require("../services/idCardService");
+    const pinService = require("../services/pinService");
     const sponsorSide = (side === "LEFT" || side === "RIGHT") ? side : "LEFT"; // Default to LEFT
-    const newCards = await purchaseIds(member.id, 1, sponsorIdCardId, sponsorSide);
-    // =====================================================
 
-    // Re-fetch member to get the permanent memberCode (matches MAIN cardNumber)
-    const freshMember = await prisma.member.findUnique({
-      where: { id: member.id },
-      include: { idCards: true }
-    });
+    // Safeguard 3: Atomic Transaction covering Member creation, PIN redemption, and Tree placement
+    const { freshMember, mainCard, newCards, qty } = await prisma.$transaction(async (tx) => {
+      // 1. Create Member record & Wallet
+      const member = await createMember({
+        name,
+        mobile,
+        email,
+        passwordHash,
+        address,
+        pinCode: postalPinCode,
+        kycStatus: "PENDING"
+      }, tx);
 
-    const mainCard = freshMember.idCards.find(c => c.type === "MAIN") || freshMember.idCards[0];
+      // 2. Validate & Redeem PIN if provided (Safeguard 1: Concurrency Lock inside tx)
+      let quantityToProvision = 1;
+      if (activationPinCode) {
+        const redeemedPin = await pinService.validateAndRedeemPin(tx, activationPinCode, member.id, null);
+        quantityToProvision = redeemedPin.quantity || 1;
+      }
+
+      // 3. Provision IDs in AutoPool & MY SYSTEM trees
+      const createdCards = await purchaseIds(member.id, quantityToProvision, sponsorIdCardId, sponsorSide, tx);
+
+      // 4. Fetch fresh member with generated memberCode & cards
+      const fresh = await tx.member.findUnique({
+        where: { id: member.id },
+        include: { idCards: true }
+      });
+
+      const main = fresh.idCards.find(c => c.type === "MAIN") || fresh.idCards[0];
+
+      return {
+        freshMember: fresh,
+        mainCard: main,
+        newCards: createdCards,
+        qty: quantityToProvision
+      };
+    }, { timeout: 30000 });
+
     const loginCardNumber = mainCard ? mainCard.cardNumber : freshMember.memberCode;
 
     const token = jwt.sign({
@@ -110,8 +137,15 @@ async function register(req, res, next) {
     res.status(201).json({
       success: true,
       data: {
-        member: { id: freshMember.id, memberCode: freshMember.memberCode, name: freshMember.name, mobile: freshMember.mobile },
+        member: {
+          id: freshMember.id,
+          memberCode: freshMember.memberCode,
+          name: freshMember.name,
+          mobile: freshMember.mobile,
+          idCards: freshMember.idCards
+        },
         token,
+        cardsCreated: newCards.length,
         loginContext: {
           loginCardId: mainCard?.id,
           cardNumber: loginCardNumber,
@@ -122,6 +156,12 @@ async function register(req, res, next) {
       }
     });
   } catch (err) {
+    if (err.status === 400 || err.code === "INVALID_PIN" || err.code === "PIN_NOT_AVAILABLE" || err.code === "PIN_ALREADY_REDEEMED" || err.code === "PIN_QTY_MISMATCH" || err.code === "PIN_REQUIRED" || err.code === "BAD_REQUEST") {
+      return res.status(400).json({
+        success: false,
+        error: { code: err.code || "BAD_REQUEST", message: err.message }
+      });
+    }
     next(err);
   }
 }

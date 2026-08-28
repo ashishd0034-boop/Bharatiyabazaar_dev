@@ -524,6 +524,58 @@ async function updateAdminUserRole(req, res, next) {
   }
 }
 
+/**
+ * List all activation PINs (ADMIN & SUPER_ADMIN)
+ */
+async function listPinsReq(req, res, next) {
+  try {
+    const pinService = require("../services/pinService");
+    const { status, purchasedByMemberId, redeemedByMemberId, limit, offset } = req.query;
+    const pins = await pinService.listPins({
+      status,
+      purchasedByMemberId,
+      redeemedByMemberId,
+      limit: limit ? parseInt(limit, 10) : 100,
+      offset: offset ? parseInt(offset, 10) : 0
+    });
+
+    res.json({
+      success: true,
+      data: pins
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Revoke an unredeemed PIN (ADMIN & SUPER_ADMIN)
+ */
+async function revokePinReq(req, res, next) {
+  try {
+    const pinService = require("../services/pinService");
+    const { id } = req.params;
+    const { reason } = req.body || {};
+    const adminId = req.admin.id;
+
+    const revoked = await pinService.revokePin(id, adminId, reason);
+
+    res.json({
+      success: true,
+      message: "PIN successfully revoked.",
+      data: revoked
+    });
+  } catch (err) {
+    if (err.status === 400 || err.status === 404 || err.code === "BAD_REQUEST" || err.code === "NOT_FOUND") {
+      return res.status(err.status || 400).json({
+        success: false,
+        error: { code: err.code || "BAD_REQUEST", message: err.message }
+      });
+    }
+    next(err);
+  }
+}
+
 module.exports = {
   listSettings,
   getSingleSetting,
@@ -542,5 +594,8 @@ module.exports = {
   getSettlementsReport,
   listAdminUsers,
   createAdminUser,
-  updateAdminUserRole
+  updateAdminUserRole,
+  listPinsReq,
+  revokePinReq
 };
+
