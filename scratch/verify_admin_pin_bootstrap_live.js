@@ -82,7 +82,7 @@ async function runLiveBootstrapVerification() {
     .send({
       name: "Root Pioneer Member",
       mobile: `9888${unique}`,
-      password: "PioneerPass123!",
+      password: "password123",
       pinCode: "110001",
       activationPin: generatedPin.pinCode,
       side: "LEFT"

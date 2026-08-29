@@ -12,7 +12,7 @@ async function runSecurityValidation() {
   console.log("==================================================");
 
   const unique = Date.now().toString().slice(-6);
-  const passwordHash = await bcrypt.hash("TestPass@123", 10);
+  const passwordHash = await bcrypt.hash("password123", 10);
 
   // Setup Test Member
   const member = await prisma.member.create({

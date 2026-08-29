@@ -64,7 +64,7 @@ async function runLiveE2E() {
     .send({
       name: `Live E2E Referral ${uniqueSuffix}`,
       mobile: `9333${uniqueSuffix}`,
-      password: "Password123!",
+      password: "password123",
       pinCode: "110001",
       activationPin: pin.pinCode,
       sponsorCardNumber: "BB10001",
