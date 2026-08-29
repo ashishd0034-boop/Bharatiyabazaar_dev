@@ -643,7 +643,37 @@ async function listMembersReq(req, res, next) {
       skip: parseInt(offset, 10)
     });
     const total = await prisma.member.count({ where });
-    res.json({ success: true, data: { members, total } });
+
+    // Defense-in-depth: Never expose passwordHash in member list
+    const sanitizedMembers = members.map(m => {
+      const { passwordHash, ...rest } = m;
+      return rest;
+    });
+
+    res.json({ success: true, data: { members: sanitizedMembers, total } });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Admin Member Password Reset (ADMIN & SUPER_ADMIN)
+ */
+async function resetMemberPasswordReq(req, res, next) {
+  try {
+    const adminService = require("../services/adminService");
+    const { id } = req.params;
+    const adminId = req.admin.id;
+    const adminEmail = req.admin.email;
+    const ipAddress = req.ip || req.headers["x-forwarded-for"] || null;
+
+    const result = await adminService.resetMemberPassword(adminId, adminEmail, id, ipAddress);
+
+    res.json({
+      success: true,
+      message: `Temporary password generated successfully for member ${result.memberCode}.`,
+      data: result
+    });
   } catch (err) {
     next(err);
   }
@@ -839,6 +869,7 @@ module.exports = {
   revokePinReq,
   generateAdminPinsReq,
   listMembersReq,
+  resetMemberPasswordReq,
   listVendorsReq,
   broadcastNotificationReq,
   listKycReq,

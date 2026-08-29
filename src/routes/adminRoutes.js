@@ -65,6 +65,7 @@ router.post("/pins/revoke/:id", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), a
 
 // Member & Vendor Management (ADMIN & SUPER_ADMIN)
 router.get("/members", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.listMembersReq);
+router.post("/members/:id/reset-password", adminPinGenLimiter, adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.resetMemberPasswordReq);
 router.get("/vendors", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.listVendorsReq);
 
 // KYC & Compliance (ADMIN & SUPER_ADMIN)

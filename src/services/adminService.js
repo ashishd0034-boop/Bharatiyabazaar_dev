@@ -217,6 +217,63 @@ async function updateCategoryMargin(category, marginRatePct, applyToExisting = f
   };
 }
 
+/**
+ * Administrative Member Password Reset (SUPER_ADMIN & ADMIN).
+ * Generates a one-time secure temporary password, hashes it with bcrypt,
+ * updates the database inside a transaction, records an AuditLog,
+ * and returns the plaintext password once.
+ */
+async function resetMemberPassword(adminId, adminEmail, memberId, ipAddress = null) {
+  const bcrypt = require("bcrypt");
+  const crypto = require("crypto");
+
+  const member = await prisma.member.findUnique({
+    where: { id: memberId },
+    select: { id: true, memberCode: true, name: true, mobile: true }
+  });
+
+  if (!member) {
+    const err = new Error("Member not found.");
+    err.code = "NOT_FOUND";
+    err.status = 404;
+    throw err;
+  }
+
+  // Generate 12-char secure temporary password: "BB@Temp" + 6 random hex chars
+  const randomSuffix = crypto.randomBytes(3).toString("hex").toUpperCase();
+  const temporaryPassword = `BB@Temp${randomSuffix}`;
+  const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.member.update({
+      where: { id: memberId },
+      data: { passwordHash }
+    });
+
+    await logAction({
+      action: "MEMBER_PASSWORD_RESET",
+      actorType: "ADMIN",
+      actorId: adminId,
+      entityType: "Member",
+      entityId: member.id,
+      metadata: {
+        memberCode: member.memberCode,
+        memberName: member.name,
+        adminEmail
+      },
+      ipAddress
+    });
+  });
+
+  return {
+    memberId: member.id,
+    memberCode: member.memberCode,
+    name: member.name,
+    mobile: member.mobile,
+    temporaryPassword
+  };
+}
+
 module.exports = {
   getSetting,
   getSettingNumber,
@@ -225,5 +282,6 @@ module.exports = {
   updateSetting,
   updateCategoryMargin,
   invalidateCache,
-  isSuperAdminOnly
+  isSuperAdminOnly,
+  resetMemberPassword
 };

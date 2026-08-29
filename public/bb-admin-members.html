@@ -89,6 +89,33 @@
       padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
       background: #fff; color: var(--navy); border: 1px solid var(--border); cursor: pointer;
     }
+    .nav-btn:hover { background: #f8fafc; }
+
+    .btn-action {
+      padding: 5px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; border: 1px solid transparent;
+    }
+    .btn-action.reset-pass { background: #fef3c7; color: #b45309; border-color: #fde68a; }
+    .btn-action.reset-pass:hover { background: #f59e0b; color: #fff; }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(13, 27, 42, 0.65); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-card {
+      background: #fff; border-radius: var(--radius-card); width: min(480px, calc(100% - 32px));
+      padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 1px solid var(--border);
+    }
+    .temp-pass-box {
+      background: #f8fafc; border: 2px dashed var(--amber); border-radius: 8px; padding: 14px;
+      display: flex; justify-content: space-between; align-items: center; margin: 16px 0;
+    }
+    .temp-pass-text { font-family: monospace; font-size: 18px; font-weight: 700; color: var(--navy); letter-spacing: 1px; }
+    .btn-copy {
+      background: #fef3c7; border: 1px solid var(--amber); color: #92400e; border-radius: 6px;
+      padding: 6px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    }
+    .btn-copy:hover { background: var(--amber); color: #fff; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body class="admin-body">
@@ -147,10 +174,11 @@
                 <th>Wallet Balance</th>
                 <th>Account Status</th>
                 <th>Joined At</th>
+                <th style="text-align:center;">Action</th>
               </tr>
             </thead>
             <tbody id="membersTableBody">
-              <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--muted);">Loading members...</td></tr>
+              <tr><td colspan="9" style="text-align:center; padding:20px; color:var(--muted);">Loading members...</td></tr>
             </tbody>
           </table>
         </div>
@@ -158,8 +186,56 @@
     </main>
   </div>
 
+  <!-- RESET PASSWORD MODAL -->
+  <div id="resetPassModal" class="modal-overlay hidden" onclick="handleModalBackdropClick(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h2 style="font-size:18px; color:var(--navy);">🔑 Reset Member Password</h2>
+        <button type="button" aria-label="Close" onclick="closeResetModal()" style="border:none; background:none; font-size:22px; cursor:pointer; color:var(--muted); padding:4px 8px; line-height:1;">&times;</button>
+      </div>
+
+      <div id="resetAlert" class="note hidden"></div>
+
+      <!-- STEP 1: CONFIRMATION -->
+      <div id="resetConfirmContent">
+        <p style="font-size:13.5px; color:var(--text); margin-bottom:14px;">
+          Are you sure you want to generate a new temporary password for member <strong id="resetTargetName">-</strong> (<code id="resetTargetCode" style="font-size:13px; color:var(--teal);">-</code>)?
+        </p>
+        <div class="note" style="border-left-color:var(--amber); background:#fffbeb; color:#92400e; font-size:12.5px; margin-bottom:16px;">
+          ⚠️ <strong>Security Notice:</strong> The member's existing password will immediately become invalid. A secure 12-character temporary password will be generated and shown once.
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="nav-btn" onclick="closeResetModal()">Cancel</button>
+          <button type="button" id="btnConfirmReset" class="btn-action reset-pass" style="padding:8px 16px; font-size:13px;" onclick="confirmResetPassword()">⚡ Generate New Password</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: RESULT DISPLAY -->
+      <div id="resetResultContent" class="hidden">
+        <div class="note success" style="margin-bottom:12px;">
+          <strong>✓ Password Reset Successfully!</strong>
+        </div>
+        <p style="font-size:13px; color:var(--muted);">
+          Provide this temporary password to the member. It is valid immediately for member login:
+        </p>
+        <div class="temp-pass-box">
+          <span id="tempPassDisplay" class="temp-pass-text">BB@TempXXXXXX</span>
+          <button type="button" id="btnCopyPass" class="btn-copy" onclick="copyTempPassword()">📋 Copy Password</button>
+        </div>
+        <div class="note danger" style="font-size:12px; margin-bottom:16px;">
+          ⚠️ <strong>Shown Only Once:</strong> This temporary password cannot be viewed or retrieved after closing this window.
+        </div>
+        <div style="display:flex; justify-content:flex-end;">
+          <button type="button" class="nav-btn" style="background:var(--teal); color:#fff; border:none;" onclick="closeResetModal()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     let searchTimeout = null;
+    let activeResetMemberId = null;
+    let currentTempPassword = "";
 
     function escapeHtml(str) {
       if (str === null || str === undefined) return "";
@@ -182,9 +258,144 @@
       return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
     }
 
+    function getAdminToken() {
+      return sessionStorage.getItem("admin_token") || localStorage.getItem("bb_admin_token") || "";
+    }
+
     function searchMembers() {
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(loadMembers, 300);
+    }
+
+    function handleModalBackdropClick(event) {
+      if (event.target && event.target.id === "resetPassModal") {
+        closeResetModal();
+      }
+    }
+
+    function openResetModal(memberId, memberCode, memberName) {
+      activeResetMemberId = memberId;
+      currentTempPassword = "";
+
+      const modal = document.getElementById("resetPassModal");
+      const confirmView = document.getElementById("resetConfirmContent");
+      const resultView = document.getElementById("resetResultContent");
+      const alertBox = document.getElementById("resetAlert");
+      const nameEl = document.getElementById("resetTargetName");
+      const codeEl = document.getElementById("resetTargetCode");
+
+      if (nameEl) nameEl.textContent = memberName || "Member";
+      if (codeEl) codeEl.textContent = memberCode || "-";
+      if (alertBox) {
+        alertBox.classList.add("hidden");
+        alertBox.textContent = "";
+      }
+      if (confirmView) confirmView.classList.remove("hidden");
+      if (resultView) resultView.classList.add("hidden");
+
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.style.display = "flex";
+      }
+    }
+
+    function closeResetModal() {
+      const modal = document.getElementById("resetPassModal");
+      const alertBox = document.getElementById("resetAlert");
+      if (alertBox) {
+        alertBox.classList.add("hidden");
+        alertBox.textContent = "";
+      }
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+      }
+      activeResetMemberId = null;
+      currentTempPassword = "";
+    }
+
+    window.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        closeResetModal();
+      }
+    });
+
+    window.openResetPasswordModal = openResetModal;
+
+    async function copyTempPassword() {
+      if (!currentTempPassword) return;
+      const btn = document.getElementById("btnCopyPass");
+      try {
+        await navigator.clipboard.writeText(currentTempPassword);
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = "✓ Copied!";
+          setTimeout(() => { btn.textContent = orig; }, 1500);
+        }
+      } catch (e) {
+        const temp = document.createElement("textarea");
+        temp.value = currentTempPassword;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = "✓ Copied!";
+          setTimeout(() => { btn.textContent = orig; }, 1500);
+        }
+      }
+    }
+
+    async function confirmResetPassword() {
+      if (!activeResetMemberId) return;
+      const btn = document.getElementById("btnConfirmReset");
+      const alertBox = document.getElementById("resetAlert");
+      const confirmView = document.getElementById("resetConfirmContent");
+      const resultView = document.getElementById("resetResultContent");
+      const passDisplay = document.getElementById("tempPassDisplay");
+
+      try {
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Generating...";
+        }
+
+        const token = getAdminToken();
+        if (!token) throw new Error("Admin session not found. Please log in again.");
+
+        const res = await fetch(`/api/admin/members/${activeResetMemberId}/reset-password`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error?.message || "Failed to reset password.");
+        }
+
+        currentTempPassword = data.data.temporaryPassword || "";
+        if (passDisplay) passDisplay.textContent = currentTempPassword;
+
+        if (confirmView) confirmView.classList.add("hidden");
+        if (resultView) resultView.classList.remove("hidden");
+      } catch (err) {
+        if (alertBox) {
+          alertBox.className = "note danger";
+          alertBox.textContent = err.message || "An unexpected error occurred.";
+          alertBox.classList.remove("hidden");
+        } else {
+          alert(err.message || "Failed to reset password.");
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "⚡ Generate New Password";
+        }
+      }
     }
 
     async function loadMembers() {
@@ -206,7 +417,7 @@
         document.getElementById("membersCountBadge").textContent = `👥 ${total} Total Members`;
 
         if (members.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--muted);">No members found.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--muted);">No members found.</td></tr>';
           return;
         }
 
@@ -224,10 +435,13 @@
             <td><strong style="color:var(--teal);">${formatCurrency(m.mainWallet?.balancePaise || 0)}</strong></td>
             <td><span class="badge ${m.status === 'ACTIVE' ? 'success' : 'danger'}">${escapeHtml(m.status || 'ACTIVE')}</span></td>
             <td>${formatDate(m.createdAt)}</td>
+            <td style="text-align:center;">
+              <button type="button" class="btn-action reset-pass" onclick="openResetModal('${m.id}', '${escapeHtml(m.memberCode || '')}', '${escapeHtml(m.name || '')}')">🔑 Reset Password</button>
+            </td>
           </tr>
         `).join("");
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
       }
     }
 
