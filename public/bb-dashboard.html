@@ -1036,8 +1036,8 @@
       const totalEarningsSub = document.getElementById('totalEarningsSub');
       if (totalEarningsSub) {
         totalEarningsSub.textContent = isSub
-          ? `On Hold: ${formatINR(heldPaise)} (${activeCard} slice)`
-          : `On Hold: ${formatINR(heldPaise)} (all cards)`;
+          ? `On Hold: ${formatINR(heldPaise)} (${activeCard} slice) · Releases after 7-day maturity (ACB ✓)`
+          : `On Hold: ${formatINR(heldPaise)} · Releases after 7-day maturity (ACB ✓)`;
       }
 
       const idCards = profile.idCards || [];
@@ -1073,13 +1073,21 @@
           const isLocked  = ["LOCKED_ACB", "PAY_ONCE_BLOCKED"].includes(c.status);
           const badgeClass = isSuccess ? "success" : isLocked ? "locked" : "pending";
           const cardBadge = c.cardNumber ? `<strong>${c.cardNumber}</strong> <span style="font-size:11px; opacity:0.7;">(${c.cardType || 'MAIN'})</span>` : '—';
+          
+          let releaseNotice = '';
+          if (c.status === "PENDING_7_DAY") {
+            const releaseDate = new Date(new Date(c.createdAt).getTime() + 7 * 24 * 60 * 60 * 1000);
+            const daysRemaining = Math.max(0, Math.ceil((releaseDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+            releaseNotice = `<div style="font-size:10.5px; opacity:0.75; margin-top:2px;">Releases in ${daysRemaining}d (${formatDate(releaseDate)}) · ACB ✓</div>`;
+          }
+
           return `
             <tr>
               <td>${formatDate(c.createdAt)}</td>
               <td>${cardBadge}</td>
               <td>${c.stream} L${c.level || 1}</td>
               <td>+${formatINR(c.amountPaise)}</td>
-              <td><span class="badge ${badgeClass}">${c.status}</span></td>
+              <td><span class="badge ${badgeClass}">${c.status}</span>${releaseNotice}</td>
             </tr>
           `;
         }).join('');

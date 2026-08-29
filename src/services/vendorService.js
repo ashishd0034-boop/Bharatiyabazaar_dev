@@ -20,10 +20,10 @@ async function getCategoryMargin(category = "GENERAL") {
   const settingKey = `CATEGORY_MARGIN_${normCat}`;
   const legacyKey = `VENDOR_MARGIN_${normCat}`;
 
-  const dynamicMargin = await adminService.getSetting(settingKey).catch(() => null) ||
-    await adminService.getSetting(legacyKey).catch(() => null);
+  const dynamicMargin = await adminService.getSetting(settingKey, null).catch(() => null) ??
+    await adminService.getSetting(legacyKey, null).catch(() => null);
 
-  if (dynamicMargin !== null && dynamicMargin !== undefined) {
+  if (dynamicMargin !== null && dynamicMargin !== undefined && dynamicMargin !== "undefined") {
     return parseFloat(dynamicMargin);
   }
 

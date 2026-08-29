@@ -22,14 +22,11 @@ async function run7DaySweep() {
       const current = await tx.commissionEntry.findUnique({ where: { id: commission.id } });
       if (current.status !== "PENDING_7_DAY") return;
 
-      // Check if source card owner has ACB
-      let hasAcb = false;
+      // Check if beneficiary ID card or owner's MAIN card has ACB satisfied
       const ownerMainCard = await tx.memberIdCard.findFirst({
         where: { memberId: commission.idCard.memberId, type: "MAIN" }
       });
-      if (ownerMainCard && ownerMainCard.acbStatus) {
-        hasAcb = true;
-      }
+      const hasAcb = Boolean(ownerMainCard?.acbStatus || commission.idCard?.acbStatus);
 
       if (hasAcb) {
         await tx.commissionEntry.update({
@@ -98,26 +95,29 @@ async function runDailyInactivitySweep() {
   }
 }
 
-// 1. Hourly 7-day and ACB Sweeps
-cron.schedule("0 * * * *", async () => {
-  try {
-    const holdProcessed = await run7DaySweep();
-    const acbProcessed = await runAcbSweep();
-    console.log(`[JOB SUMMARY] Hourly Sweep: Processed ${holdProcessed} 7-day holds, Unlocked ${acbProcessed} ACB statuses.`);
-  } catch (error) {
-    console.error("[JOB ERROR] Hourly Sweep Failed:", error);
-  }
-});
+// Register background cron jobs in production / development (disabled in test runs)
+if (process.env.NODE_ENV !== "test") {
+  // 1. Hourly 7-day and ACB Sweeps
+  cron.schedule("0 * * * *", async () => {
+    try {
+      const holdProcessed = await run7DaySweep();
+      const acbProcessed = await runAcbSweep();
+      console.log(`[JOB SUMMARY] Hourly Sweep: Processed ${holdProcessed} 7-day holds, Unlocked ${acbProcessed} ACB statuses.`);
+    } catch (error) {
+      console.error("[JOB ERROR] Hourly Sweep Failed:", error);
+    }
+  });
 
-// 2. Weekly Monday Settlement at 00:00 ("0 0 * * MON")
-cron.schedule("0 0 * * MON", async () => {
-  await runMondaySettlement().catch(() => {});
-});
+  // 2. Weekly Monday Settlement at 00:00 ("0 0 * * MON")
+  cron.schedule("0 0 * * MON", async () => {
+    await runMondaySettlement().catch(() => {});
+  });
 
-// 3. Daily Inactivity Lifecycle Sweep at 02:00 ("0 2 * * *")
-cron.schedule("0 2 * * *", async () => {
-  await runDailyInactivitySweep().catch(() => {});
-});
+  // 3. Daily Inactivity Lifecycle Sweep at 02:00 ("0 2 * * *")
+  cron.schedule("0 2 * * *", async () => {
+    await runDailyInactivitySweep().catch(() => {});
+  });
+}
 
 module.exports = {
   run7DaySweep,
