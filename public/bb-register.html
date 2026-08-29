@@ -761,7 +761,7 @@
 
       if (feedback) { feedback.textContent = 'Verifying PIN...'; feedback.className = 'note info'; feedback.classList.remove('hidden'); }
       try {
-        const res = await fetch(`${API_BASE}/pins/validate`, {
+        const res = await fetch(`${API_BASE}/auth/verify-pin`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ pinCode: code })

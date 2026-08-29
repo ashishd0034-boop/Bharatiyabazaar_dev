@@ -91,6 +91,12 @@ const adminGeneratePinSchema = z.object({
   })
 });
 
+const verifyPinSchema = z.object({
+  body: z.object({
+    pinCode: z.string().trim().min(4, "PIN code must be at least 4 characters").max(30, "PIN code cannot exceed 30 characters")
+  })
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -100,5 +106,6 @@ module.exports = {
   vendorSaleSchema,
   vendorRegisterSchema,
   settingUpdateSchema,
-  adminGeneratePinSchema
+  adminGeneratePinSchema,
+  verifyPinSchema
 };

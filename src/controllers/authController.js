@@ -276,9 +276,42 @@ async function adminLogin(req, res, next) {
   }
 }
 
+/**
+ * Public Activation PIN Verification (Rate-limited, zero-auth).
+ * Allows unauthenticated prospective registrants to validate their PIN
+ * and see its ID capacity / value before submitting registration.
+ */
+async function verifyPin(req, res, next) {
+  try {
+    const pinService = require("../services/pinService");
+    const { pinCode } = req.body;
+    const pin = await pinService.validatePin(pinCode);
+
+    res.json({
+      success: true,
+      message: `PIN ${pin.pinCode} is valid for ${pin.quantity} ID(s).`,
+      data: {
+        valid: true,
+        pinCode: pin.pinCode,
+        quantity: pin.quantity,
+        pricePaise: pin.pricePaise
+      }
+    });
+  } catch (err) {
+    if (err.status === 400 || err.code === "INVALID_PIN" || err.code === "PIN_NOT_AVAILABLE" || err.code === "PIN_REQUIRED") {
+      return res.status(400).json({
+        success: false,
+        error: { code: err.code || "BAD_REQUEST", message: err.message }
+      });
+    }
+    next(err);
+  }
+}
+
 module.exports = {
   register,
   login,
   adminLogin,
-  validateReferral // NEW
+  validateReferral,
+  verifyPin
 };
