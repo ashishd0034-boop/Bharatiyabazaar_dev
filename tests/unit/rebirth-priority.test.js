@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const idCardService = require("../../src/services/idCardService");
 const rebirthService = require("../../src/services/rebirthService");
@@ -8,30 +9,7 @@ describe("Unit: Rebirth Priority, Placement & Cap Invariants", () => {
   const unique = Date.now().toString().slice(-6);
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.auditLog.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.adminUser.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
-    await seedSettingsAndSuperAdmin();
-    adminService.invalidateCache();
+    await truncateDb(prisma);
   }
 
   beforeEach(async () => {
@@ -175,11 +153,13 @@ describe("Unit: Rebirth Priority, Placement & Cap Invariants", () => {
       await idCardService.purchaseIds(rootMember.id, 1); // Pos 1
 
       // 30 filler cards -> completes L4 for Pos 1 -> Rebirth at Pos 32
-      const filler = await prisma.member.create({
-        data: { name: `FillerProp ${unique}`, mobile: `8510${unique}`, status: "ACTIVE" }
-      });
-      await prisma.wallet.create({ data: { memberId: filler.id, balancePaise: 0 } });
-      await idCardService.purchaseIds(filler.id, 30);
+      for (let i = 1; i <= 30; i++) {
+        const filler = await prisma.member.create({
+          data: { name: `FillerProp ${unique}_${i}`, mobile: `8510${unique}${i.toString().padStart(2, '0')}`, status: "ACTIVE" }
+        });
+        await prisma.wallet.create({ data: { memberId: filler.id, balancePaise: 0 } });
+        await idCardService.purchaseIds(filler.id, 1);
+      }
 
       const rebirthCard = await prisma.memberIdCard.findFirst({
         where: { memberId: rootMember.id, type: "REBIRTH" },

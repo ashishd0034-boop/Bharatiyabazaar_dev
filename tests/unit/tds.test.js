@@ -1,6 +1,8 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const tdsService = require("../../src/services/tdsService");
 const withdrawalService = require("../../src/services/withdrawalService");
+const walletService = require("../../src/services/walletService");
 const adminService = require("../../src/services/adminService");
 const { seedSettingsAndSuperAdmin } = require("../../src/lib/seedSettings");
 
@@ -8,30 +10,7 @@ describe("Unit: TDS Calculations & Lifecycle (194H, 194R, 194C)", () => {
   const unique = Date.now().toString().slice(-6);
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.auditLog.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.adminUser.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
-    await seedSettingsAndSuperAdmin();
-    adminService.invalidateCache();
+    await truncateDb(prisma);
   }
 
   beforeEach(async () => {
@@ -279,7 +258,10 @@ describe("Unit: TDS Calculations & Lifecycle (194H, 194R, 194C)", () => {
       const card = await prisma.memberIdCard.create({
         data: { memberId: member.id, cardNumber: `LC_${unique}`, type: "MAIN", acbStatus: true }
       });
-      await prisma.wallet.create({ data: { memberId: member.id, balancePaise: 3000000 } });
+      await prisma.wallet.create({ data: { memberId: member.id, balancePaise: 0 } });
+      await prisma.$transaction(async (tx) => {
+        await walletService.credit(tx, member.id, 3000000, "TOPUP", null, "Test topup");
+      });
 
       // Request withdrawal of ₹25,000 (TDS = ₹150 / 15,000 paise)
       const withdrawal = await withdrawalService.requestWithdrawal(member.id, card.id, "BANK", 2500000);

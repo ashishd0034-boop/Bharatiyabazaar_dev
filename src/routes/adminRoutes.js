@@ -29,8 +29,16 @@ router.get("/settings/:key", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), admi
 router.put("/settings/:key", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.updateSettingValue);
 router.put("/categories/:category/margin", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.updateCategoryMarginReq);
 
-// Operational & Reports Endpoints (ADMIN & SUPER_ADMIN)
-router.get("/reports/reconciliation", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.getReconciliationReport);
+const reconciliationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === "test" ? 100 : 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many reconciliation report requests, please try again later." } }
+});
+
+// Operational & Reports Endpoints
+router.get("/reports/reconciliation", reconciliationLimiter, adminAuthMiddleware(["SUPER_ADMIN"]), adminController.getReconciliationReport);
 router.get("/reports/withdrawals", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.getPendingWithdrawalsReport);
 router.get("/reports/tds-summary", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.getTdsSummaryReport);
 router.get("/reports/settlements", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.getSettlementsReport);
@@ -42,8 +50,17 @@ router.post("/settlements/run", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), a
 router.post("/vendors/:id/penalize", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.penalizeVendorReq);
 router.post("/vendors/:id/freeze", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.freezeVendorReq);
 
+const adminPinGenLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === "test" ? 100 : 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many PIN generation requests, please try again later." } }
+});
+
 // PIN Management Endpoints (ADMIN & SUPER_ADMIN)
 router.get("/pins", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.listPinsReq);
+router.post("/pins/generate", adminPinGenLimiter, adminAuthMiddleware(["SUPER_ADMIN"]), validate(schemas.adminGeneratePinSchema), adminController.generateAdminPinsReq);
 router.post("/pins/revoke/:id", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.revokePinReq);
 
 // Member & Vendor Management (ADMIN & SUPER_ADMIN)

@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const request = require("supertest");
 const app = require("../../src/server");
 const prisma = require("../../src/lib/prisma");
@@ -15,29 +16,7 @@ describe("Task 11: PIN-Based ID Activation System & Safeguards", () => {
   let adminUser, adminToken;
 
   async function cleanDb() {
-    await prisma.activationPin.deleteMany({});
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.auditLog.deleteMany({});
-    await prisma.adminUser.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
   }
 
   beforeAll(async () => {

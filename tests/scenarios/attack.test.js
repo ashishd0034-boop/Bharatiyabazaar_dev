@@ -1,6 +1,8 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const request = require("supertest");
 const app = require("../../src/server");
 const prisma = require("../../src/lib/prisma");
+const walletService = require("../../src/services/walletService");
 
 describe("Security: IDOR Prevention on /api/id-cards/purchase", () => {
   let attackerToken;
@@ -8,24 +10,7 @@ describe("Security: IDOR Prevention on /api/id-cards/purchase", () => {
   let victimId;
 
   beforeAll(async () => {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
 
     const uniqueSuffix = Date.now().toString().slice(-6);
     
@@ -50,10 +35,9 @@ describe("Security: IDOR Prevention on /api/id-cards/purchase", () => {
     attackerId = attackerRes.body.data.member.id;
     attackerToken = attackerRes.body.data.token;
 
-    // Fund attacker wallet for authorized purchase test
-    await prisma.wallet.update({
-      where: { memberId: attackerId },
-      data: { balancePaise: 200000 }
+    // Fund attacker wallet for authorized purchase test via walletService
+    await prisma.$transaction(async (tx) => {
+      await walletService.credit(tx, attackerId, 200000, "TEST_DEPOSIT", null, "Test deposit");
     });
   });
 

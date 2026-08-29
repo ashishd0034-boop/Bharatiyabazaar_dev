@@ -1,47 +1,42 @@
-const prisma = require("/Users/ashishdubey/Desktop/coder/Bharatiya Bazaar/qewn/bb-backend/src/lib/prisma");
+const prisma = require("../src/lib/prisma");
 
-async function checkHistory() {
-  console.log("=== AUDIT LOGS ===");
+async function checkAuditAndHistory() {
+  console.log("=== CHECKING AUDIT LOGS AND DB MODIFICATIONS ===");
+
   const auditLogs = await prisma.auditLog.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 50
+    orderBy: { createdAt: "desc" },
+    take: 30
   });
-  console.log(`Found ${auditLogs.length} audit logs:`);
-  auditLogs.forEach(a => console.log(a));
 
-  console.log("\n=== ALL MEMBERS IN DB ===");
-  const members = await prisma.member.findMany({
-    include: {
-      idCards: {
-        include: { autoPoolNode: true }
+  console.log("Audit Logs count:", auditLogs.length);
+  for (const log of auditLogs) {
+    console.log(`- [${log.createdAt.toISOString()}] Admin ${log.adminId} Action: ${log.action} Target: ${log.targetId} Details:`, log.details);
+  }
+
+  // Check all ledger entries in whole DB around 2026-08-28T08:00 to 08:35
+  const ledgers = await prisma.ledgerEntry.findMany({
+    where: {
+      createdAt: {
+        gte: new Date("2026-08-28T07:00:00.000Z"),
+        lte: new Date("2026-08-28T09:00:00.000Z")
       }
     },
-    orderBy: { createdAt: 'asc' }
-  });
-  console.log(`Found ${members.length} members:`);
-  members.forEach(m => {
-    console.log(`  ${m.memberCode} | ${m.name} | ${m.mobile} | Cards: ${m.idCards.map(c => `${c.cardNumber} (AP #${c.autoPoolNode?.globalPosition})`).join(', ')} | Created: ${m.createdAt.toISOString()}`);
-  });
-
-  console.log("\n=== ALL COMMISSION ENTRIES IN DB ===");
-  const comms = await prisma.commissionEntry.findMany({
+    orderBy: { createdAt: "asc" },
     include: {
-      idCard: {
-        include: { member: true }
+      wallet: {
+        include: {
+          member: true
+        }
       }
-    },
-    orderBy: { createdAt: 'asc' }
-  });
-  console.log(`Found ${comms.length} commission entries:`);
-  comms.forEach(c => {
-    console.log(`  ID: ${c.id} | Card: ${c.idCard.cardNumber} (${c.idCard.member.memberCode}) | Stream: ${c.stream} L${c.level} | Rs.${c.amountPaise / 100} | Status: ${c.status} | CreatedAt: ${c.createdAt.toISOString()}`);
+    }
   });
 
-  console.log("\n=== SYSTEM COUNTER ===");
-  const counters = await prisma.systemCounter.findMany();
-  console.log(counters);
+  console.log("\nLedger entries around PIN creation period (2026-08-28):", ledgers.length);
+  for (const l of ledgers) {
+    console.log(`[${l.createdAt.toISOString()}] Member: ${l.wallet.member.memberCode} | Type: ${l.type} | Amount: ₹${l.amountPaise / 100} | Source: ${l.source} | Before: ₹${l.balanceBeforePaise / 100} | After: ₹${l.balanceAfterPaise / 100} | Desc: ${l.description}`);
+  }
 
   await prisma.$disconnect();
 }
 
-checkHistory();
+checkAuditAndHistory().catch(console.error);

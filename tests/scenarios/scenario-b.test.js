@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const { purchaseIds } = require("../../src/services/idCardService");
 const withdrawalService = require("../../src/services/withdrawalService");
@@ -32,24 +33,7 @@ describe("Scenario B: Wallet & Ledger Integration", () => {
   });
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
   }
 
   it("should sweep unlocked commissions into wallet, update ledger, and allow withdrawal", async () => {

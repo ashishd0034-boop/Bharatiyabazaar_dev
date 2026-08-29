@@ -248,10 +248,107 @@ async function revokePin(pinId, adminId, reason = null) {
   return updated;
 }
 
+/**
+ * Direct administrative PIN generation by SUPER_ADMIN.
+ * Bypasses wallet debit, generates batch of PINs with purchasedByMemberId = null,
+ * and records structured AuditLog.
+ */
+async function adminGeneratePins(adminId, count = 1, quantity = 1, reason = "", ipAddress = null) {
+  const batchCount = parseInt(count, 10) || 1;
+  const qty = parseInt(quantity, 10) || 1;
+
+  if (batchCount < 1 || batchCount > 20) {
+    const err = new Error("Batch count must be between 1 and 20.");
+    err.code = "INVALID_BATCH_COUNT";
+    err.status = 400;
+    throw err;
+  }
+
+  if (qty < 1 || qty > 10) {
+    const err = new Error("Quantity per PIN must be between 1 and 10.");
+    err.code = "INVALID_QUANTITY";
+    err.status = 400;
+    throw err;
+  }
+
+  if (!reason || reason.trim().length < 5) {
+    const err = new Error("Administrative reason is required (min 5 characters).");
+    err.code = "REASON_REQUIRED";
+    err.status = 400;
+    throw err;
+  }
+
+  const idPricePaise = await adminService.getSetting("ID_PRICE_PAISE", 60000, "integer");
+  const pricePaise = qty * idPricePaise;
+
+  return await prisma.$transaction(async (tx) => {
+    const createdPins = [];
+    const pinCodes = [];
+
+    for (let i = 0; i < batchCount; i++) {
+      let pinCode;
+      let isUnique = false;
+
+      // Ensure uniqueness
+      while (!isUnique) {
+        const randomHex = crypto.randomBytes(4).toString("hex").toUpperCase();
+        pinCode = `PIN-${randomHex}`;
+        const existing = await tx.activationPin.findUnique({ where: { pinCode } });
+        if (!existing) isUnique = true;
+      }
+
+      const pin = await tx.activationPin.create({
+        data: {
+          pinCode,
+          quantity: qty,
+          pricePaise,
+          status: "AVAILABLE",
+          purchasedByMemberId: null // Admin issued
+        }
+      });
+
+      createdPins.push({
+        id: pin.id,
+        pinCode: pin.pinCode,
+        quantity: pin.quantity,
+        pricePaise: pin.pricePaise,
+        status: pin.status,
+        issuanceType: "ADMIN_ISSUED",
+        createdAt: pin.createdAt
+      });
+      pinCodes.push(pinCode);
+    }
+
+    // Write AuditLog
+    await logAction({
+      action: "ADMIN_PIN_GENERATED",
+      actorType: "ADMIN",
+      actorId: adminId,
+      entityType: "ActivationPin",
+      entityId: pinCodes[0] || null,
+      metadata: {
+        count: batchCount,
+        quantityPerPin: qty,
+        totalPricePaise: pricePaise * batchCount,
+        pinCodes,
+        reason: reason.trim()
+      },
+      ipAddress
+    });
+
+    return {
+      pins: createdPins,
+      totalGenerated: createdPins.length,
+      reason: reason.trim()
+    };
+  }, { timeout: 15000 });
+}
+
 module.exports = {
   generatePin,
   validatePin,
   validateAndRedeemPin,
   listPins,
-  revokePin
+  revokePin,
+  adminGeneratePins
 };

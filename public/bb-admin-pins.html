@@ -110,16 +110,52 @@
     .btn-action.revoke { background: #fee2e2; color: var(--danger); border-color: #fca5a5; }
     .btn-action.revoke:hover { background: var(--danger); color: #fff; }
 
+    .hidden { display: none !important; }
+
     .nav-btn {
       padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none;
       background: #fff; color: var(--navy); border: 1px solid var(--border); cursor: pointer;
     }
-
-    .hidden { display: none !important; }
+    .nav-btn:hover { background: #f8fafc; }
 
     @media (max-width: 768px) {
       .stat-row { grid-template-columns: 1fr 1fr; }
     }
+
+    .badge.purple { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+
+    .btn-primary {
+      padding: 9px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 700;
+      background: var(--teal); color: #fff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(13, 27, 42, 0.65); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-card {
+      background: #fff; border-radius: var(--radius-card); width: min(520px, calc(100% - 32px));
+      padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 1px solid var(--border);
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12.5px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+    .form-control {
+      width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+      font-size: 13.5px; outline: none; background: #fff; box-sizing: border-box;
+    }
+    .form-control:focus { border-color: var(--teal); }
+
+    .pin-code-box {
+      background: #f8fafc; border: 1px dashed var(--teal); border-radius: 8px; padding: 10px 14px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+    }
+    .pin-code-text { font-family: monospace; font-size: 15px; font-weight: 700; color: var(--navy); }
+    .btn-copy {
+      background: #e6fffa; border: 1px solid var(--teal); color: var(--teal-dark); border-radius: 6px;
+      padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .btn-copy:hover { background: var(--teal); color: #fff; }
   </style>
 </head>
 <body class="admin-body">
@@ -145,7 +181,8 @@
           <h1>Activation PINs &amp; Group Keys</h1>
           <p>सक्रियण पिन प्रबंधन · Audit generated activation keys, track sponsor purchases, and inspect redemption records</p>
         </div>
-        <div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button id="btnOpenGenModal" class="btn-primary" onclick="openGenModal()">👑 + Generate Admin PIN</button>
           <button class="nav-btn" onclick="loadPinsList()">🔄 Refresh List</button>
         </div>
       </section>
@@ -165,7 +202,7 @@
           <div class="value" id="kpiRedeemedPins" style="color:var(--info);">0</div>
         </div>
         <div class="card stat-card">
-          <div class="label">Total PIN Revenue (Paise)</div>
+          <div class="label">Total PIN Value</div>
           <div class="value" id="kpiPinRevenue" style="color:var(--teal);">₹0.00</div>
         </div>
       </section>
@@ -202,9 +239,9 @@
               <tr>
                 <th>PIN Code</th>
                 <th>Quantity</th>
-                <th>Price Paid</th>
+                <th>Price Value</th>
                 <th>Status</th>
-                <th>Purchased By</th>
+                <th>Issuance / Purchaser</th>
                 <th>Redeemed By</th>
                 <th>Created Date</th>
                 <th style="text-align:center;">Action</th>
@@ -219,8 +256,69 @@
     </main>
   </div>
 
+  <!-- ADMIN GENERATE PIN MODAL -->
+  <div id="genPinModal" class="modal-overlay hidden" onclick="handleModalBackdropClick(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h2 style="font-size:18px; color:var(--navy);">👑 Super Admin PIN Issuance</h2>
+        <button type="button" aria-label="Close" onclick="closeGenModal()" style="border:none; background:none; font-size:22px; cursor:pointer; color:var(--muted); padding:4px 8px; line-height:1;">&times;</button>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+        Issue official activation PINs directly without wallet deduction. All generation events are recorded in the system AuditLog.
+      </p>
+
+      <div id="modalAlert" class="note hidden"></div>
+
+      <div id="genFormContent">
+        <div class="form-group">
+          <label>ID Capacity per PIN (Quantity)</label>
+          <select id="genQuantity" class="form-control">
+            <option value="1">1 ID — Single Registration (₹600 value)</option>
+            <option value="2">2 IDs — Two IDs (₹1,200 value)</option>
+            <option value="3" selected>3 IDs — 3-ID Package (₹1,800 value)</option>
+            <option value="4">4 IDs (₹2,400 value)</option>
+            <option value="5">5 IDs (₹3,000 value)</option>
+            <option value="6">6 IDs (₹3,600 value)</option>
+            <option value="7">7 IDs (₹4,200 value)</option>
+            <option value="8">8 IDs (₹4,800 value)</option>
+            <option value="9">9 IDs (₹5,400 value)</option>
+            <option value="10">10 IDs — Max Group Pack (₹6,000 value)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Batch Count (Number of PINs to generate)</label>
+          <input type="number" id="genCount" class="form-control" min="1" max="20" value="1" />
+        </div>
+
+        <div class="form-group">
+          <label>Administrative Reason / Justification <span style="color:var(--danger)">*</span></label>
+          <textarea id="genReason" class="form-control" rows="2" placeholder="e.g. Initial root sponsor onboarding / Phase B bootstrap"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" class="nav-btn" onclick="closeGenModal()">Cancel</button>
+          <button type="button" id="btnSubmitGen" class="btn-primary" onclick="submitAdminPinGen()">⚡ Generate PIN(s)</button>
+        </div>
+      </div>
+
+      <!-- RESULTS CONTAINER -->
+      <div id="genResultsContent" class="hidden" style="margin-top:16px;">
+        <div class="note success" style="margin-bottom:14px;">
+          <strong>✓ PINs Generated Successfully!</strong> Make sure to copy them now:
+        </div>
+        <div id="generatedPinsList" style="max-height:220px; overflow-y:auto; margin-bottom:16px;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+          <button type="button" class="btn-copy" onclick="copyAllGeneratedPins()">📋 Copy All PINs</button>
+          <button type="button" class="btn-primary" onclick="finishPinGen()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     let allPinsData = [];
+    let lastGeneratedCodes = [];
 
     function escapeHtml(str) {
       if (str === null || str === undefined) return "";
@@ -241,6 +339,183 @@
       if (!dateStr) return "-";
       const d = new Date(dateStr);
       return d.toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function getAdminToken() {
+      return sessionStorage.getItem("admin_token") || localStorage.getItem("bb_admin_token") || "";
+    }
+
+    function handleModalBackdropClick(event) {
+      if (event.target && event.target.id === "genPinModal") {
+        closeGenModal();
+      }
+    }
+
+    function openGenModal() {
+      const modal = document.getElementById("genPinModal");
+      const form = document.getElementById("genFormContent");
+      const results = document.getElementById("genResultsContent");
+      const alertBox = document.getElementById("modalAlert");
+      const reasonInput = document.getElementById("genReason");
+      const countInput = document.getElementById("genCount");
+
+      if (form) form.classList.remove("hidden");
+      if (results) results.classList.add("hidden");
+      if (alertBox) {
+        alertBox.classList.add("hidden");
+        alertBox.textContent = "";
+      }
+      if (reasonInput) reasonInput.value = "";
+      if (countInput) countInput.value = "1";
+
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.style.display = "flex";
+      }
+    }
+
+    function closeGenModal() {
+      const modal = document.getElementById("genPinModal");
+      const alertBox = document.getElementById("modalAlert");
+      if (alertBox) {
+        alertBox.classList.add("hidden");
+        alertBox.textContent = "";
+      }
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+      }
+    }
+
+    function finishPinGen() {
+      closeGenModal();
+      loadPinsList();
+    }
+
+    // Close on Escape key press
+    window.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        closeGenModal();
+      }
+    });
+
+    async function copyToClipboard(text, btnEl) {
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = btnEl.textContent;
+        btnEl.textContent = "✓ Copied!";
+        setTimeout(() => { btnEl.textContent = original; }, 1500);
+      } catch (err) {
+        // Fallback copy
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        const original = btnEl.textContent;
+        btnEl.textContent = "✓ Copied!";
+        setTimeout(() => { btnEl.textContent = original; }, 1500);
+      }
+    }
+
+    function copyAllGeneratedPins() {
+      if (lastGeneratedCodes.length === 0) return;
+      const text = lastGeneratedCodes.join("\n");
+      navigator.clipboard.writeText(text);
+      alert(`Copied ${lastGeneratedCodes.length} PIN(s) to clipboard!`);
+    }
+
+    async function submitAdminPinGen() {
+      const btn = document.getElementById("btnSubmitGen");
+      const alertBox = document.getElementById("modalAlert");
+      const quantityEl = document.getElementById("genQuantity");
+      const countEl = document.getElementById("genCount");
+      const reasonEl = document.getElementById("genReason");
+      const formEl = document.getElementById("genFormContent");
+      const resultsEl = document.getElementById("genResultsContent");
+      const listEl = document.getElementById("generatedPinsList");
+
+      try {
+        const quantity = quantityEl ? parseInt(quantityEl.value, 10) : 1;
+        const count = countEl ? parseInt(countEl.value, 10) : 1;
+        const reason = reasonEl ? reasonEl.value.trim() : "";
+
+        if (alertBox) {
+          alertBox.classList.add("hidden");
+          alertBox.textContent = "";
+        }
+
+        if (!reason || reason.length < 5) {
+          if (alertBox) {
+            alertBox.className = "note danger";
+            alertBox.textContent = "Please provide an administrative reason (at least 5 characters).";
+            alertBox.classList.remove("hidden");
+          } else {
+            alert("Please provide an administrative reason (at least 5 characters).");
+          }
+          return;
+        }
+
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Generating...";
+        }
+
+        const token = getAdminToken();
+        if (!token) {
+          throw new Error("Admin session not found. Please log in again.");
+        }
+
+        const res = await fetch("/api/admin/pins/generate", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ quantity, count, reason })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error?.message || (typeof data.error === "string" ? data.error : "Failed to generate PINs"));
+        }
+
+        const pins = (data && data.data && Array.isArray(data.data.pins)) ? data.data.pins : [];
+        lastGeneratedCodes = pins.map(p => p.pinCode);
+
+        if (listEl) {
+          if (pins.length === 0) {
+            listEl.innerHTML = '<div style="padding:10px; color:var(--muted);">No PINs returned in response.</div>';
+          } else {
+            listEl.innerHTML = pins.map(p => `
+              <div class="pin-code-box">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span class="pin-code-text">${escapeHtml(p.pinCode)}</span>
+                  <span style="font-size:12px; color:var(--muted);">(${p.quantity} ID - ${formatCurrency(p.pricePaise)})</span>
+                </div>
+                <button type="button" class="btn-copy" onclick="copyToClipboard('${p.pinCode}', this)">📋 Copy</button>
+              </div>
+            `).join("");
+          }
+        }
+
+        if (formEl) formEl.classList.add("hidden");
+        if (resultsEl) resultsEl.classList.remove("hidden");
+      } catch (err) {
+        if (alertBox) {
+          alertBox.className = "note danger";
+          alertBox.textContent = err.message || "An unexpected error occurred.";
+          alertBox.classList.remove("hidden");
+        } else {
+          alert(err.message || "An unexpected error occurred.");
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "⚡ Generate PIN(s)";
+        }
+      }
     }
 
     async function loadPinsList() {
@@ -281,7 +556,7 @@
 
       const filtered = allPinsData.filter(p => {
         const matchesStatus = statusFilter === "ALL" || p.status === statusFilter;
-        const purchaserStr = p.purchasedByMember ? `${p.purchasedByMember.name} ${p.purchasedByMember.memberCode || ''}`.toLowerCase() : '';
+        const purchaserStr = p.purchasedByMember ? `${p.purchasedByMember.name} ${p.purchasedByMember.memberCode || ''}`.toLowerCase() : 'admin issued direct';
         const redeemerStr = p.redeemedByMember ? `${p.redeemedByMember.name} ${p.redeemedByMember.memberCode || ''}`.toLowerCase() : '';
         const pinCodeStr = (p.pinCode || '').toLowerCase();
 
@@ -296,8 +571,13 @@
 
       tbody.innerHTML = filtered.map(p => `
         <tr>
-          <td><strong style="font-family:monospace; font-size:13.5px; color:var(--navy);">${escapeHtml(p.pinCode)}</strong></td>
-          <td>${p.quantity} ID(s)</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <strong style="font-family:monospace; font-size:13.5px; color:var(--navy);">${escapeHtml(p.pinCode)}</strong>
+              <button type="button" class="btn-copy" style="padding:2px 6px; font-size:10px;" onclick="copyToClipboard('${p.pinCode}', this)">📋</button>
+            </div>
+          </td>
+          <td><strong>${p.quantity} ID(s)</strong></td>
           <td><strong>${formatCurrency(p.pricePaise)}</strong></td>
           <td>
             <span class="badge ${p.status === 'AVAILABLE' ? 'success' : (p.status === 'REDEEMED' ? 'admin' : 'danger')}">
@@ -305,14 +585,22 @@
             </span>
           </td>
           <td>
-            ${p.purchasedByMember ? `<div><strong>${escapeHtml(p.purchasedByMember.name)}</strong></div><div style="font-size:11px; color:var(--muted); font-family:monospace;">${escapeHtml(p.purchasedByMember.memberCode || '-')}</div>` : '<span style="color:var(--muted);">System Direct</span>'}
+            ${p.purchasedByMember ? `
+              <div><strong>${escapeHtml(p.purchasedByMember.name)}</strong></div>
+              <div style="font-size:11px; color:var(--muted); font-family:monospace;">${escapeHtml(p.purchasedByMember.memberCode || '-')}</div>
+            ` : `
+              <span class="badge purple">👑 ADMIN ISSUED</span>
+            `}
           </td>
           <td>
-            ${p.redeemedByMember ? `<div><strong>${escapeHtml(p.redeemedByMember.name)}</strong></div><div style="font-size:11px; color:var(--muted); font-family:monospace;">${escapeHtml(p.redeemedByMember.memberCode || '-')}</div>` : '<span style="color:var(--muted); font-style:italic;">Not Redeemed</span>'}
+            ${p.redeemedByMember ? `
+              <div><strong>${escapeHtml(p.redeemedByMember.name)}</strong></div>
+              <div style="font-size:11px; color:var(--muted); font-family:monospace;">${escapeHtml(p.redeemedByMember.memberCode || '-')}</div>
+            ` : '<span style="color:var(--muted); font-style:italic;">Not Redeemed</span>'}
           </td>
           <td>${formatDate(p.createdAt)}</td>
           <td style="text-align:center;">
-            ${p.status === 'AVAILABLE' ? `<button class="btn-action revoke" onclick="handleRevokePin('${p.id}', '${p.pinCode}')">Revoke Key</button>` : '—'}
+            ${p.status === 'AVAILABLE' ? `<button type="button" class="btn-action revoke" onclick="handleRevokePin('${p.id}', '${p.pinCode}')">Revoke Key</button>` : '—'}
           </td>
         </tr>
       `).join("");

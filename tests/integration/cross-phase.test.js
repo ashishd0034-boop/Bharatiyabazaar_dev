@@ -1,9 +1,11 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const { createMember } = require("../../src/services/memberService");
 const { purchaseIds } = require("../../src/services/idCardService");
 const { checkAndProcessRebirths } = require("../../src/services/rebirthService");
 const { requestWithdrawal, processWithdrawal } = require("../../src/services/withdrawalService");
 const { updateSetting } = require("../../src/services/adminService");
+const walletService = require("../../src/services/walletService");
 
 describe("Integration: Cross-Phase Interactions", () => {
   let superAdmin;
@@ -27,24 +29,7 @@ describe("Integration: Cross-Phase Interactions", () => {
   });
 
   async function cleanDb() {
-    await prisma.auditLog.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.adminUser.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
   }
 
   it("Phase 4 + Phase 5: Rebirth ID commission can be withdrawn", async () => {
@@ -60,7 +45,8 @@ describe("Integration: Cross-Phase Interactions", () => {
       data: {
         memberId: member.id,
         cardNumber: "M10001",
-        type: "MAIN"
+        type: "MAIN",
+        acbStatus: true
       }
     });
 
@@ -73,11 +59,8 @@ describe("Integration: Cross-Phase Interactions", () => {
     });
 
     // Give some wallet balance to the member from Rebirth earnings
-    const wallet = await prisma.wallet.update({
-      where: { memberId: member.id },
-      data: {
-        balancePaise: 100000 // 1000 Rs
-      }
+    await prisma.$transaction(async (tx) => {
+      await walletService.credit(tx, member.id, 100000, "REBIRTH", null, "Rebirth earnings");
     });
 
     // Request withdrawal (Phase 5)
@@ -98,9 +81,8 @@ describe("Integration: Cross-Phase Interactions", () => {
       kycStatus: "VERIFIED"
     });
 
-    await prisma.wallet.update({
-      where: { memberId: member2.id },
-      data: { balancePaise: 2100000 } // 21000 Rs
+    await prisma.$transaction(async (tx) => {
+      await walletService.credit(tx, member2.id, 2100000, "COMMISSION", null, "Initial commission");
     });
 
     // 2. Admin raises TDS rate to 10%
@@ -110,7 +92,8 @@ describe("Integration: Cross-Phase Interactions", () => {
       data: {
         memberId: member2.id,
         cardNumber: "M10002",
-        type: "MAIN"
+        type: "MAIN",
+        acbStatus: true
       }
     });
 

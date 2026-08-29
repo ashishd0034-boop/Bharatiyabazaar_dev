@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const request = require("supertest");
 const app = require("../../src/server");
 const prisma = require("../../src/lib/prisma");
@@ -17,28 +18,7 @@ describe("Task 10B: Admin UI Integration & RBAC Flow Validation", () => {
   let testMember, testVendor;
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.auditLog.deleteMany({});
-    await prisma.adminUser.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
   }
 
   beforeAll(async () => {
@@ -68,6 +48,8 @@ describe("Task 10B: Admin UI Integration & RBAC Flow Validation", () => {
       }
     });
 
+    const walletService = require("../../src/services/walletService");
+
     // 3. Create Member & Vendor for cross-auth & operational testing
     testMember = await prisma.member.create({
       data: {
@@ -77,22 +59,14 @@ describe("Task 10B: Admin UI Integration & RBAC Flow Validation", () => {
         kycStatus: "VERIFIED",
         panNumber: "ABCDE1234F",
         mainWallet: {
-          create: { balancePaise: 50000 }
+          create: { balancePaise: 0 }
         }
       },
       include: { mainWallet: true }
     });
 
-    await prisma.ledgerEntry.create({
-      data: {
-        walletId: testMember.mainWallet.id,
-        type: "CREDIT",
-        source: "MEMBER_WALLET",
-        amountPaise: 50000,
-        balanceAfterPaise: 50000,
-        balanceBeforePaise: 0,
-        description: "Initial member balance"
-      }
+    await prisma.$transaction(async (tx) => {
+      await walletService.credit(tx, testMember.id, 50000, "MEMBER_WALLET", null, "Initial member balance");
     });
 
     const idCard = await prisma.memberIdCard.create({
@@ -250,10 +224,15 @@ describe("Task 10B: Admin UI Integration & RBAC Flow Validation", () => {
   });
 
   it("5. should verify financial reconciliation report with variance === 0 and queue reporting", async () => {
-    // 5A: Financial Wallet vs Ledger reconciliation
-    const resRecon = await request(app)
+    // 5A: Financial Wallet vs Ledger reconciliation (SUPER_ADMIN only)
+    const resForbidden = await request(app)
       .get("/api/admin/reports/reconciliation")
       .set("Authorization", `Bearer ${regularAdminToken}`);
+    expect(resForbidden.status).toBe(403);
+
+    const resRecon = await request(app)
+      .get("/api/admin/reports/reconciliation")
+      .set("Authorization", `Bearer ${superAdminToken}`);
 
     expect(resRecon.status).toBe(200);
     expect(resRecon.body.success).toBe(true);

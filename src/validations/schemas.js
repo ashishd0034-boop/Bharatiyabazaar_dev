@@ -83,6 +83,14 @@ const settingUpdateSchema = z.object({
   })
 });
 
+const adminGeneratePinSchema = z.object({
+  body: z.object({
+    count: z.number().int().min(1, "Count must be at least 1").max(20, "Count cannot exceed 20").optional().default(1),
+    quantity: z.number().int().min(1, "Quantity must be at least 1").max(10, "Quantity cannot exceed 10").optional().default(1),
+    reason: z.string().trim().min(5, "Reason must be at least 5 characters").max(255, "Reason cannot exceed 255 characters")
+  })
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
@@ -91,5 +99,6 @@ module.exports = {
   withdrawalRequestSchema,
   vendorSaleSchema,
   vendorRegisterSchema,
-  settingUpdateSchema
+  settingUpdateSchema,
+  adminGeneratePinSchema
 };

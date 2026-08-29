@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const { processMemberPurchase } = require("../../src/services/vendorService");
 const { calculateCommissionSplits, SYSTEM_COUNTER_ID } = require("../../src/services/setuKoshService");
@@ -10,24 +11,7 @@ describe("Scenario E: Setu Kosh Engine", () => {
   let vendor;
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
   }
 
   async function setupBase() {

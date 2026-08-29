@@ -109,5 +109,20 @@ async function getLedgerHistory(memberId, limit = 50, offset = 0) {
   return wallet.ledgerEntries;
 }
 
-module.exports = { credit, debit, getWalletBalance, getLedgerHistory };
+/**
+ * Adjust wallet balance for authorized administrative adjustments.
+ * deltaPaise > 0 performs an ADMIN_ADJUSTMENT credit.
+ * deltaPaise < 0 performs an ADMIN_ADJUSTMENT debit.
+ */
+async function adjustBalance(tx, memberId, deltaPaise, reason = "Administrative adjustment", referenceId = null) {
+  if (!deltaPaise || deltaPaise === 0) return null;
+
+  if (deltaPaise > 0) {
+    return await credit(tx, memberId, deltaPaise, "ADMIN_ADJUSTMENT", referenceId, reason);
+  } else {
+    return await debit(tx, memberId, Math.abs(deltaPaise), "ADMIN_ADJUSTMENT", referenceId, reason);
+  }
+}
+
+module.exports = { credit, debit, adjustBalance, getWalletBalance, getLedgerHistory };
 

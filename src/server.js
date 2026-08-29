@@ -54,12 +54,33 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter);
 
-// --- NEW: Serve Static Files (Frontend) ---
-// This tells Express to look for HTML/CSS/JS files in the 'public' folder
-app.use(express.static(path.join(__dirname, "../public")));
+// --- Tiered Static Assets & Anti-Stale Caching ---
+app.use(express.static(path.join(__dirname, "../public"), {
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, filePath) => {
+    const ext = path.extname(filePath).toLowerCase();
+    if (ext === ".html") {
+      // HTML documents: NEVER cache in browser memory/disk, force immediate fresh fetch
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+      res.removeHeader("ETag");
+    } else if (ext === ".js" || ext === ".css") {
+      // Scripts and stylesheets: Revalidate with ETag on every request
+      res.setHeader("Cache-Control", "no-cache, must-revalidate, max-age=0");
+    } else if ([".png", ".jpg", ".jpeg", ".svg", ".webp", ".gif", ".woff", ".woff2", ".ttf", ".ico"].includes(ext)) {
+      // Static media: Cache for 24h
+      res.setHeader("Cache-Control", "public, max-age=86400");
+    }
+  }
+}));
 
-// When someone visits the root URL, serve the main canonical landing page
+// When someone visits the root URL, serve the main canonical landing page (uncached)
 app.get("/", (req, res) => {
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   res.sendFile(path.join(__dirname, "../public", "bharatiya-bazaar-v2.html"));
 });
 // -----------------------------------------

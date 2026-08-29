@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const { processWeeklySettlement } = require("../../src/services/settlementService");
 
@@ -114,25 +115,7 @@ describe("Scenario F: Vendor Settlement Engine", () => {
   });
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
   }
 
   it("should process the settlement accurately and update wallets", async () => {

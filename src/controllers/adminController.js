@@ -253,50 +253,69 @@ async function getDashboardStats(req, res, next) {
 }
 
 /**
- * Platform-wide Financial Wallet & Ledger Reconciliation Report
+ * Platform-wide Financial Wallet & Ledger Reconciliation Report (Per-Wallet & System-Wide)
  */
 async function getReconciliationReport(req, res, next) {
   try {
-    const [walletAgg, heldCommissionsAgg, ledgerCredits, ledgerDebits] = await Promise.all([
-      prisma.wallet.aggregate({
-        _sum: { balancePaise: true }
-      }),
-      prisma.commissionEntry.aggregate({
-        where: { status: "HELD" },
-        _sum: { amountPaise: true }
-      }),
-      prisma.ledgerEntry.aggregate({
-        where: { type: "CREDIT" },
-        _sum: { amountPaise: true }
-      }),
-      prisma.ledgerEntry.aggregate({
-        where: { type: "DEBIT" },
-        _sum: { amountPaise: true }
-      })
-    ]);
+    const wallets = await prisma.wallet.findMany({
+      include: {
+        member: { select: { id: true, memberCode: true, name: true } },
+        ledgerEntries: true
+      }
+    });
 
-    const totalWalletsBalancePaise = walletAgg._sum.balancePaise || 0;
-    const totalWalletsOnHoldPaise = heldCommissionsAgg._sum.amountPaise || 0;
-    const totalWalletLiabilitiesPaise = totalWalletsBalancePaise;
+    let totalWalletsBalancePaise = 0;
+    let totalCreditsPaise = 0;
+    let totalDebitsPaise = 0;
+    const divergences = [];
 
-    const totalCreditsPaise = ledgerCredits._sum.amountPaise || 0;
-    const totalDebitsPaise = ledgerDebits._sum.amountPaise || 0;
+    for (const wallet of wallets) {
+      totalWalletsBalancePaise += wallet.balancePaise;
+
+      let credits = 0;
+      let debits = 0;
+      for (const entry of wallet.ledgerEntries) {
+        if (entry.type === "CREDIT") credits += entry.amountPaise;
+        else if (entry.type === "DEBIT") debits += entry.amountPaise;
+      }
+
+      totalCreditsPaise += credits;
+      totalDebitsPaise += debits;
+      const expectedBalance = credits - debits;
+      const delta = wallet.balancePaise - expectedBalance;
+
+      if (delta !== 0) {
+        divergences.push({
+          walletId: wallet.id,
+          memberId: wallet.memberId,
+          memberCode: wallet.member?.memberCode || wallet.memberId,
+          memberName: wallet.member?.name || "N/A",
+          actualBalancePaise: wallet.balancePaise,
+          expectedBalancePaise: expectedBalance,
+          deltaPaise: delta,
+          totalCreditsPaise: credits,
+          totalDebitsPaise: debits
+        });
+      }
+    }
+
     const netLedgerBalancePaise = totalCreditsPaise - totalDebitsPaise;
-
-    const variancePaise = Math.abs(totalWalletLiabilitiesPaise - netLedgerBalancePaise);
-    const isReconciled = variancePaise === 0;
+    const variancePaise = Math.abs(totalWalletsBalancePaise - netLedgerBalancePaise);
+    const isReconciled = variancePaise === 0 && divergences.length === 0;
 
     res.json({
       success: true,
       data: {
+        totalWalletsChecked: wallets.length,
+        totalBalancedWallets: wallets.length - divergences.length,
+        totalDivergentWallets: divergences.length,
         totalWalletsBalancePaise,
-        totalWalletsOnHoldPaise,
-        totalWalletLiabilitiesPaise,
         totalCreditsPaise,
         totalDebitsPaise,
         netLedgerBalancePaise,
         variancePaise,
         isReconciled,
+        divergences,
         generatedAt: new Date().toISOString()
       }
     });
@@ -566,12 +585,33 @@ async function revokePinReq(req, res, next) {
       data: revoked
     });
   } catch (err) {
-    if (err.status === 400 || err.status === 404 || err.code === "BAD_REQUEST" || err.code === "NOT_FOUND") {
-      return res.status(err.status || 400).json({
-        success: false,
-        error: { code: err.code || "BAD_REQUEST", message: err.message }
-      });
-    }
+    next(err);
+  }
+}
+
+/**
+ * Direct Administrative PIN Generation (SUPER_ADMIN only)
+ */
+async function generateAdminPinsReq(req, res, next) {
+  try {
+    const pinService = require("../services/pinService");
+    const { count = 1, quantity = 1, reason } = req.body;
+    const adminId = req.admin.id;
+    const ipAddress = req.ip || req.headers["x-forwarded-for"] || null;
+
+    const result = await pinService.adminGeneratePins(adminId, count, quantity, reason, ipAddress);
+
+    res.status(201).json({
+      success: true,
+      message: `Successfully generated ${result.totalGenerated} admin activation PIN(s).`,
+      data: {
+        pins: result.pins,
+        totalGenerated: result.totalGenerated,
+        issuedByAdmin: req.admin.email,
+        reason: result.reason
+      }
+    });
+  } catch (err) {
     next(err);
   }
 }
@@ -797,6 +837,7 @@ module.exports = {
   updateAdminUserRole,
   listPinsReq,
   revokePinReq,
+  generateAdminPinsReq,
   listMembersReq,
   listVendorsReq,
   broadcastNotificationReq,

@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const { createMember } = require("../../src/services/memberService");
 const { purchaseIds } = require("../../src/services/idCardService");
@@ -46,27 +47,7 @@ describe("Integration: Full Lifecycle", () => {
   });
 
   async function cleanDb() {
-    await prisma.auditLog.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.adminUser.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
   }
 
   it("1. Registration & Onboarding", async () => {
@@ -200,10 +181,10 @@ describe("Integration: Full Lifecycle", () => {
 
   it("5. Withdrawal", async () => {
     // Member A withdraws their Rs 25.
-    // Minimum withdrawal is usually 500, let's manually give them more money to pass validation.
-    await prisma.wallet.update({
-      where: { memberId: memberA.id },
-      data: { balancePaise: 60000 } // Rs 600
+    // Minimum withdrawal is usually 500, credit wallet with funds to pass validation via walletService
+    const walletService = require("../../src/services/walletService");
+    await prisma.$transaction(async (tx) => {
+      await walletService.credit(tx, memberA.id, 60000, "COMMISSION", null, "Initial funds");
     });
 
     const withdrawal = await requestWithdrawal(memberA.id, idCardA.id, "BANK", 50000); // Withdraw 500 Rs

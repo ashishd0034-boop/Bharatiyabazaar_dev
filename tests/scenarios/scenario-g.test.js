@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const { getSetting, updateSetting } = require("../../src/services/adminService");
 const { logAction } = require("../../src/services/auditService");
@@ -33,9 +34,7 @@ describe("Scenario G: Admin Settings & Audit", () => {
   });
 
   async function cleanDb() {
-    await prisma.auditLog.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.adminUser.deleteMany({});
+    await truncateDb(prisma);
   }
 
   it("should allow SUPER_ADMIN to update financial settings and create an audit log", async () => {

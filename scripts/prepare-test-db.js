@@ -55,8 +55,15 @@ async function prepareTestDb() {
     await testDbClient.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
     await testDbClient.query(schemaSql);
     console.log(`✓ Test database "${dbName}" schema synchronized successfully.`);
+
+    // Apply ledger integrity triggers to test DB
+    const fs = require("fs");
+    const triggerSqlPath = path.resolve(__dirname, "../prisma/migrations/20260829104500_ledger_integrity/migration.sql");
+    const triggerSql = fs.readFileSync(triggerSqlPath, "utf-8");
+    await testDbClient.query(triggerSql);
+    console.log(`✓ Test database "${dbName}" ledger integrity triggers applied successfully.`);
   } catch (err) {
-    console.error("❌ Failed to apply schema to test database:", err.message);
+    console.error("❌ Failed to apply schema/triggers to test database:", err.message);
     process.exit(1);
   } finally {
     await testDbClient.end();

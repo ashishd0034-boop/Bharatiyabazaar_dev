@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const request = require("supertest");
 const app = require("../../src/server");
 const prisma = require("../../src/lib/prisma");
@@ -18,29 +19,7 @@ describe("Wave 5: Admin Settings & Audit Engine Full Validation", () => {
   let superAdminToken, adminToken;
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.auditLog.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.adminUser.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
-    adminService.invalidateCache();
+    await truncateDb(prisma);
   }
 
   beforeAll(async () => {
@@ -189,8 +168,9 @@ describe("Wave 5: Admin Settings & Audit Engine Full Validation", () => {
       const mCard = await prisma.memberIdCard.create({
         data: { memberId: member.id, cardNumber: `BB95${unique}`, type: "MAIN", acbStatus: true }
       });
-      await prisma.wallet.create({
-        data: { memberId: member.id, balancePaise: 5000000 } // Rs. 50,000
+      const walletService = require("../../src/services/walletService");
+      await prisma.$transaction(async (tx) => {
+        await walletService.credit(tx, member.id, 5000000, "TOPUP", null, "Test topup");
       });
 
       // 1. Update TDS 194H threshold to Rs. 50,000 (5,000,000 paise) via SUPERADMIN

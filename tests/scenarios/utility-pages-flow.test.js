@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const request = require("supertest");
 const app = require("../../src/server");
 const prisma = require("../../src/lib/prisma");
@@ -15,28 +16,7 @@ describe("Task 10C: Utility Pages & Derived Feed Flow Validation", () => {
   let memberCard, rebirthCard;
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.auditLog.deleteMany({});
-    await prisma.adminUser.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
   }
 
   beforeAll(async () => {
@@ -44,6 +24,8 @@ describe("Task 10C: Utility Pages & Derived Feed Flow Validation", () => {
     await seedSettingsAndSuperAdmin();
 
     const pwHash = await bcrypt.hash("Pass123456", 10);
+
+    const walletService = require("../../src/services/walletService");
 
     // 1. Primary Member
     member = await prisma.member.create({
@@ -55,10 +37,14 @@ describe("Task 10C: Utility Pages & Derived Feed Flow Validation", () => {
         kycStatus: "VERIFIED",
         panNumber: "ABCDE5555F",
         mainWallet: {
-          create: { balancePaise: 100000 } // Rs. 1,000
+          create: { balancePaise: 0 }
         }
       },
       include: { mainWallet: true }
+    });
+
+    await prisma.$transaction(async (tx) => {
+      await walletService.credit(tx, member.id, 100000, "COMMISSION", null, "Initial commission");
     });
 
     memberCard = await prisma.memberIdCard.create({
@@ -80,10 +66,14 @@ describe("Task 10C: Utility Pages & Derived Feed Flow Validation", () => {
         passwordHash: pwHash,
         kycStatus: "PENDING",
         mainWallet: {
-          create: { balancePaise: 20000 }
+          create: { balancePaise: 0 }
         }
       },
       include: { mainWallet: true }
+    });
+
+    await prisma.$transaction(async (tx) => {
+      await walletService.credit(tx, otherMember.id, 20000, "COMMISSION", null, "Initial commission");
     });
 
     // 3. Vendor

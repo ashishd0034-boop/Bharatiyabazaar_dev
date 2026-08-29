@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const request = require("supertest");
 const app = require("../../src/server");
 const prisma = require("../../src/lib/prisma");
@@ -14,25 +15,7 @@ describe("Task 10A: Vendor UI Integration & End-to-End API Flow", () => {
   let registeredVendor, registeredMember;
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
   }
 
   beforeAll(async () => {
@@ -69,6 +52,8 @@ describe("Task 10A: Vendor UI Integration & End-to-End API Flow", () => {
 
     // 2. Create a Buyer Member
     const passwordHash = await bcrypt.hash("Buyer@123", 10);
+    const walletService = require("../../src/services/walletService");
+
     buyerMember = await prisma.member.create({
       data: {
         name: `Buyer ${unique}`,
@@ -78,9 +63,13 @@ describe("Task 10A: Vendor UI Integration & End-to-End API Flow", () => {
         kycStatus: "VERIFIED",
         panNumber: "BUYPA1234F",
         mainWallet: {
-          create: { balancePaise: 500000 }
+          create: { balancePaise: 0 }
         }
       }
+    });
+
+    await prisma.$transaction(async (tx) => {
+      await walletService.credit(tx, buyerMember.id, 500000, "TOPUP", null, "Buyer topup");
     });
 
     buyerCard = await prisma.memberIdCard.create({

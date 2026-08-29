@@ -1,54 +1,45 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const request = require("supertest");
 const app = require("../../src/server");
 const prisma = require("../../src/lib/prisma");
+const walletService = require("../../src/services/walletService");
 
-describe("Regression Guard: Registration Flow with Multiple IDs", () => {
-  let newMemberToken;
+describe("Registration and Additional ID Purchase Flow", () => {
+  const unique = Date.now().toString().slice(-6);
   let newMemberId;
-  const testMobile = "8888" + Date.now().toString().slice(-6);
+  let newMemberToken;
+  const testMobile = "8888" + unique;
 
   beforeAll(async () => {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.vendorReferralBonus.deleteMany({});
-    await prisma.vendorSettlement.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.voucher.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.vendor.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
+    await truncateDb(prisma);
+    const { seedSettingsAndSuperAdmin } = require("../../src/lib/seedSettings");
+    await seedSettingsAndSuperAdmin();
   });
 
   afterAll(async () => {
+    await truncateDb(prisma);
     await prisma.$disconnect();
   });
 
-  it("should register a member and buy exactly 1 MAIN ID initially", async () => {
-    const regRes = await request(app)
+  it("should register a new member with MAIN ID card", async () => {
+    const res = await request(app)
       .post("/api/auth/register")
       .send({
-        name: "Regression Test User",
+        name: "Registration Flow Tester",
         mobile: testMobile,
-        password: "password123"
+        password: "Password123",
+        pinCode: "110001",
+        side: "LEFT"
       });
 
-    expect(regRes.status).toBe(201);
-    expect(regRes.body.success).toBe(true);
-    expect(regRes.body.data.token).toBeDefined();
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.member).toBeDefined();
+    expect(res.body.data.token).toBeDefined();
 
-    newMemberToken = regRes.body.data.token;
-    newMemberId = regRes.body.data.member.id;
+    newMemberId = res.body.data.member.id;
+    newMemberToken = res.body.data.token;
 
-    // Check DB for cards
     const cards = await prisma.memberIdCard.findMany({
       where: { memberId: newMemberId }
     });
@@ -67,10 +58,9 @@ describe("Regression Guard: Registration Flow with Multiple IDs", () => {
     expect(failRes.status).toBe(400);
     expect(failRes.body.success).toBe(false);
 
-    // 2. Fund member wallet
-    await prisma.wallet.update({
-      where: { memberId: newMemberId },
-      data: { balancePaise: 200000 }
+    // 2. Fund member wallet via walletService
+    await prisma.$transaction(async (tx) => {
+      await walletService.credit(tx, newMemberId, 200000, "TEST_DEPOSIT", null, "Test deposit");
     });
 
     // 3. Purchase succeeds with wallet debit

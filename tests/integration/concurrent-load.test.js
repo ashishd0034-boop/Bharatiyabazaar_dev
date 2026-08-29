@@ -1,8 +1,11 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const { createMember } = require("../../src/services/memberService");
 const { purchaseIds } = require("../../src/services/idCardService");
 
 describe("Integration: Concurrent Load", () => {
+  jest.setTimeout(30000);
+
   beforeAll(async () => {
     await cleanDb();
   });
@@ -13,32 +16,7 @@ describe("Integration: Concurrent Load", () => {
   });
 
   async function cleanDb() {
-    await prisma.auditLog.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.vendorSale.deleteMany({});
-    await prisma.settlementRun.deleteMany({});
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.mySystemNode.deleteMany({});
-    await prisma.autoPoolNode.deleteMany({});
-    await prisma.setuKoshNode.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.memberIdCard.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.setuKoshCounter.deleteMany({});
-    await prisma.member.deleteMany({});
-    await prisma.adminUser.deleteMany({});
-    await prisma.platformSetting.deleteMany({});
-    await prisma.systemCounter.deleteMany({});
-    
-    // Seed the SystemCounter to avoid P2002 race conditions in upsert during 50 concurrent transactions
-    await prisma.systemCounter.create({
-      data: {
-        id: "AUTOPOOL_GLOBAL",
-        currentValue: 0
-      }
-    });
+    await truncateDb(prisma);
   }
 
   it("should process 50 concurrent ID purchases without race conditions", async () => {

@@ -1,3 +1,4 @@
+const { truncateDb } = require("../helpers/cleanDb");
 const prisma = require("../../src/lib/prisma");
 const { requestWithdrawal, processWithdrawal } = require("../../src/services/withdrawalService");
 const walletService = require("../../src/services/walletService");
@@ -42,18 +43,7 @@ describe("Scenario D: Withdrawal, Escrow, TDS, and Rejection", () => {
   });
 
   async function cleanDb() {
-    await prisma.ledgerEntry.deleteMany({});
-    await prisma.payOnceLedger.deleteMany({});
-    await prisma.withdrawal.deleteMany({});
-    await prisma.tdsLedger.deleteMany({});
-    await prisma.wallet.deleteMany({});
-    await prisma.commissionEntry.deleteMany({});
-    await prisma.memberIdCard.deleteMany({ 
-      where: { 
-        member: { mobile: { in: [testMobile, "9999999995"] } }
-      } 
-    });
-    await prisma.member.deleteMany({ where: { mobile: { in: [testMobile, "9999999995"] } } });
+    await truncateDb(prisma);
   }
 
   it("should enforce minimum withdrawal limit", async () => {
@@ -267,13 +257,5 @@ describe("Scenario D: Withdrawal, Escrow, TDS, and Rejection", () => {
     // Taxable = 30k - 20k = Rs. 10,000 (1,000,000 paise)
     // TDS = 20% of 1,000,000 = 200,000 paise (Rs. 2,000)
     expect(record.tdsPaise).toBe(200000);
-    
-    // Cleanup
-    await prisma.withdrawal.deleteMany({ where: { memberId: unverifiedMember.id }});
-    await prisma.tdsLedger.deleteMany({ where: { memberId: unverifiedMember.id }});
-    await prisma.ledgerEntry.deleteMany({ where: { wallet: { memberId: unverifiedMember.id }}});
-    await prisma.wallet.deleteMany({ where: { memberId: unverifiedMember.id }});
-    await prisma.memberIdCard.deleteMany({ where: { memberId: unverifiedMember.id }});
-    await prisma.member.delete({ where: { id: unverifiedMember.id }});
   });
 });
