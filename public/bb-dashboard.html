@@ -706,7 +706,7 @@
           <div class="card stat-card highlight">
             <div class="label"><span class="ico">👛</span> Wallet Balance</div>
             <div class="value" id="walletBalance">Rs.0.00</div>
-            <div class="sub">Available for withdrawal</div>
+            <div class="sub" id="walletBalanceSub">Available for withdrawal</div>
           </div>
           <div class="card stat-card">
             <div class="label"><span class="ico">💰</span> Total Earnings</div>
@@ -1001,26 +1001,43 @@
         `Member since ${memberSince.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })} · ${activeCard}${isSub ? ` (owner ${ownerCode})` : ''}`;
 
       // Update stats
-      const balance = wallet?.balancePaise || 0;
-      document.getElementById('walletBalance').textContent = formatINR(balance);
-      document.getElementById('walletBalanceSide').textContent = formatINR(balance);
+      const displayBalance = typeof wallet?.displayBalancePaise === "number"
+        ? wallet.displayBalancePaise
+        : (wallet?.cardEarnings ? wallet.cardEarnings.cardWithdrawablePaise : (wallet?.balancePaise || 0));
+      const unifiedBalance = typeof wallet?.unifiedWalletBalancePaise === "number"
+        ? wallet.unifiedWalletBalancePaise
+        : (wallet?.balancePaise || 0);
 
-      const totalEarnings = wallet?.cardEarnings 
-        ? wallet.cardEarnings.cardTotalPaise 
-        : (commissions?.reduce((sum, c) => sum + c.amountPaise, 0) || 0);
+      document.getElementById('walletBalance').textContent = formatINR(displayBalance);
+      document.getElementById('walletBalanceSide').textContent = formatINR(displayBalance);
+
+      const walletBalanceSub = document.getElementById('walletBalanceSub');
+      if (walletBalanceSub) {
+        if (isSub) {
+          walletBalanceSub.textContent = `${activeCard} slice · ${formatINR(unifiedBalance)} in unified wallet`;
+        } else {
+          walletBalanceSub.textContent = 'Available for withdrawal (unified)';
+        }
+      }
+
+      const totalEarnings = typeof wallet?.displayTotalEarningsPaise === "number"
+        ? wallet.displayTotalEarningsPaise
+        : (wallet?.cardEarnings ? wallet.cardEarnings.cardTotalPaise : (commissions?.reduce((sum, c) => sum + c.amountPaise, 0) || 0));
       document.getElementById('totalEarnings').textContent = formatINR(totalEarnings);
 
-      const heldPaise = wallet?.cardEarnings 
-        ? wallet.cardEarnings.cardOnHoldPaise
-        : (commissions || [])
-            .filter(c => c.status === "PENDING_7_DAY" || c.status === "LOCKED_ACB")
-            .reduce((s, c) => s + c.amountPaise, 0);
+      const heldPaise = typeof wallet?.displayOnHoldPaise === "number"
+        ? wallet.displayOnHoldPaise
+        : (wallet?.cardEarnings 
+            ? wallet.cardEarnings.cardOnHoldPaise
+            : (commissions || [])
+                .filter(c => c.status === "PENDING_7_DAY" || c.status === "LOCKED_ACB")
+                .reduce((s, c) => s + c.amountPaise, 0));
 
       const totalEarningsSub = document.getElementById('totalEarningsSub');
       if (totalEarningsSub) {
-        totalEarningsSub.textContent = wallet?.cardEarnings 
-          ? `On Hold: ${formatINR(heldPaise)} (${wallet.cardEarnings.cardNumber} slice)`
-          : `On Hold: ${formatINR(heldPaise)} (7-day / ACB lock)`;
+        totalEarningsSub.textContent = isSub
+          ? `On Hold: ${formatINR(heldPaise)} (${activeCard} slice)`
+          : `On Hold: ${formatINR(heldPaise)} (all cards)`;
       }
 
       const idCards = profile.idCards || [];

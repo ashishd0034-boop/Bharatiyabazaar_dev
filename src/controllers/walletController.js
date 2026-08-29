@@ -40,8 +40,17 @@ async function getBalance(req, res, next) {
       };
     });
 
+    const unifiedWalletBalancePaise = wallet.balancePaise || 0;
+    const totalAllCardsEarningsPaise = breakdown.reduce((sum, b) => sum + b.totalPaise, 0);
+    const totalAllCardsOnHoldPaise = breakdown.reduce((sum, b) => sum + b.onHoldPaise, 0);
+    const totalWithdrawableFromCardsPaise = breakdown.reduce((sum, b) => sum + b.withdrawablePaise, 0);
+    const memberLevelCreditsPaise = Math.max(0, unifiedWalletBalancePaise - totalWithdrawableFromCardsPaise);
+
     let filteredBreakdown = breakdown;
     let cardEarnings = null;
+    let displayBalancePaise = unifiedWalletBalancePaise;
+    let displayTotalEarningsPaise = totalAllCardsEarningsPaise;
+    let displayOnHoldPaise = totalAllCardsOnHoldPaise;
 
     if (req.loginContext?.isSubCard) {
       const active = breakdown.find(b => b.cardNumber === req.loginContext.loginCardNumber) || breakdown[0];
@@ -54,12 +63,21 @@ async function getBalance(req, res, next) {
         cardNumber: active.cardNumber,
         cardType: active.cardType
       } : null;
+
+      displayBalancePaise = active ? active.withdrawablePaise : 0;
+      displayTotalEarningsPaise = active ? active.totalPaise : 0;
+      displayOnHoldPaise = active ? active.onHoldPaise : 0;
     }
 
     res.json({
       success: true,
       data: {
         ...wallet,
+        displayBalancePaise,
+        displayTotalEarningsPaise,
+        displayOnHoldPaise,
+        unifiedWalletBalancePaise,
+        memberLevelCreditsPaise,
         loginContext: req.loginContext,
         cardEarnings,
         breakdown: filteredBreakdown
