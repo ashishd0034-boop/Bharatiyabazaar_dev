@@ -2,18 +2,25 @@ const { recordPurchase, getMemberCounter, getSetuKoshTree } = require("../servic
 
 async function purchase(req, res, next) {
   try {
-    const { vendorId, amountPaise, memberId, idCardId, idempotencyKey } = req.body;
-    // Buyer can be passed explicitly (e.g. if vendor initiates) or defaulted to authenticated member
-    const targetMemberId = memberId || req.member.id;
+    const { amountPaise, memberId, buyerCode, cardNumber, memberCode, idCardId, idempotencyKey } = req.body;
+    const vendor = req.vendor;
 
-    if (!vendorId || !amountPaise || parseInt(amountPaise) <= 0) {
-      return res.status(400).json({
+    if (!vendor) {
+      return res.status(401).json({
         success: false,
-        error: { code: "BAD_REQUEST", message: "vendorId and positive amountPaise are required" }
+        error: { code: "UNAUTHORIZED", message: "Vendor authentication required" }
       });
     }
 
-    const result = await recordPurchase(targetMemberId, vendorId, parseInt(amountPaise), {
+    const targetMemberId = memberId;
+    if (!targetMemberId || !amountPaise || parseInt(amountPaise) <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: { code: "BAD_REQUEST", message: "Valid memberId and positive amountPaise are required" }
+      });
+    }
+
+    const result = await recordPurchase(targetMemberId, vendor.id, parseInt(amountPaise), {
       idCardId,
       idempotencyKey: idempotencyKey || req.headers["x-idempotency-key"] || null
     });

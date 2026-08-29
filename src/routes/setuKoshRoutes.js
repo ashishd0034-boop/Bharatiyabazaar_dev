@@ -1,13 +1,15 @@
 const express = require("express");
 const setuKoshController = require("../controllers/setuKoshController");
 const authMiddleware = require("../middleware/authMiddleware");
+const vendorAuthMiddleware = require("../middleware/vendorAuthMiddleware");
 
 const router = express.Router();
 
-router.use(authMiddleware);
+// Restrict purchase recording strictly to authenticated vendors
+router.post("/purchase", vendorAuthMiddleware, setuKoshController.purchase);
 
-router.post("/purchase", setuKoshController.purchase);
-router.get("/counter", setuKoshController.getCounter);
-router.get("/tree", setuKoshController.getTree);
+// Member endpoints
+router.get("/counter", authMiddleware, setuKoshController.getCounter);
+router.get("/tree", authMiddleware, setuKoshController.getTree);
 
 module.exports = router;

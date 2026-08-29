@@ -34,8 +34,18 @@ router.post("/purchase", authMiddleware, async (req, res, next) => {
   }
 });
 
-// POST /api/pins/validate (Public / Member auth)
-router.post("/validate", async (req, res, next) => {
+const rateLimit = require("express-rate-limit");
+
+const pinValidateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many PIN validation attempts, please try again later." } }
+});
+
+// POST /api/pins/validate (Member auth + rate limited)
+router.post("/validate", pinValidateLimiter, authMiddleware, async (req, res, next) => {
   try {
     const { pinCode } = req.body;
     const pin = await pinService.validatePin(pinCode);

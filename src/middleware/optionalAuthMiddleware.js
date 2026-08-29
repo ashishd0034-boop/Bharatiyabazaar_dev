@@ -1,7 +1,10 @@
 const jwt = require("jsonwebtoken");
 const prisma = require("../lib/prisma");
 
-const JWT_SECRET = process.env.JWT_SECRET || "default_jwt_secret";
+if (!process.env.JWT_SECRET) {
+  throw new Error("FATAL ERROR: JWT_SECRET is not defined.");
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /**
  * Optional Authentication Middleware.
@@ -19,7 +22,7 @@ async function optionalAuthMiddleware(req, res, next) {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
 
     // Cross-auth protection: Reject VENDOR or ADMIN tokens when authenticating as member
     if (decoded.type === "VENDOR" || decoded.type === "ADMIN") {

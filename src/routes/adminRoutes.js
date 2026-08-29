@@ -4,11 +4,21 @@ const adminAuthMiddleware = require("../middleware/adminAuthMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const schemas = require("../validations/schemas");
 
+const rateLimit = require("express-rate-limit");
+
 const router = express.Router();
 const authController = require("../controllers/authController");
 
-// Public admin login endpoint
-router.post("/login", validate(schemas.adminLoginSchema), authController.adminLogin);
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === "test" ? 100 : 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many admin login attempts, please try again later." } }
+});
+
+// Public admin login endpoint (strictly rate limited)
+router.post("/login", adminLoginLimiter, validate(schemas.adminLoginSchema), authController.adminLogin);
 
 // Dashboard Summary (ADMIN & SUPER_ADMIN)
 router.get("/dashboard-stats", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.getDashboardStats);

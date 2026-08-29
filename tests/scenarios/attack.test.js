@@ -49,6 +49,12 @@ describe("Security: IDOR Prevention on /api/id-cards/purchase", () => {
       });
     attackerId = attackerRes.body.data.member.id;
     attackerToken = attackerRes.body.data.token;
+
+    // Fund attacker wallet for authorized purchase test
+    await prisma.wallet.update({
+      where: { memberId: attackerId },
+      data: { balancePaise: 200000 }
+    });
   });
 
   afterAll(async () => {

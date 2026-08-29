@@ -11,6 +11,12 @@ async function getProfile(req, res, next) {
       }
     });
 
+    if (!member) {
+      return res.status(404).json({ success: false, error: { code: "NOT_FOUND", message: "Member not found" } });
+    }
+
+    delete member.passwordHash;
+
     const activeCard = member.idCards.find(c => c.cardNumber === req.loginContext?.loginCardNumber) || 
                        member.idCards.find(c => c.type === "MAIN") || 
                        member.idCards[0];

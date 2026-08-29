@@ -1,6 +1,9 @@
 const jwt = require("jsonwebtoken");
 const prisma = require("../lib/prisma");
 
+if (!process.env.JWT_SECRET) {
+  throw new Error("FATAL ERROR: JWT_SECRET is not defined.");
+}
 const JWT_SECRET = process.env.JWT_SECRET;
 
 async function authMiddleware(req, res, next) {
@@ -12,13 +15,13 @@ async function authMiddleware(req, res, next) {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
     
-    // Cross-auth protection: Reject VENDOR tokens on member endpoints
-    if (decoded.type === "VENDOR") {
+    // Cross-auth protection: Reject VENDOR and ADMIN tokens on member endpoints
+    if (decoded.type === "VENDOR" || decoded.type === "ADMIN") {
       return res.status(401).json({
         success: false,
-        error: { code: "UNAUTHORIZED", message: "Vendor tokens cannot access member endpoints" }
+        error: { code: "UNAUTHORIZED", message: "Invalid token type: Member authentication required" }
       });
     }
 

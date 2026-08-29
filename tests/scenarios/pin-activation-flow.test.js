@@ -216,6 +216,7 @@ describe("Task 11: PIN-Based ID Activation System & Safeguards", () => {
     it("should validate an existing available PIN", async () => {
       const res = await request(app)
         .post("/api/pins/validate")
+        .set("Authorization", `Bearer ${sponsorToken}`)
         .send({ pinCode: testPinCode });
 
       expect(res.status).toBe(200);
@@ -228,6 +229,7 @@ describe("Task 11: PIN-Based ID Activation System & Safeguards", () => {
     it("should return 400 for a non-existent PIN", async () => {
       const res = await request(app)
         .post("/api/pins/validate")
+        .set("Authorization", `Bearer ${sponsorToken}`)
         .send({ pinCode: "PIN-NONEXISTENT" });
 
       expect(res.status).toBe(400);

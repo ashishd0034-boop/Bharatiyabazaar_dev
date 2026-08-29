@@ -258,8 +258,7 @@ async function adminLogin(req, res, next) {
     }
 
     const validPassword = await bcrypt.compare(password, admin.passwordHash);
-    if (!validPassword && password !== admin.passwordHash) {
-      // Temporary fallback for seeded unhashed passwords like "hashed_password"
+    if (!validPassword) {
       return res.status(401).json({ success: false, error: { code: "UNAUTHORIZED", message: "Invalid credentials" } });
     }
 

@@ -6,15 +6,17 @@ const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
 
-const authLimiter = rateLimit({
+const strictAuthLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit each IP to 10 requests per windowMs
-  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many login attempts" } }
+  max: process.env.NODE_ENV === "test" ? 100 : 5, // Strict 5 in prod/dev; permits test suite runs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many attempts, please try again later." } }
 });
 
-router.get("/validate-referral", authController.validateReferral); // Add this line
-router.post("/register", validate(schemas.registerSchema), authController.register);
-router.post("/login", authLimiter, validate(schemas.loginSchema), authController.login);
-router.post("/admin/login", authLimiter, validate(schemas.adminLoginSchema), authController.adminLogin);
+router.get("/validate-referral", authController.validateReferral);
+router.post("/register", strictAuthLimiter, validate(schemas.registerSchema), authController.register);
+router.post("/login", strictAuthLimiter, validate(schemas.loginSchema), authController.login);
+router.post("/admin/login", strictAuthLimiter, validate(schemas.adminLoginSchema), authController.adminLogin);
 
 module.exports = router;

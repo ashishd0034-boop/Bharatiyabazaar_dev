@@ -1,7 +1,10 @@
 const jwt = require("jsonwebtoken");
 const prisma = require("../lib/prisma");
 
-const JWT_SECRET = process.env.JWT_SECRET || "default_jwt_secret";
+if (!process.env.JWT_SECRET) {
+  throw new Error("FATAL ERROR: JWT_SECRET is not defined.");
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /**
  * Dedicated Admin Authentication Middleware.
@@ -20,7 +23,7 @@ function requireAdmin(roles = ["ADMIN", "SUPER_ADMIN"]) {
     const token = authHeader.split(" ")[1];
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
 
       // Strict token type assertion: Must be an ADMIN token
       if (decoded.type !== "ADMIN") {

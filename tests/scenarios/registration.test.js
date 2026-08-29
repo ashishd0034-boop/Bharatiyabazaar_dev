@@ -57,7 +57,23 @@ describe("Regression Guard: Registration Flow with Multiple IDs", () => {
     expect(cards[0].type).toBe("MAIN");
   });
 
-  it("should allow purchasing 2 additional IDs using the new token via /purchase-additional", async () => {
+  it("should reject purchasing additional IDs without wallet funds/PIN, then allow with wallet balance", async () => {
+    // 1. Verify blocked without funds
+    const failRes = await request(app)
+      .post("/api/id-cards/purchase-additional")
+      .set("Authorization", `Bearer ${newMemberToken}`)
+      .send({ count: 2 });
+
+    expect(failRes.status).toBe(400);
+    expect(failRes.body.success).toBe(false);
+
+    // 2. Fund member wallet
+    await prisma.wallet.update({
+      where: { memberId: newMemberId },
+      data: { balancePaise: 200000 }
+    });
+
+    // 3. Purchase succeeds with wallet debit
     const subRes = await request(app)
       .post("/api/id-cards/purchase-additional")
       .set("Authorization", `Bearer ${newMemberToken}`)

@@ -4,7 +4,10 @@ const prisma = require("../lib/prisma");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "default_jwt_secret";
+if (!process.env.JWT_SECRET) {
+  throw new Error("FATAL ERROR: JWT_SECRET is not defined.");
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /**
  * Register a new vendor with category margin, referral binding, and security deposit.
@@ -88,7 +91,7 @@ async function register(req, res, next) {
       });
     }
 
-    // 3. Register Vendor via Service
+    // 3. Register Vendor via Service (derive margin strictly server-side)
     const vendor = await registerVendor({
       memberId: member.id,
       businessName: businessName.trim(),
@@ -148,7 +151,7 @@ async function login(req, res, next) {
     }
 
     const validPassword = await bcrypt.compare(password, member.passwordHash);
-    if (!validPassword && password !== member.passwordHash) {
+    if (!validPassword) {
       return res.status(401).json({
         success: false,
         error: { code: "UNAUTHORIZED", message: "Invalid credentials" }
