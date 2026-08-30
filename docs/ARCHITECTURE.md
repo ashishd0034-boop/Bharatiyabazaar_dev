@@ -67,7 +67,13 @@ src/
 │   │   ├── wallet.controller.js         # Balance, Summary & Ledger Handlers
 │   │   └── wallet.routes.js             # Wallet Routes (/api/wallet/*, /api/wallets/*)
 │   │
-│   └── [FUTURE SLICES: vendor, withdrawal, setu-kosh, admin]
+│   ├── withdrawal/                      # Member Withdrawals & Admin Approval Slice
+│   │   ├── withdrawal.schemas.js        # Request & Action Validation Schemas
+│   │   ├── withdrawal.service.js        # Step 0-3 TDS & Admin Deductions, Escrow Locking
+│   │   ├── withdrawal.controller.js     # Request, Complete, Reject, History Handlers
+│   │   └── withdrawal.routes.js         # Withdrawal Routes (/api/withdrawals/*)
+│   │
+│   └── [FUTURE SLICES: vendor, setu-kosh, admin]
 │
 ├── jobs/                                # Scheduled CRON Tasks (e.g. 7-day holds, hourly sweep)
 └── server.js                            # Express Application Bootstrap & Route Mounting
@@ -81,8 +87,8 @@ src/
    - `src/modules/*` may import from `src/core/*`.
    - `src/core/*` **NEVER** imports from `src/modules/*`.
 2. **Strict Module Isolation (Import Rule)**:
-   - Domain modules must **NOT** import directly from sibling domain modules (e.g., `src/modules/pin/` and `src/modules/wallet/` import only from `src/core/`).
-   - Cross-domain interactions are mediated via shared core services (e.g., `wallet.service.js`, `ledger.service.js`, `acb.service.js`).
+   - Domain modules must **NOT** import directly from sibling domain modules.
+   - Cross-domain interactions are mediated via shared core services (e.g., `wallet.service.js`, `ledger.service.js`, `tds.service.js`, `acb.service.js`).
 3. **Core Placement Lock**:
    - `commission.service.js` and `acb.service.js` are locked to `src/core/services/` to prevent circular cross-module dependencies.
 
@@ -90,17 +96,16 @@ src/
 
 ## 3. Mathematical & Business Domain Invariants
 
-### 3.1 Prepaid Activation PIN Lifecycle & Auth Boundaries
-- **Public vs. Member Authentication**:
-  - `POST /api/auth/verify-pin`: Public unauthenticated validation during registration flow.
-  - `POST /api/pins/validate`: JWT-authenticated member verification with strict rate limiting.
-  - `POST /api/pins/purchase`: Member-level wallet debit and PIN creation.
-  - Admin batch PIN generation remains an administrative privilege in `system-settings.service.js`.
-
-### 3.2 Dual Balance Accounting & Ledger Immutability
-- **Ledger Invariant**: Sum of all member + vendor + company wallet balances strictly equals the net sum of all `LedgerEntry` records:
-  $$\sum \text{Wallet Balance} = \sum \text{Ledger Credits} - \sum \text{Ledger Debits}$$
-- **Atomic Operations**: All financial credits, debits, and lock transactions run within PostgreSQL `$transaction` blocks with explicit timeout boundaries.
+### 3.1 Withdrawal Step 0-3 Execution Model & Escrow
+- **Locking & Eligibility**:
+  - Initiations locked strictly to MAIN ID card with `acbStatus = true`.
+  - Row locking: `SELECT * FROM wallets WHERE "memberId" = ... FOR UPDATE`.
+- **Step 0**: 194R Voucher Tax Liability recovery deduction.
+- **Step 1**: 194H TDS calculation (Section 194H threshold & PAN-based rate).
+- **Step 2**: Admin Fee deduction on post-TDS amount (10% Bank/UPI, 5% Wallet).
+- **Step 3**: Net Payable credit.
+- **Accounting Assertion**:
+  $$\text{Gross Amount} = \text{Recovered 194R} + \text{TDS 194H} + \text{Admin Fee} + \text{Net Payout}$$
 
 ---
 
@@ -112,6 +117,7 @@ src/
 | **Phase 2** | `my-system`, `idCardService` | - Created `src/modules/my-system/`<br>- Isolated `findSpillSlot`, `nextSlot`, `placeInMySystem`<br>- Extracted `getGenealogyTree`, `getMyPlacement`, `getDirectReferralCounts`<br>- Delegated `idCardService.purchaseIds` placement hooks to `mySystemService`<br>- Preserved `idCardService` export surface | **0 differences** (87/87 routes matching) | 28 / 28 Suites Passed<br>140 / 140 Tests Passed<br>Live Smoke: 100% Green |
 | **Phase 3** | `autopool`, `rebirth` | - Created `src/modules/autopool/`<br>- Isolated `getAutoPoolTreeAndStats` & `getSparseTreeExplorer`<br>- Extracted `rebirth.service.js` with nearest-ancestor priority queue<br>- Preserved `src/services/rebirthService.js` export surface | **0 differences** (87/87 routes matching) | 28 / 28 Suites Passed<br>140 / 140 Tests Passed<br>Live Smoke: 100% Green |
 | **Phase 4** | `pin`, `wallet` | - Created `src/modules/pin/` (member purchase, validate, my-pins)<br>- Created `src/modules/wallet/` (balance, ledger, commissions)<br>- Preserved auth boundaries (POST /api/pins/validate stays member JWT-authenticated)<br>- Preserved `src/services/pinService.js` and `src/controllers/walletController.js` export surfaces | **0 differences** (87/87 routes matching) | 28 / 28 Suites Passed<br>140 / 140 Tests Passed<br>Live Smoke: 100% Green |
+| **Phase 5** | `withdrawal` | - Created `src/modules/withdrawal/` (request, complete, reject, history, preview)<br>- Step 0-3 calculation, escrow management, and ACB MAIN lock isolated<br>- Preserved `src/services/withdrawalService.js` and `src/controllers/withdrawalController.js` export surfaces | **0 differences** (87/87 routes matching) | 28 / 28 Suites Passed<br>140 / 140 Tests Passed<br>Live Smoke: 100% Green |
 
 ---
 

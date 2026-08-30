@@ -2,16 +2,7 @@ const { z } = require("zod");
 const { registerSchema, loginSchema, adminLoginSchema, verifyPinSchema } = require("../modules/auth/auth.schemas");
 const { kycSchema } = require("../modules/member/member.schemas");
 const { purchasePinSchema, validatePinSchema } = require("../modules/pin/pin.schemas");
-
-const withdrawalRequestSchema = z.object({
-  body: z.object({
-    idCardId: z.string().optional(),
-    method: z.enum(["BANK", "UPI", "WALLET", "MEMBER_WALLET", "VOUCHER_CONVERSION"]).optional(),
-    amountPaise: z.number().positive("Amount must be positive"),
-    paymentDetails: z.any().optional(),
-    idempotencyKey: z.string().optional()
-  })
-});
+const { withdrawalRequestSchema } = require("../modules/withdrawal/withdrawal.schemas");
 
 const vendorSaleSchema = z.object({
   body: z.object({

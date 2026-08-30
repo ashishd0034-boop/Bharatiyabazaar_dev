@@ -15,7 +15,7 @@ if (!process.env.JWT_SECRET) {
 const authRoutes = require("./modules/auth/auth.routes");
 const memberRoutes = require("./modules/member/member.routes");
 const walletRoutes = require("./modules/wallet/wallet.routes");
-const withdrawalRoutes = require("./routes/withdrawalRoutes");
+const withdrawalRoutes = require("./modules/withdrawal/withdrawal.routes");
 const vendorRoutes = require("./routes/vendorRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const setuKoshRoutes = require("./routes/setuKoshRoutes");
