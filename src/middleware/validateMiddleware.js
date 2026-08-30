@@ -1,16 +1,4 @@
-function validate(schema) {
-  return (req, res, next) => {
-    try {
-      schema.parse({
-        body: req.body,
-        query: req.query,
-        params: req.params
-      });
-      next();
-    } catch (err) {
-      next(err); // Pass to errorMiddleware
-    }
-  };
-}
+// Backwards-compatibility shim: Re-exports validate middleware from src/core/middleware/validate.middleware.js
+const validate = require("../core/middleware/validate.middleware");
 
 module.exports = validate;

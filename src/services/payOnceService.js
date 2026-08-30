@@ -1,28 +1,4 @@
-const prisma = require("../lib/prisma");
+// Backwards-compatibility shim: Re-exports from src/core/services/pay-once.service.js
+const payOnceService = require("../core/services/pay-once.service");
 
-async function hasAlreadyPaid(tx, idCardId, level) {
-  const record = await tx.payOnceLedger.findUnique({
-    where: {
-      idCardId_level: {
-        idCardId,
-        level
-      }
-    }
-  });
-  return !!record;
-}
-
-async function recordPayment(tx, idCardId, level, paidVia) {
-  return await tx.payOnceLedger.create({
-    data: {
-      idCardId,
-      level,
-      paidVia
-    }
-  });
-}
-
-module.exports = {
-  hasAlreadyPaid,
-  recordPayment
-};
+module.exports = payOnceService;

@@ -12,20 +12,20 @@ if (!process.env.JWT_SECRET) {
 }
 
 // Route imports
-const authRoutes = require("./routes/authRoutes");
-const memberRoutes = require("./routes/memberRoutes");
-const walletRoutes = require("./routes/walletRoutes");
+const authRoutes = require("./modules/auth/auth.routes");
+const memberRoutes = require("./modules/member/member.routes");
+const walletRoutes = require("./modules/wallet/wallet.routes");
 const withdrawalRoutes = require("./routes/withdrawalRoutes");
 const vendorRoutes = require("./routes/vendorRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const setuKoshRoutes = require("./routes/setuKoshRoutes");
 const healthRoutes = require("./routes/healthRoutes");
 const idCardRoutes = require("./routes/idCardRoutes"); // Legacy from before, keeping it
-const pinRoutes = require("./routes/pinRoutes");
+const pinRoutes = require("./modules/pin/pin.routes");
 
 // Middleware
-const errorHandler = require("./middleware/errorMiddleware");
-const auth = require("./middleware/authMiddleware");
+const errorHandler = require("./core/middleware/error.middleware");
+const auth = require("./core/middleware/auth.middleware");
 
 const app = express();
 

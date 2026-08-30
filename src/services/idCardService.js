@@ -1,8 +1,9 @@
-const prisma = require("../lib/prisma");
-const commissionService = require("./commissionService");
-const acbService = require("./acbService");
+const prisma = require("../core/database/prisma");
+const commissionService = require("../core/services/commission.service");
+const acbService = require("../core/services/acb.service");
 const rebirthService = require("./rebirthService");
-const adminService = require("./adminService");
+const adminService = require("../core/services/system-settings.service");
+const { placeInMySystem } = require("../modules/my-system/my-system.service");
 
 async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide = null, externalTx = null) {
   const db = externalTx || prisma;
@@ -146,77 +147,6 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
   }
 
   return newCards;
-}
-
-async function findSpillSlot(tx, sponsorNodeId, preferredSide) {
-  let currentId = sponsorNodeId;
-  while (true) {
-    const child = await tx.mySystemNode.findFirst({ where: { parentNodeId: currentId, side: preferredSide } });
-    if (!child) return { parentNodeId: currentId, side: preferredSide };
-    currentId = child.id;
-  }
-}
-
-function nextSlot(childrenMap, rootId) {
-  const q = [rootId];
-  while (q.length > 0) {
-    const cur = q.shift();
-    const kids = childrenMap[cur] || [];
-    if (!kids.some(k => k.side === "LEFT")) return { parentNodeId: cur, side: "LEFT" };
-    if (!kids.some(k => k.side === "RIGHT")) return { parentNodeId: cur, side: "RIGHT" };
-    for (const k of kids) q.push(k.id);
-  }
-  throw new Error("No available position found in MY SYSTEM tree");
-}
-
-async function placeInMySystem(tx, idCard, memberId, type, sponsorIdCardId, sponsorSide, bulkMode, bulkRootNodeId, childrenMap, nodeCardMap) {
-  if (idCard.type === "REBIRTH") return null;
-
-  if (type === "MAIN") {
-    if (sponsorIdCardId && sponsorSide) {
-      const sponsorNode = await tx.mySystemNode.findUnique({ where: { idCardId: sponsorIdCardId } });
-      if (sponsorNode) {
-        const slot = await findSpillSlot(tx, sponsorNode.id, sponsorSide);
-        const node = await tx.mySystemNode.create({ data: { idCardId: idCard.id, parentNodeId: slot.parentNodeId, side: slot.side, placementType: "SPONSOR", sponsorIdCardId } });
-        if (!childrenMap[slot.parentNodeId]) childrenMap[slot.parentNodeId] = [];
-        childrenMap[slot.parentNodeId].push({ id: node.id, side: slot.side });
-        nodeCardMap[node.id] = idCard.id;
-        return node;
-      }
-    }
-    const node = await tx.mySystemNode.create({ data: { idCardId: idCard.id, parentNodeId: null, side: null, placementType: "ROOT", sponsorIdCardId: null } });
-    nodeCardMap[node.id] = idCard.id;
-    return node;
-  }
-
-  // SUB ID
-  let rootNodeId = bulkRootNodeId;
-  if (!rootNodeId) {
-    const mainCard = await tx.memberIdCard.findFirst({ where: { memberId, type: "MAIN" } });
-    if (!mainCard) throw new Error("MAIN ID not found for SUB placement");
-    let mn = null;
-    for (const nid of Object.keys(nodeCardMap)) { if (nodeCardMap[nid] === mainCard.id) { mn = nid; break; } }
-    if (!mn) {
-      const dbn = await tx.mySystemNode.findFirst({ where: { idCardId: mainCard.id } });
-      if (!dbn) throw new Error("MAIN ID MY SYSTEM node not found. Run Nuke script.");
-      mn = dbn.id;
-    }
-    rootNodeId = mn;
-  }
-
-  const position = nextSlot(childrenMap, rootNodeId);
-  const sponsorCardId = nodeCardMap[position.parentNodeId] || null;
-
-  const node = await tx.mySystemNode.create({
-    data: { idCardId: idCard.id, parentNodeId: position.parentNodeId, side: position.side, placementType: "AUTO", sponsorIdCardId: sponsorCardId }
-  });
-
-  // Update pure-JS tree state instantly (no DB read-back)
-  if (!childrenMap[position.parentNodeId]) childrenMap[position.parentNodeId] = [];
-  childrenMap[position.parentNodeId].push({ id: node.id, side: position.side });
-  nodeCardMap[node.id] = idCard.id;
-
-  return node;
 }
 
 module.exports = { purchaseIds };

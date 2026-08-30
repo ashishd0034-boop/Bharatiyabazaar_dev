@@ -1,17 +1,4 @@
-async function createEntry(tx, { walletId, type, amountPaise, balanceBeforePaise, balanceAfterPaise, source, referenceId, description }) {
-  // Ledger immutability rule: strictly append-only.
-  return await tx.ledgerEntry.create({
-    data: {
-      walletId,
-      type,
-      amountPaise,
-      balanceBeforePaise,
-      balanceAfterPaise,
-      source,
-      referenceId,
-      description
-    }
-  });
-}
+// Backwards-compatibility shim: Re-exports from src/core/services/ledger.service.js
+const ledgerService = require("../core/services/ledger.service");
 
-module.exports = { createEntry };
+module.exports = ledgerService;

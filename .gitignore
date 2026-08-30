@@ -17,6 +17,9 @@ coverage/
 dist/
 /generated/prisma
 
+# Scratch & temporary artifacts
+scratch/
+
 # OS files
 .DS_Store
 */.DS_Store
