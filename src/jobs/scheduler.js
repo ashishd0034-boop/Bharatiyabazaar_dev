@@ -22,11 +22,9 @@ async function run7DaySweep() {
       const current = await tx.commissionEntry.findUnique({ where: { id: commission.id } });
       if (current.status !== "PENDING_7_DAY") return;
 
-      // Check if beneficiary ID card or owner's MAIN card has ACB satisfied
-      const ownerMainCard = await tx.memberIdCard.findFirst({
-        where: { memberId: commission.idCard.memberId, type: "MAIN" }
-      });
-      const hasAcb = Boolean(ownerMainCard?.acbStatus || commission.idCard?.acbStatus);
+      // Check if beneficiary ID card has ACB satisfied (REBIRTH is ACB-exempt; MAIN/SUB require own ACB)
+      const isRebirth = commission.idCard.type === "REBIRTH";
+      const hasAcb = isRebirth ? true : Boolean(commission.idCard.acbStatus);
 
       if (hasAcb) {
         await tx.commissionEntry.update({
@@ -50,7 +48,7 @@ async function run7DaySweep() {
 async function runAcbSweep() {
   let processed = 0;
   const cards = await prisma.memberIdCard.findMany({
-    where: { acbStatus: false },
+    where: { type: { in: ["MAIN", "SUB"] }, acbStatus: false },
     include: { sponsoredNodes: true }
   });
 

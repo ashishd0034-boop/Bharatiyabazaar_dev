@@ -1033,11 +1033,17 @@
                 .filter(c => c.status === "PENDING_7_DAY" || c.status === "LOCKED_ACB")
                 .reduce((s, c) => s + c.amountPaise, 0));
 
+      const activeCardObj = profile.activeCard || (wallet?.cardEarnings ? { type: wallet.cardEarnings.cardType, acbStatus: wallet.cardEarnings.acbStatus } : null);
+      const isRebirthActive = activeCardObj?.type === "REBIRTH" || (activeCard && activeCard.startsWith("RB"));
+      const activeAcbText = isRebirthActive
+        ? "ACB not required"
+        : (activeCardObj?.acbStatus ? "ACB ✓" : "ACB Pending");
+
       const totalEarningsSub = document.getElementById('totalEarningsSub');
       if (totalEarningsSub) {
         totalEarningsSub.textContent = isSub
-          ? `On Hold: ${formatINR(heldPaise)} (${activeCard} slice) · Releases after 7-day maturity (ACB ✓)`
-          : `On Hold: ${formatINR(heldPaise)} · Releases after 7-day maturity (ACB ✓)`;
+          ? `On Hold: ${formatINR(heldPaise)} (${activeCard} slice) · Releases after 7-day maturity (${activeAcbText})`
+          : `On Hold: ${formatINR(heldPaise)} · Releases after 7-day maturity (${activeAcbText})`;
       }
 
       const idCards = profile.idCards || [];
@@ -1078,7 +1084,11 @@
           if (c.status === "PENDING_7_DAY") {
             const releaseDate = new Date(new Date(c.createdAt).getTime() + 7 * 24 * 60 * 60 * 1000);
             const daysRemaining = Math.max(0, Math.ceil((releaseDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
-            releaseNotice = `<div style="font-size:10.5px; opacity:0.75; margin-top:2px;">Releases in ${daysRemaining}d (${formatDate(releaseDate)}) · ACB ✓</div>`;
+            const isRebirthComm = c.cardType === "REBIRTH" || (c.cardNumber && c.cardNumber.startsWith("RB"));
+            const acbTag = isRebirthComm
+              ? "ACB not required"
+              : (c.cardAcbStatus ? "ACB ✓" : "Awaiting ACB");
+            releaseNotice = `<div style="font-size:10.5px; opacity:0.75; margin-top:2px;">Releases in ${daysRemaining}d (${formatDate(releaseDate)}) · ${acbTag}</div>`;
           }
 
           return `
@@ -1099,6 +1109,10 @@
       if (breakdown.length > 0) {
         idCardsList.innerHTML = breakdown.map(card => {
           const isCurrent = card.isCurrentLogin ? ' <span class="badge" style="background:#3b82f6; color:#fff; font-size:10px; padding:2px 6px;">Current Login</span>' : '';
+          const isRebirthCard = card.cardType === "REBIRTH" || (card.cardNumber && card.cardNumber.startsWith("RB"));
+          const acbBadge = isRebirthCard
+            ? `<span class="badge" style="background:rgba(255,255,255,0.08); color:var(--text-muted);">ACB not required</span>`
+            : `<span class="badge ${card.acbStatus ? 'success' : 'pending'}">${card.acbStatus ? 'ACB' : 'Pending'}</span>`;
           return `
             <div class="wallet-row" style="${card.isCurrentLogin ? 'border-left: 3px solid #3b82f6; padding-left: 8px; background:rgba(59,130,246,0.04);' : ''}">
               <div>
@@ -1106,9 +1120,7 @@
                 <div class="desc">${card.cardType} · Total: ${formatINR(card.totalPaise)} (Hold: ${formatINR(card.onHoldPaise)})</div>
               </div>
               <div class="amt" style="text-align:right;">
-                <span class="badge ${card.acbStatus ? 'success' : 'pending'}">
-                  ${card.acbStatus ? 'ACB' : 'Pending'}
-                </span>
+                ${acbBadge}
                 <div style="font-size:12px; color:var(--teal); font-weight:600; margin-top:2px;">
                   +${formatINR(card.withdrawablePaise)}
                 </div>
@@ -1117,19 +1129,23 @@
           `;
         }).join('');
       } else if (idCards.length > 0) {
-        idCardsList.innerHTML = idCards.map(card => `
-          <div class="wallet-row">
-            <div>
-              <div class="name">${card.cardNumber}</div>
-              <div class="desc">${card.type} · ${card.status}</div>
+        idCardsList.innerHTML = idCards.map(card => {
+          const isRebirthCard = card.type === "REBIRTH" || (card.cardNumber && card.cardNumber.startsWith("RB"));
+          const acbBadge = isRebirthCard
+            ? `<span class="badge" style="background:rgba(255,255,255,0.08); color:var(--text-muted);">ACB not required</span>`
+            : `<span class="badge ${card.acbStatus ? 'success' : 'pending'}">${card.acbStatus ? 'ACB' : 'Pending'}</span>`;
+          return `
+            <div class="wallet-row">
+              <div>
+                <div class="name">${card.cardNumber}</div>
+                <div class="desc">${card.type} · ${card.status}</div>
+              </div>
+              <div class="amt">
+                ${acbBadge}
+              </div>
             </div>
-            <div class="amt">
-              <span class="badge ${card.acbStatus ? 'success' : 'pending'}">
-                ${card.acbStatus ? 'ACB' : 'Pending'}
-              </span>
-            </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       }
     }
 

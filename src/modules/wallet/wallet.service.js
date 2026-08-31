@@ -97,10 +97,10 @@ async function getLedgerHistory(memberId, limit = 50, offset = 0) {
 async function getCommissions(memberId, loginContext = null, limit = 50) {
   const idCards = await prisma.memberIdCard.findMany({
     where: { memberId },
-    select: { id: true, cardNumber: true, type: true }
+    select: { id: true, cardNumber: true, type: true, acbStatus: true }
   });
   const cardMap = {};
-  idCards.forEach(c => { cardMap[c.id] = { cardNumber: c.cardNumber, cardType: c.type }; });
+  idCards.forEach(c => { cardMap[c.id] = { cardNumber: c.cardNumber, cardType: c.type, acbStatus: c.acbStatus }; });
 
   const whereClause = loginContext?.isSubCard && loginContext?.loginCardId
     ? { idCardId: loginContext.loginCardId }
@@ -116,6 +116,7 @@ async function getCommissions(memberId, loginContext = null, limit = 50) {
     ...c,
     cardNumber: cardMap[c.idCardId]?.cardNumber || null,
     cardType: cardMap[c.idCardId]?.cardType || null,
+    cardAcbStatus: cardMap[c.idCardId]?.acbStatus || false,
     isCurrentLogin: loginContext?.loginCardNumber === cardMap[c.idCardId]?.cardNumber
   }));
 

@@ -106,7 +106,7 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
       // 1. Evaluate ACB for direct tree sponsor (enables SUB cards with L+R referrals to unlock ACB)
       if (mySystemNode && mySystemNode.sponsorIdCardId) {
         const treeSponsor = await tx.memberIdCard.findUnique({ where: { id: mySystemNode.sponsorIdCardId } });
-        if (treeSponsor && !treeSponsor.acbStatus) {
+        if (treeSponsor && treeSponsor.type !== "REBIRTH" && !treeSponsor.acbStatus) {
           if (await acbService.checkAcbStatus(tx, treeSponsor.id)) {
             await acbService.unlockAcb(tx, treeSponsor.id);
             await acbService.unlockLockedEarnings(tx, treeSponsor.id);
@@ -126,7 +126,7 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
       // 3. Evaluate ACB for external batch sponsor if distinct
       if (item.sponsorIdCardId && (!mySystemNode || item.sponsorIdCardId !== mySystemNode.sponsorIdCardId)) {
         const sponsorCard = await tx.memberIdCard.findUnique({ where: { id: item.sponsorIdCardId } });
-        if (sponsorCard && !sponsorCard.acbStatus) {
+        if (sponsorCard && sponsorCard.type !== "REBIRTH" && !sponsorCard.acbStatus) {
           if (await acbService.checkAcbStatus(tx, sponsorCard.id)) {
             await acbService.unlockAcb(tx, sponsorCard.id);
             await acbService.unlockLockedEarnings(tx, sponsorCard.id);

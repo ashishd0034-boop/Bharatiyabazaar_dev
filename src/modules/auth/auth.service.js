@@ -76,8 +76,9 @@ async function registerMember(registrationData) {
       throw err;
     }
 
-    const sponsorMainCard = sponsor.idCards?.find(c => c.type === "MAIN") || sponsor.idCards?.[0];
-    if (sponsorMainCard) sponsorIdCardId = sponsorMainCard.id;
+    const specificCard = sponsor.idCards?.find(c => c.cardNumber === cleanRef);
+    const sponsorCard = specificCard || sponsor.idCards?.find(c => c.type === "MAIN") || sponsor.idCards?.[0];
+    if (sponsorCard) sponsorIdCardId = sponsorCard.id;
   }
 
   // Determine activation PIN vs postal code

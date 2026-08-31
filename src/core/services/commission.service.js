@@ -119,15 +119,11 @@ async function calculateAndCreateCommissions(tx, idCardId, level, stream, amount
     const rebirthRequiresMainAcb = await systemSettingsService.getSettingBoolean("REBIRTH_WITHDRAWAL_REQUIRES_MAIN_ACB", true);
 
     const isRebirth = idCard.type === "REBIRTH";
-    const ownerMainCard = await db.memberIdCard.findFirst({
-      where: { memberId: idCard.memberId, type: "MAIN" }
-    });
-
     let hasAcb = true;
     if (isRebirth) {
-      hasAcb = rebirthRequiresMainAcb ? Boolean(ownerMainCard?.acbStatus) : true;
+      hasAcb = true; // REBIRTH cards are ACB-exempt (ACB v3)
     } else {
-      hasAcb = Boolean(ownerMainCard?.acbStatus || idCard.acbStatus);
+      hasAcb = Boolean(idCard.acbStatus); // MAIN and SUB require their OWN acbStatus (no inheritance)
     }
 
     let initialStatus = "CONFIRMED";

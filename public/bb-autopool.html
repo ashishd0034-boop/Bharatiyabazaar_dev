@@ -562,7 +562,7 @@
           <div class="nd-row"><span class="k">Card Type</span><span class="v">${escapeHtml(badgeLabel)}</span></div>
           ${sponsorRow}
           <div class="nd-row"><span class="k">Joined</span><span class="v">${fmtDate(node.joinedAt)}</span></div>
-          <div class="nd-row"><span class="k">ACB Status</span><span class="v ${node.acbStatus ? 'green' : ''}">${node.acbStatus ? '✓ Unlocked' : 'Pending'}</span></div>
+          <div class="nd-row"><span class="k">ACB Status</span><span class="v ${isRebirth ? '' : (node.acbStatus ? 'green' : '')}">${isRebirth ? 'ACB not required' : (node.acbStatus ? '✓ Unlocked' : 'Pending')}</span></div>
           <div class="nd-row"><span class="k">⬅ LEFT Sub-pool</span><span class="v">${leftSize}</span></div>
           <div class="nd-row"><span class="k">➡ RIGHT Sub-pool</span><span class="v">${rightSize}</span></div>
         </div>
@@ -589,7 +589,7 @@
           <div class="nd-row"><span class="k">Card Type</span><span class="v">${escapeHtml(badgeLabel)}</span></div>
           <div class="nd-row"><span class="k">Joined</span><span class="v">${fmtDate(node.joinedAt)}</span></div>
           <div class="nd-row"><span class="k">Sponsor (MY SYSTEM)</span><span class="v green">${escapeHtml(node.sponsorCode || '—')}</span></div>
-          <div class="nd-row"><span class="k">ACB Status</span><span class="v ${node.acbStatus ? 'green' : ''}">${node.acbStatus ? '✓ Unlocked' : 'Pending'}</span></div>
+          <div class="nd-row"><span class="k">ACB Status</span><span class="v ${isRebirth ? '' : (node.acbStatus ? 'green' : '')}">${isRebirth ? 'ACB not required' : (node.acbStatus ? '✓ Unlocked' : 'Pending')}</span></div>
           ${node.acbUnlockedAt ? `<div class="nd-row"><span class="k">ACB Unlocked On</span><span class="v green">${fmtDate(node.acbUnlockedAt)}</span></div>` : ''}
           <div class="nd-row"><span class="k">⬅ LEFT Sub-pool</span><span class="v">${leftSize}</span></div>
           <div class="nd-row"><span class="k">➡ RIGHT Sub-pool</span><span class="v">${rightSize}</span></div>
