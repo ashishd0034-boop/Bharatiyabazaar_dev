@@ -16,11 +16,22 @@ async function validateReferralCode(code) {
     throw err;
   }
 
+  // Check if this code belongs to a REBIRTH card
+  const rebirthCard = await prisma.memberIdCard.findFirst({
+    where: { cardNumber: cleanCode, type: "REBIRTH" }
+  });
+  if (rebirthCard) {
+    const err = new Error("REBIRTH IDs cannot sponsor new members (placed automatically via global AutoPool)");
+    err.status = 400;
+    err.code = "REBIRTH_CANNOT_SPONSOR";
+    throw err;
+  }
+
   const sponsor = await prisma.member.findFirst({
     where: {
       OR: [
         { memberCode: cleanCode },
-        { idCards: { some: { cardNumber: cleanCode } } }
+        { idCards: { some: { cardNumber: cleanCode, type: { in: ["MAIN", "SUB"] } } } }
       ]
     },
     include: {
@@ -35,9 +46,12 @@ async function validateReferralCode(code) {
     throw err;
   }
 
+  const specificCard = sponsor.idCards?.find(c => c.cardNumber === cleanCode && c.type !== "REBIRTH");
+  const displayCode = specificCard ? specificCard.cardNumber : sponsor.memberCode;
+
   return {
     name: sponsor.name,
-    memberCode: sponsor.memberCode,
+    memberCode: displayCode,
     valid: true
   };
 }
@@ -57,11 +71,23 @@ async function registerMember(registrationData) {
 
   if (referralCode && referralCode.trim()) {
     const cleanRef = referralCode.trim().toUpperCase();
+
+    // Reject REBIRTH IDs from sponsoring
+    const rebirthCard = await prisma.memberIdCard.findFirst({
+      where: { cardNumber: cleanRef, type: "REBIRTH" }
+    });
+    if (rebirthCard) {
+      const err = new Error("REBIRTH IDs cannot sponsor new members (placed automatically via global AutoPool)");
+      err.status = 400;
+      err.code = "REBIRTH_CANNOT_SPONSOR";
+      throw err;
+    }
+
     const sponsor = await prisma.member.findFirst({
       where: {
         OR: [
           { memberCode: cleanRef },
-          { idCards: { some: { cardNumber: cleanRef } } }
+          { idCards: { some: { cardNumber: cleanRef, type: { in: ["MAIN", "SUB"] } } } }
         ]
       },
       include: {
@@ -76,7 +102,7 @@ async function registerMember(registrationData) {
       throw err;
     }
 
-    const specificCard = sponsor.idCards?.find(c => c.cardNumber === cleanRef);
+    const specificCard = sponsor.idCards?.find(c => c.cardNumber === cleanRef && c.type !== "REBIRTH");
     const sponsorCard = specificCard || sponsor.idCards?.find(c => c.type === "MAIN") || sponsor.idCards?.[0];
     if (sponsorCard) sponsorIdCardId = sponsorCard.id;
   }

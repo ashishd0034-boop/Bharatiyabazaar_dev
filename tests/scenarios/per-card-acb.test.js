@@ -28,7 +28,7 @@ describe("Scenario: Per-Card ACB Enforcement (MAIN + SUB Only, No Inheritance, R
       .post("/api/auth/register")
       .send({
         name: "ACB Pioneer",
-        mobile: "9888123456",
+        mobile: "9888771234",
         password: "password123",
         pinCode: "110001",
         activationPin: pin.pinCode,
@@ -73,11 +73,13 @@ describe("Scenario: Per-Card ACB Enforcement (MAIN + SUB Only, No Inheritance, R
     const mainLogin = await request(app)
       .post("/api/auth/login")
       .send({ mobile: mainCard.cardNumber, password: "password123" });
+    expect(mainLogin.status).toBe(200);
     mainToken = mainLogin.body.data.token;
 
     const subLogin = await request(app)
       .post("/api/auth/login")
       .send({ mobile: subCard.cardNumber, password: "password123" });
+    expect(subLogin.status).toBe(200);
     subToken = subLogin.body.data.token;
   });
 
