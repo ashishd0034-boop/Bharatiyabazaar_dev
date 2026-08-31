@@ -1,16 +1,14 @@
 const express = require("express");
-const rateLimit = require("express-rate-limit");
+const { createRateLimiter } = require("../../core/utils/rateLimiter");
 const pinController = require("./pin.controller");
 const authMiddleware = require("../../core/middleware/auth.middleware");
 
 const router = express.Router();
 
-const pinValidateLimiter = rateLimit({
+const pinValidateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many PIN validation attempts, please try again later." } }
+  prodMax: 5,
+  message: "Too many PIN validation attempts, please try again later."
 });
 
 // Member PIN Endpoints

@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path"); // Added for serving static files
 const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
+const { createRateLimiter } = require("./core/utils/rateLimiter");
 require("dotenv").config();
 
 // Fail-fast JWT Check
@@ -46,11 +46,9 @@ const allowedOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json({ limit: "100kb" }));
 
-const globalLimiter = rateLimit({
+const globalLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // 300 requests
-  standardHeaders: true,
-  legacyHeaders: false,
+  prodMax: 300 // 300 requests in prod, 30,000 in dev/test
 });
 app.use(globalLimiter);
 

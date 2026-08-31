@@ -4,16 +4,14 @@ const vendorAuthMiddleware = require("../middleware/vendorAuthMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const schemas = require("../validations/schemas");
 
-const rateLimit = require("express-rate-limit");
+const { createRateLimiter } = require("../core/utils/rateLimiter");
 
 const router = express.Router();
 
-const vendorAuthLimiter = rateLimit({
+const vendorAuthLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "test" ? 100 : 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many attempts, please try again later." } }
+  prodMax: 5,
+  message: "Too many attempts, please try again later."
 });
 
 // Public vendor registration & login (rate limited)

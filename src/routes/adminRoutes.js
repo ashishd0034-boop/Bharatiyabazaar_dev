@@ -4,17 +4,15 @@ const adminAuthMiddleware = require("../middleware/adminAuthMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const schemas = require("../validations/schemas");
 
-const rateLimit = require("express-rate-limit");
+const { createRateLimiter } = require("../core/utils/rateLimiter");
 
 const router = express.Router();
 const authController = require("../controllers/authController");
 
-const adminLoginLimiter = rateLimit({
+const adminLoginLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "test" ? 100 : 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many admin login attempts, please try again later." } }
+  prodMax: 5,
+  message: "Too many admin login attempts, please try again later."
 });
 
 // Public admin login endpoint (strictly rate limited)
@@ -29,12 +27,10 @@ router.get("/settings/:key", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), admi
 router.put("/settings/:key", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.updateSettingValue);
 router.put("/categories/:category/margin", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.updateCategoryMarginReq);
 
-const reconciliationLimiter = rateLimit({
+const reconciliationLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "test" ? 100 : 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many reconciliation report requests, please try again later." } }
+  prodMax: 20,
+  message: "Too many reconciliation report requests, please try again later."
 });
 
 // Operational & Reports Endpoints
@@ -50,12 +46,10 @@ router.post("/settlements/run", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), a
 router.post("/vendors/:id/penalize", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.penalizeVendorReq);
 router.post("/vendors/:id/freeze", adminAuthMiddleware(["ADMIN", "SUPER_ADMIN"]), adminController.freezeVendorReq);
 
-const adminPinGenLimiter = rateLimit({
+const adminPinGenLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "test" ? 100 : 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: { code: "TOO_MANY_REQUESTS", message: "Too many PIN generation requests, please try again later." } }
+  prodMax: 10,
+  message: "Too many PIN generation requests, please try again later."
 });
 
 // PIN Management Endpoints (ADMIN & SUPER_ADMIN)
