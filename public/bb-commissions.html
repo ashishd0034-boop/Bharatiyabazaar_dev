@@ -208,10 +208,10 @@
           <div style="overflow-x:auto;">
             <table>
               <thead>
-                <tr><th>Date</th><th>Stream</th><th>Level</th><th>Description</th><th>Amount</th><th>Status</th></tr>
+                <tr><th>Date</th><th>Card</th><th>Stream</th><th>Level</th><th>Description</th><th>Amount</th><th>Status</th></tr>
               </thead>
               <tbody id="commissionTableBody">
-                <tr><td colspan="6" style="text-align:center; color:var(--muted);">No commissions yet. Start referring friends to earn!</td></tr>
+                <tr><td colspan="7" style="text-align:center; color:var(--muted);">No commissions yet. Start referring friends to earn!</td></tr>
               </tbody>
             </table>
           </div>
@@ -454,19 +454,25 @@
       const tbody = document.getElementById('commissionTableBody');
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:32px;">No commissions generated for this ID yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:32px;">No commissions generated for this ID yet.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = filtered.map(c => `
+      tbody.innerHTML = filtered.map(c => {
+        const cardBadge = c.cardNumber
+          ? `<strong>${c.cardNumber}</strong> <span style="font-size:11px; opacity:0.7;">(${c.cardType || 'MAIN'})</span>`
+          : '—';
+        return `
         <tr data-stream="${c.stream}" data-status="${c.status}">
           <td>${formatDate(c.createdAt)}</td>
+          <td>${cardBadge}</td>
           <td>${c.stream}</td>
           <td>Level ${c.level || '-'}</td>
           <td>${c.description || c.stream + ' commission'}</td>
           <td>+${formatINR(c.amountPaise)}</td>
           <td><span class="badge ${badgeFor(c.status)}">${STATUS_LABEL[c.status] || c.status}</span></td>
-        </tr>`).join('');
+        </tr>`;
+      }).join('');
     }
 
     document.getElementById('filterStream').addEventListener('change', renderTable);

@@ -91,8 +91,16 @@ async function getLedgerHistory(memberId, limit = 50, offset = 0) {
   return await coreWalletService.getLedgerHistory(memberId, limit, offset);
 }
 
+const CARD_TYPE_RANK = { MAIN: 0, SUB: 1, REBIRTH: 2 };
+
+function getCardRank(cardType) {
+  return typeof CARD_TYPE_RANK[cardType] === "number" ? CARD_TYPE_RANK[cardType] : 3;
+}
+
 /**
- * Returns commission entries scoped to member cards or active login card.
+ * Returns commission entries scoped to member cards or active login card,
+ * grouped by card: MAIN first, SUB (cardNumber asc), REBIRTH (cardNumber asc),
+ * and newest first (createdAt desc) within each card's section.
  */
 async function getCommissions(memberId, loginContext = null, limit = 50) {
   const idCards = await prisma.memberIdCard.findMany({
@@ -119,6 +127,22 @@ async function getCommissions(memberId, loginContext = null, limit = 50) {
     cardAcbStatus: cardMap[c.idCardId]?.acbStatus || false,
     isCurrentLogin: loginContext?.loginCardNumber === cardMap[c.idCardId]?.cardNumber
   }));
+
+  // 3-tier card-grouped sorting:
+  // 1. Group Rank: MAIN (0) -> SUB (1) -> REBIRTH (2)
+  // 2. cardNumber ascending
+  // 3. createdAt descending (newest first within each card's group)
+  enriched.sort((a, b) => {
+    const rankA = getCardRank(a.cardType);
+    const rankB = getCardRank(b.cardType);
+    if (rankA !== rankB) return rankA - rankB;
+
+    const cardA = (a.cardNumber || "").toUpperCase();
+    const cardB = (b.cardNumber || "").toUpperCase();
+    if (cardA !== cardB) return cardA.localeCompare(cardB);
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   return {
     commissions: enriched,
