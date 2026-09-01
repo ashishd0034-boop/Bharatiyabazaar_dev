@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="/js/member-shell.js"></script>
   <style>
     :root {
       --navy: #0d1b2a; --navy-2: #14263b; --teal: #0f9d9d; --teal-dark: #0b7c7c;
@@ -304,14 +305,11 @@
 
   <script>
     const API_BASE = 'http://localhost:4000/api';
-    function getToken() { return localStorage.getItem('jwt_token'); }
-    function logout() { localStorage.removeItem('jwt_token'); localStorage.removeItem('member'); window.location.href = '/bb-register.html'; }
-    function handleLogout() { if (confirm('Logout?')) logout(); }
     function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
     function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
 
     async function apiCall(endpoint) {
-      const token = getToken();
+      const token = getMemberToken();
       if (!token) { logout(); return null; }
       try {
         const r = await fetch(`${API_BASE}${endpoint}`, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
@@ -578,7 +576,7 @@
     document.getElementById('profileModal').addEventListener('click', (e) => { if (e.target.id === 'profileModal') closeProfileModal(); });
 
     async function loadTree() {
-      const token = getToken();
+      const token = getMemberToken();
       if (!token) { logout(); return; }
 
       const [profile, data] = await Promise.all([
@@ -589,18 +587,15 @@
       document.getElementById('loadingIndicator').classList.add('hidden');
       document.getElementById('treeContent').classList.remove('hidden');
 
-      const loginCtx = localStorage.getItem('loginContext') ? JSON.parse(localStorage.getItem('loginContext')) : null;
-      const name = profile?.name || 'Member';
-      const mainCard = (profile?.idCards || []).find(c => c.type === 'MAIN');
-      const activeCard = loginCtx?.cardNumber || mainCard?.cardNumber || profile?.memberCode;
+      // Unified Member Shell Identity Renderer
+      const identityRes = await initMemberIdentity({ profile });
+      const loginCtx = identityRes?.loginContext || profile?.loginContext;
+      const activeCard = loginCtx?.cardNumber || profile?.memberCode;
       const isSub = loginCtx?.isSubCard || false;
       const ownerCode = loginCtx?.ownerMemberCode || profile?.memberCode;
 
       if (profile) {
         myMemberCode = profile.memberCode || null;
-        document.getElementById('memberName').textContent = name;
-        document.getElementById('memberCode').innerHTML = `${activeCard} ${isSub ? `<span style="font-size:10px; opacity:0.8;">(owner ${ownerCode})</span>` : ''}`;
-        document.getElementById('memberAvatar').textContent = name.charAt(0).toUpperCase();
       }
 
       if (isSub) {

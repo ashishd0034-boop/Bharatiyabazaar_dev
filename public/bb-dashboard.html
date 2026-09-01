@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="/js/member-shell.js"></script>
 
   <style>
     :root {
@@ -922,14 +923,20 @@
     <script>
     const API_BASE = 'http://localhost:4000/api';
 
-    function getToken() { return localStorage.getItem('jwt_token'); }
-    function logout() {
-      localStorage.removeItem('jwt_token');
-      localStorage.removeItem('member');
-      window.location.href = '/bb-register.html';
-    }
-    function handleLogout() {
-      if (confirm('Are you sure you want to logout?')) logout();
+    function handleSwitchCard(cardNumber, cardType, cardId) {
+      const member = localStorage.getItem('member') ? JSON.parse(localStorage.getItem('member')) : null;
+      const ownerCode = member?.memberCode || '';
+      const newCtx = {
+        cardNumber: cardNumber,
+        cardType: cardType,
+        isSubCard: cardType !== 'MAIN',
+        loginCardId: cardId || null,
+        loginCardNumber: cardNumber,
+        loginCardType: cardType,
+        ownerMemberCode: ownerCode
+      };
+      setLoginContext(newCtx);
+      window.location.reload();
     }
 
     function formatINR(paise) {
@@ -945,7 +952,7 @@
     }
 
     async function apiCall(endpoint) {
-      const token = getToken();
+      const token = getMemberToken();
       if (!token) { logout(); return null; }
       try {
         const response = await fetch(`${API_BASE}${endpoint}`, {
@@ -964,7 +971,7 @@
     }
 
     async function loadDashboard() {
-      const token = getToken();
+      const token = getMemberToken();
       if (!token) { logout(); return; }
 
       const [profile, wallet, commissions] = await Promise.all([
@@ -982,23 +989,12 @@
       document.getElementById('loadingIndicator').style.display = 'none';
       document.getElementById('dashboardContent').style.display = 'block';
 
-      const loginCtx = wallet?.loginContext || (localStorage.getItem('loginContext') ? JSON.parse(localStorage.getItem('loginContext')) : null);
-      const name = profile.name || 'Member';
-      const mainCard = (profile.idCards || []).find(c => c.type === 'MAIN');
-      const activeCard = loginCtx?.cardNumber || mainCard?.cardNumber || profile.memberCode;
+      // Unified Member Shell Identity Renderer
+      const identityRes = await initMemberIdentity({ profile, loginContext: wallet?.loginContext });
+      const loginCtx = identityRes?.loginContext || profile.loginContext;
+      const activeCard = loginCtx?.cardNumber || profile.memberCode;
       const isSub = loginCtx?.isSubCard || false;
       const ownerCode = loginCtx?.ownerMemberCode || profile.memberCode;
-      
-      // Update sidebar profile
-      document.getElementById('memberName').textContent = name;
-      document.getElementById('memberCode').innerHTML = `${activeCard} ${isSub ? `<span style="font-size:10px; opacity:0.8;">(owner ${ownerCode})</span>` : ''}`;
-      document.getElementById('memberAvatar').textContent = name.charAt(0).toUpperCase();
-      
-      // Update topbar greeting
-      document.getElementById('greeting').textContent = `Good morning, ${name} 🙏`;
-      const memberSince = new Date(profile.createdAt);
-      document.getElementById('memberSince').textContent = 
-        `Member since ${memberSince.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })} · ${activeCard}${isSub ? ` (owner ${ownerCode})` : ''}`;
 
       // Update stats
       const displayBalance = typeof wallet?.displayBalancePaise === "number"
@@ -1124,7 +1120,9 @@
       const breakdown = wallet?.breakdown || [];
       if (breakdown.length > 0) {
         idCardsList.innerHTML = breakdown.map(card => {
-          const isCurrent = card.isCurrentLogin ? ' <span class="badge" style="background:#3b82f6; color:#fff; font-size:10px; padding:2px 6px;">Current Login</span>' : '';
+          const isCurrent = card.isCurrentLogin;
+          const currentBadge = isCurrent ? ' <span class="badge" style="background:#3b82f6; color:#fff; font-size:10px; padding:2px 6px;">Current Login</span>' : '';
+          const switchBtn = !isCurrent ? ` <button onclick="handleSwitchCard('${card.cardNumber}', '${card.cardType}', '${card.id || ''}')" style="background:transparent; border:1px solid rgba(15,157,157,0.4); color:var(--teal); font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; margin-left:6px;">Switch Active ID</button>` : '';
           const isRebirthCard = card.cardType === "REBIRTH" || (card.cardNumber && card.cardNumber.startsWith("RB"));
           const acbBadge = isRebirthCard
             ? `<span class="badge" style="background:rgba(255,255,255,0.08); color:var(--text-muted);">ACB not required</span>`
@@ -1132,7 +1130,7 @@
           return `
             <div class="wallet-row" style="${card.isCurrentLogin ? 'border-left: 3px solid #3b82f6; padding-left: 8px; background:rgba(59,130,246,0.04);' : ''}">
               <div>
-                <div class="name">${card.cardNumber} ${isCurrent}</div>
+                <div class="name">${card.cardNumber} ${currentBadge}${switchBtn}</div>
                 <div class="desc">${card.cardType} · Total: ${formatINR(card.totalPaise)} (Hold: ${formatINR(card.onHoldPaise)})</div>
               </div>
               <div class="amt" style="text-align:right;">
@@ -1146,6 +1144,9 @@
         }).join('');
       } else if (idCards.length > 0) {
         idCardsList.innerHTML = idCards.map(card => {
+          const isCurrent = card.cardNumber === activeCard;
+          const currentBadge = isCurrent ? ' <span class="badge" style="background:#3b82f6; color:#fff; font-size:10px; padding:2px 6px;">Current Login</span>' : '';
+          const switchBtn = !isCurrent ? ` <button onclick="handleSwitchCard('${card.cardNumber}', '${card.type}', '${card.id || ''}')" style="background:transparent; border:1px solid rgba(15,157,157,0.4); color:var(--teal); font-size:10px; padding:2px 8px; border-radius:4px; cursor:pointer; margin-left:6px;">Switch Active ID</button>` : '';
           const isRebirthCard = card.type === "REBIRTH" || (card.cardNumber && card.cardNumber.startsWith("RB"));
           const acbBadge = isRebirthCard
             ? `<span class="badge" style="background:rgba(255,255,255,0.08); color:var(--text-muted);">ACB not required</span>`
@@ -1153,7 +1154,7 @@
           return `
             <div class="wallet-row">
               <div>
-                <div class="name">${card.cardNumber}</div>
+                <div class="name">${card.cardNumber} ${currentBadge}${switchBtn}</div>
                 <div class="desc">${card.type} · ${card.status}</div>
               </div>
               <div class="amt">

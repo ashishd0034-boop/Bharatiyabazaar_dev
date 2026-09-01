@@ -11,6 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap"
     rel="stylesheet"
   />
+  <script src="/js/member-shell.js"></script>
 
   <style>
     :root {
@@ -298,7 +299,7 @@
     async function initHindiDashboard() {
       const token = getMemberToken();
       if (!token) {
-        window.location.href = "bb-register.html";
+        logout();
         return;
       }
 
@@ -311,7 +312,7 @@
         ]);
 
         if (profileRes.status === 401 || walletRes.status === 401) {
-          logoutMember();
+          logout();
           return;
         }
 
@@ -320,7 +321,8 @@
         const cardsData = await cardsRes.json();
         const setData = await setuRes.json();
 
-        if (profileData.success) {
+        if (profileData.success && profileData.data) {
+          await initMemberIdentity({ profile: profileData.data });
           renderProfile(profileData.data);
         }
         if (walletData.success) {
@@ -338,13 +340,10 @@
     }
 
     function renderProfile(member) {
-      document.getElementById("topbarMemberInfo").classList.remove("hidden");
-      document.getElementById("topbarMemberName").textContent = member.name || "सदस्य";
       document.getElementById("hindiWelcome").textContent = `नमस्ते, ${member.name || 'सदस्य'} जी!`;
 
       const activeCard = member.activeCard || member.idCards?.[0];
       if (activeCard) {
-        document.getElementById("topbarCardNumber").textContent = activeCard.cardNumber || "MAIN";
         if (activeCard.acbStatus) {
           document.getElementById("valAcbStatus").innerHTML = `<span class="badge success">सक्रिय लाभार्थी (ACB Qualified) ✓</span>`;
           document.getElementById("valAcbSub").textContent = "निकासी के लिए पूर्णतः योग्य";

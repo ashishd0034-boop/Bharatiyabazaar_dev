@@ -109,6 +109,16 @@ async function getMemberProfile(memberId, loginContext) {
                      member.idCards.find(c => c.type === "MAIN") || 
                      member.idCards[0];
 
+  const resolvedLoginContext = {
+    cardNumber: activeCard ? activeCard.cardNumber : member.memberCode,
+    cardType: activeCard ? activeCard.type : "MAIN",
+    isSubCard: activeCard ? activeCard.type !== "MAIN" : false,
+    loginCardId: activeCard ? activeCard.id : null,
+    loginCardNumber: activeCard ? activeCard.cardNumber : member.memberCode,
+    loginCardType: activeCard ? activeCard.type : "MAIN",
+    ownerMemberCode: member.memberCode
+  };
+
   return {
     ...member,
     activeCard: activeCard ? {
@@ -116,7 +126,8 @@ async function getMemberProfile(memberId, loginContext) {
       cardNumber: activeCard.cardNumber,
       type: activeCard.type,
       acbStatus: activeCard.acbStatus
-    } : null
+    } : null,
+    loginContext: resolvedLoginContext
   };
 }
 

@@ -11,6 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
     rel="stylesheet"
   />
+  <script src="/js/member-shell.js"></script>
 
   <style>
     :root {
@@ -293,7 +294,7 @@
     async function initSetuKoshPage() {
       const token = getMemberToken();
       if (!token) {
-        window.location.href = "bb-register.html";
+        logout();
         return;
       }
 
@@ -304,19 +305,15 @@
         ]);
 
         if (profRes.status === 401 || cntRes.status === 401) {
-          logoutMember();
+          logout();
           return;
         }
 
         const profData = await profRes.json();
         const cntData = await cntRes.json();
 
-        if (profData.success) {
-          const m = profData.data;
-          document.getElementById("topbarMemberInfo").classList.remove("hidden");
-          document.getElementById("topbarMemberName").textContent = m.name || "Member";
-          const card = m.activeCard || m.idCards?.[0];
-          if (card) document.getElementById("topbarCardNumber").textContent = card.cardNumber || "MAIN";
+        if (profData.success && profData.data) {
+          await initMemberIdentity({ profile: profData.data });
         }
 
         if (cntData.success) {

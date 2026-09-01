@@ -11,6 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
     rel="stylesheet"
   />
+  <script src="/js/member-shell.js"></script>
 
   <style>
     :root {
@@ -202,7 +203,7 @@
     async function initNotifications() {
       const token = getMemberToken();
       if (!token) {
-        window.location.href = "bb-register.html";
+        logout();
         return;
       }
 
@@ -213,18 +214,15 @@
         ]);
 
         if (profRes.status === 401 || notifRes.status === 401) {
-          logoutMember();
+          logout();
           return;
         }
 
         const profData = await profRes.json();
         const notifData = await notifRes.json();
 
-        if (profData.success) {
-          document.getElementById("topbarMemberInfo").classList.remove("hidden");
-          document.getElementById("topbarMemberName").textContent = profData.data.name || "Member";
-          const card = profData.data.activeCard || profData.data.idCards?.[0];
-          if (card) document.getElementById("topbarCardNumber").textContent = card.cardNumber || "MAIN";
+        if (profData.success && profData.data) {
+          await initMemberIdentity({ profile: profData.data });
         }
 
         if (notifData.success) {

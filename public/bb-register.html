@@ -11,6 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
     rel="stylesheet"
   />
+  <script src="/js/member-shell.js"></script>
 
   <style>
     :root {
@@ -481,11 +482,16 @@
         const data = await res.json();
 
         if (res.ok && data.data?.token) {
+          clearAllSessionData();
           localStorage.setItem('jwt_token', data.data.token);
           localStorage.setItem('member', JSON.stringify(data.data.member));
-          if (data.data.loginContext) {
-            localStorage.setItem('loginContext', JSON.stringify(data.data.loginContext));
-          }
+          const loginCtx = data.data.loginContext || {
+            cardNumber: data.data.member?.memberCode,
+            cardType: 'MAIN',
+            isSubCard: false,
+            ownerMemberCode: data.data.member?.memberCode
+          };
+          localStorage.setItem('loginContext', JSON.stringify(loginCtx));
           window.location.href = '/bb-dashboard.html';
         } else {
           if(errorBox) { errorBox.textContent = data.error?.message || 'Invalid credentials'; errorBox.classList.remove('hidden'); }
@@ -676,10 +682,19 @@
         }
 
         // Save token immediately
+        clearAllSessionData();
         const token = regData.data.token;
         const member = regData.data.member || {};
         localStorage.setItem('jwt_token', token);
         localStorage.setItem('member', JSON.stringify(member));
+        const mainCard = (member.idCards || []).find(c => c.type === 'MAIN') || member.idCards?.[0];
+        const loginCtx = regData.data.loginContext || {
+          cardNumber: mainCard ? mainCard.cardNumber : member.memberCode,
+          cardType: 'MAIN',
+          isSubCard: false,
+          ownerMemberCode: member.memberCode
+        };
+        localStorage.setItem('loginContext', JSON.stringify(loginCtx));
 
         // Populate main confirm fields
         document.getElementById('confirm-id').textContent = member.memberCode || member.id || '-';

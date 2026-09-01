@@ -11,6 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
     rel="stylesheet"
   />
+  <script src="/js/member-shell.js"></script>
 
   <style>
     :root {
@@ -282,11 +283,8 @@
             headers: { "Authorization": `Bearer ${token}` }
           });
           const data = await res.json();
-          if (data.success) {
-            document.getElementById("topbarMemberInfo").classList.remove("hidden");
-            document.getElementById("topbarMemberName").textContent = data.data.name || "Member";
-            const card = data.data.activeCard || data.data.idCards?.[0];
-            if (card) document.getElementById("topbarCardNumber").textContent = card.cardNumber || "MAIN";
+          if (data.success && data.data) {
+            await initMemberIdentity({ profile: data.data, redirectOnMissing: false });
             document.getElementById("guestNotice").classList.add("hidden");
           } else {
             document.getElementById("guestNotice").classList.remove("hidden");

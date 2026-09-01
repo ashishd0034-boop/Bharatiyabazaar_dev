@@ -11,6 +11,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap"
     rel="stylesheet"
   />
+  <script src="/js/member-shell.js"></script>
 
   <style>
     :root {
@@ -849,17 +850,12 @@
 
       if (!profile) return;
 
-      const mainCard = (profile.idCards || []).find(c => c.type === 'MAIN') || profile.idCards?.[0];
-      const loginCtx = wallet?.loginContext || (localStorage.getItem('loginContext') ? JSON.parse(localStorage.getItem('loginContext')) : null);
-
-      // 1. Sidebar Profile & Topbar
+      // Unified Member Shell Identity Renderer
+      const identityRes = await initMemberIdentity({ profile, loginContext: wallet?.loginContext });
+      const loginCtx = identityRes?.loginContext || profile?.loginContext;
       const displayName = profile.name || 'Member';
-      const activeCardNum = loginCtx?.cardNumber || mainCard?.cardNumber || profile.memberCode;
+      const activeCardNum = loginCtx?.cardNumber || profile.memberCode;
       const isSub = loginCtx?.isSubCard || false;
-
-      document.getElementById('memberAvatar').textContent = displayName.charAt(0).toUpperCase();
-      document.getElementById('memberName').textContent = displayName;
-      document.getElementById('memberCode').innerHTML = `${activeCardNum} ${isSub ? `<span style="font-size:10px; opacity:0.8;">(owner ${loginCtx.ownerMemberCode})</span>` : ''}`;
 
       document.getElementById('topbarSubtitle').textContent = `${displayName} · ${activeCardNum} · Rebirth Cycle & Vouchers`;
 
