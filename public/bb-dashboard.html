@@ -1315,7 +1315,13 @@
       if (alertBox) alertBox.classList.add('hidden');
       if (outBox) outBox.classList.add('hidden');
 
-      const token = getToken();
+      const token = getMemberToken();
+      if (!token) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Buy PIN with Wallet Balance'; }
+        logout();
+        return;
+      }
+
       try {
         const res = await fetch(`${API_BASE}/pins/purchase`, {
           method: 'POST',
@@ -1337,8 +1343,7 @@
             alertBox.classList.remove('hidden');
           }
           // Refresh wallet balance and pins list
-          loadDashboard();
-          loadMyPins();
+          await Promise.all([loadDashboard(), loadMyPins()]);
         } else {
           if (alertBox) {
             alertBox.textContent = data.error?.message || data.message || 'PIN purchase failed.';
@@ -1366,12 +1371,28 @@
       });
     }
 
+    function copyPinText(pinCode, btnEl) {
+      if (!pinCode) return;
+      navigator.clipboard.writeText(pinCode).then(() => {
+        if (btnEl) {
+          const prev = btnEl.textContent;
+          btnEl.textContent = '✓ Copied';
+          setTimeout(() => { btnEl.textContent = prev; }, 1500);
+        }
+      }).catch(() => {
+        prompt('Copy PIN Code:', pinCode);
+      });
+    }
+
     async function loadMyPins() {
       const listEl = document.getElementById('myPinsList');
       if (!listEl) return;
 
-      const token = getToken();
-      if (!token) return;
+      const token = getMemberToken();
+      if (!token) {
+        listEl.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center; padding:16px;">Session expired. Please log in again.</div>';
+        return;
+      }
 
       try {
         const res = await fetch(`${API_BASE}/pins/my-pins`, {
@@ -1388,21 +1409,26 @@
           listEl.innerHTML = pins.map(p => `
             <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px;">
               <div>
-                <strong style="font-family:monospace; font-size:13.5px; color:var(--navy);">${p.pinCode}</strong>
-                <div style="font-size:11px; color:var(--muted); margin-top:2px;">
-                  ${p.quantity} ID(s) · ₹${(p.pricePaise/100).toFixed(2)} · ${new Date(p.createdAt).toLocaleDateString()}
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <strong style="font-family:monospace; font-size:13.5px; color:var(--navy); letter-spacing:0.5px;">${p.pinCode}</strong>
+                  <button type="button" onclick="copyPinText('${p.pinCode}', this)" style="background:transparent; border:1px solid var(--border); border-radius:4px; padding:2px 6px; font-size:11px; cursor:pointer; color:var(--teal);">📋</button>
+                </div>
+                <div style="font-size:11px; color:var(--muted); margin-top:3px;">
+                  <strong>${p.quantity} ID(s)</strong> · ₹${(p.pricePaise/100).toFixed(2)} · ${new Date(p.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}
                 </div>
               </div>
               <div>
-                <span class="badge ${p.status === 'AVAILABLE' ? 'success' : (p.status === 'REDEEMED' ? 'pending' : 'danger')}" style="font-size:11px;">
+                <span class="badge ${p.status === 'AVAILABLE' ? 'success' : (p.status === 'REDEEMED' ? 'pending' : 'locked')}" style="font-size:11px;">
                   ${p.status}
                 </span>
               </div>
             </div>
           `).join('');
+        } else {
+          listEl.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center; padding:16px;">No PINs purchased yet.</div>';
         }
       } catch (e) {
-        listEl.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center; padding:16px;">Failed to load PINs.</div>';
+        listEl.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center; padding:16px;">No PINs purchased yet.</div>';
       }
     }
 

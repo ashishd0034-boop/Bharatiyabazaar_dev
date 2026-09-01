@@ -549,9 +549,11 @@ async function updateAdminUserRole(req, res, next) {
 async function listPinsReq(req, res, next) {
   try {
     const pinService = require("../services/pinService");
-    const { status, purchasedByMemberId, redeemedByMemberId, limit, offset } = req.query;
+    const { status, source, purchaserCode, memberCode, purchasedByMemberId, redeemedByMemberId, limit, offset } = req.query;
     const pins = await pinService.listPins({
       status,
+      source,
+      purchaserCode: purchaserCode || memberCode,
       purchasedByMemberId,
       redeemedByMemberId,
       limit: limit ? parseInt(limit, 10) : 100,

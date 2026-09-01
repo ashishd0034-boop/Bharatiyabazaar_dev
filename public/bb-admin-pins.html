@@ -225,6 +225,11 @@
             placeholder="🔍 Search PIN code, purchaser member, or redeemer..."
             oninput="filterPinsTable()"
           />
+          <select id="filterPinSource" class="filter-select" onchange="filterPinsTable()">
+            <option value="ALL">All Sources (सभी स्रोत)</option>
+            <option value="MEMBER_PURCHASED">Member Purchased (सदस्य द्वारा खरीदा)</option>
+            <option value="ADMIN_ISSUED">Admin Issued (एडमिन जारी)</option>
+          </select>
           <select id="filterPinStatus" class="filter-select" onchange="filterPinsTable()">
             <option value="ALL">All Statuses (सभी)</option>
             <option value="AVAILABLE">AVAILABLE (सक्रिय / उपलब्ध)</option>
@@ -552,16 +557,22 @@
     function filterPinsTable() {
       const query = (document.getElementById("searchPinInput").value || "").trim().toLowerCase();
       const statusFilter = document.getElementById("filterPinStatus").value;
+      const sourceFilter = document.getElementById("filterPinSource")?.value || "ALL";
       const tbody = document.getElementById("pinsTableBody");
 
       const filtered = allPinsData.filter(p => {
         const matchesStatus = statusFilter === "ALL" || p.status === statusFilter;
+        const isMemberPurchased = Boolean(p.purchasedByMemberId) || p.source === "MEMBER_PURCHASED";
+        const matchesSource = sourceFilter === "ALL" ||
+          (sourceFilter === "MEMBER_PURCHASED" && isMemberPurchased) ||
+          (sourceFilter === "ADMIN_ISSUED" && !isMemberPurchased);
+
         const purchaserStr = p.purchasedByMember ? `${p.purchasedByMember.name} ${p.purchasedByMember.memberCode || ''}`.toLowerCase() : 'admin issued direct';
         const redeemerStr = p.redeemedByMember ? `${p.redeemedByMember.name} ${p.redeemedByMember.memberCode || ''}`.toLowerCase() : '';
         const pinCodeStr = (p.pinCode || '').toLowerCase();
 
         const matchesQuery = !query || pinCodeStr.includes(query) || purchaserStr.includes(query) || redeemerStr.includes(query);
-        return matchesStatus && matchesQuery;
+        return matchesStatus && matchesSource && matchesQuery;
       });
 
       if (filtered.length === 0) {

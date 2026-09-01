@@ -57,12 +57,33 @@ async function generatePin(purchaserMemberId, quantity, customTx = null) {
       }
     });
 
+    const purchaser = await tx.member.findUnique({
+      where: { id: purchaserMemberId },
+      select: { memberCode: true, name: true }
+    });
+
+    await logAction({
+      action: "PIN_PURCHASED",
+      actorType: "MEMBER",
+      actorId: purchaserMemberId,
+      entityType: "ActivationPin",
+      entityId: pin.id,
+      metadata: {
+        pinCode: pin.pinCode,
+        quantity: qty,
+        pricePaise,
+        purchaserMemberCode: purchaser?.memberCode,
+        purchaserName: purchaser?.name
+      }
+    });
+
     return {
       id: pin.id,
       pinCode: pin.pinCode,
       quantity: pin.quantity,
       pricePaise: pin.pricePaise,
       status: pin.status,
+      source: "MEMBER_PURCHASED",
       createdAt: pin.createdAt
     };
   };
@@ -182,15 +203,32 @@ async function validateAndRedeemPin(tx, pinCode, redeemingMemberId, requestedQty
 }
 
 /**
- * List PINs for member query.
+ * List PINs for member or admin query.
  */
 async function listPins(filter = {}) {
   const where = {};
-  if (filter.status) where.status = filter.status.toUpperCase();
-  if (filter.purchasedByMemberId) where.purchasedByMemberId = filter.purchasedByMemberId;
-  if (filter.redeemedByMemberId) where.redeemedByMemberId = filter.redeemedByMemberId;
+  if (filter.status && filter.status.toUpperCase() !== "ALL") {
+    where.status = filter.status.toUpperCase();
+  }
+  if (filter.purchasedByMemberId) {
+    where.purchasedByMemberId = filter.purchasedByMemberId;
+  }
+  if (filter.redeemedByMemberId) {
+    where.redeemedByMemberId = filter.redeemedByMemberId;
+  }
+  if (filter.source === "ADMIN_ISSUED") {
+    where.purchasedByMemberId = null;
+  } else if (filter.source === "MEMBER_PURCHASED") {
+    where.purchasedByMemberId = { not: null };
+  }
+  if (filter.purchaserCode || filter.memberCode) {
+    const code = (filter.purchaserCode || filter.memberCode).trim().toUpperCase();
+    where.purchasedByMember = {
+      memberCode: { contains: code }
+    };
+  }
 
-  return await prisma.activationPin.findMany({
+  const pins = await prisma.activationPin.findMany({
     where,
     include: {
       purchasedByMember: {
@@ -201,9 +239,14 @@ async function listPins(filter = {}) {
       }
     },
     orderBy: { createdAt: "desc" },
-    take: filter.limit || 100,
-    skip: filter.offset || 0
+    take: filter.limit ? parseInt(filter.limit, 10) : 100,
+    skip: filter.offset ? parseInt(filter.offset, 10) : 0
   });
+
+  return pins.map(p => ({
+    ...p,
+    source: p.purchasedByMemberId ? "MEMBER_PURCHASED" : "ADMIN_ISSUED"
+  }));
 }
 
 /**
