@@ -34,6 +34,7 @@ async function getCommissions(req, res, next) {
     res.json({
       success: true,
       data: result.commissions,
+      totalCount: result.totalCount,
       loginContext: result.loginContext
     });
   } catch (err) {

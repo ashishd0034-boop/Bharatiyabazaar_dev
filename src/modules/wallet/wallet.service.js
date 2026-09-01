@@ -114,11 +114,14 @@ async function getCommissions(memberId, loginContext = null, limit = 50) {
     ? { idCardId: loginContext.loginCardId }
     : { idCardId: { in: idCards.map(i => i.id) } };
 
-  const commissions = await prisma.commissionEntry.findMany({
-    where: whereClause,
-    orderBy: { createdAt: "desc" },
-    take: parseInt(limit) || 50
-  });
+  const [commissions, totalCount] = await Promise.all([
+    prisma.commissionEntry.findMany({
+      where: whereClause,
+      orderBy: { createdAt: "desc" },
+      take: parseInt(limit) || 50
+    }),
+    prisma.commissionEntry.count({ where: whereClause })
+  ]);
 
   const enriched = commissions.map(c => ({
     ...c,
@@ -146,6 +149,7 @@ async function getCommissions(memberId, loginContext = null, limit = 50) {
 
   return {
     commissions: enriched,
+    totalCount,
     loginContext
   };
 }

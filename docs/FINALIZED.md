@@ -60,3 +60,24 @@
 
 ## 7. Route & Authorization Table
 - **JWT Identity Scoping**: All member endpoints scope data strictly by `req.member.id` and `req.loginContext`. No endpoint may accept a foreign `memberId` or `cardNumber` without server-side ownership verification (yielding `403 FORBIDDEN`).
+
+---
+
+## 8. Unified Commission Presentation & Status Vocabulary Contract (`CommissionUI`)
+- **Single Source of Truth (`public/js/commission-ui.js`)**: All pages displaying commission entries (`bb-dashboard.html`, `bb-commissions.html`, etc.) must render commission rows and badges exclusively through `CommissionUI`. No page may define separate badge maps or table row HTML templates.
+- **Unified 6-Column Layout**: Both dashboard and commission history share the exact 6 columns: `Date | Card | Stream | Level | Amount | Status (+ Subtext)`. The redundant Description column is deprecated in favor of explicit `Stream` and `Level` columns.
+- **Exhaustive Friendly Status Labels**:
+  - `WITHDRAWABLE` / `CONFIRMED` $\to$ **`WITHDRAWABLE`** (badge: `success`)
+  - `PENDING_7_DAY` $\to$ **`PENDING (7-DAY)`** (badge: `pending`)
+  - `LOCKED_ACB` $\to$ **`LOCKED (ACB)`** (badge: `locked` / `danger`)
+  - `PAY_ONCE_BLOCKED` $\to$ **`PAY-ONCE BLOCKED`** (badge: `blocked`)
+  - `PENDING_SETTLEMENT` $\to$ **`PENDING (SETTLEMENT)`** (badge: `pending`)
+  - `PIN_GATE_INACTIVE` $\to$ **`PIN GATE INACTIVE`** (badge: `locked`)
+  - `PENDING` $\to$ **`PENDING`** (badge: `pending`)
+  - `EXPIRED` / `CANCELLED` $\to$ **`EXPIRED`** / **`CANCELLED`** (badge: `muted`)
+- **Subtext Rules (ACB v3)**:
+  - `PENDING_7_DAY`: Calculates days remaining to 7-day maturity; displays `ACB not required` for REBIRTH cards (`RB...`), `ACB ✓` for ACB-qualified cards, and `Awaiting ACB` for pending cards.
+  - `LOCKED_ACB`: Displays `Awaiting 1L + 1R referral on this ID`.
+  - `PAY_ONCE_BLOCKED`: Displays `Already rewarded for Level N`.
+- **Dashboard Affordance**: Displays the 10 most recent commissions with an explicit footer indicating `Showing X of N commissions` and a direct link to `bb-commissions.html` (`View all N commissions →`).
+

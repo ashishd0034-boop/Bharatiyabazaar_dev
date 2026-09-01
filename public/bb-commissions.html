@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
   <script src="/js/member-shell.js"></script>
+  <script src="/js/commission-ui.js"></script>
   <style>
     :root {
       --navy: #0d1b2a; --navy-2: #14263b; --teal: #0f9d9d; --teal-dark: #0b7c7c;
@@ -63,12 +64,13 @@
     th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; font-size: 13.5px; vertical-align: top; }
     th { background: #f8fafc; color: var(--navy); font-weight: 600; }
 
-    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .badge { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
     .badge.success { background: #e8f8ee; color: var(--success); }
     .badge.pending { background: #fff4e0; color: var(--warning); }
-    .badge.blocked { background: #f1f5f9; color: #475569; }
+    .badge.locked, .badge.danger { background: #fee2e2; color: var(--danger); }
+    .badge.blocked { background: #f1f5f9; color: #475569; border: 1px dashed rgba(100,116,139,0.3); }
     .badge.info { background: #e8f6ff; color: var(--info); }
-    .badge.danger { background: #fee2e2; color: var(--danger); }
+    .badge.muted { background: #f1f5f9; color: var(--muted); }
 
     .note { border-left: 4px solid var(--teal); background: #f3fbfb; color: #155e5e; padding: 11px 12px; border-radius: 8px; font-size: 13px; margin-top: 12px; }
     .note.warning { border-left-color: var(--warning); background: #fff8e9; color: #7c4a03; }
@@ -200,7 +202,7 @@
             </select>
             <select id="filterStatus">
               <option value="all">All Statuses</option>
-              <option value="confirmed">CONFIRMED (incl. Withdrawable)</option>
+              <option value="withdrawable">WITHDRAWABLE</option>
               <option value="pending">PENDING (7-Day / Locked)</option>
               <option value="blocked">PAY-ONCE BLOCKED</option>
             </select>
@@ -209,10 +211,10 @@
           <div style="overflow-x:auto;">
             <table>
               <thead>
-                <tr><th>Date</th><th>Card</th><th>Stream</th><th>Level</th><th>Description</th><th>Amount</th><th>Status</th></tr>
+                <tr><th>Date</th><th>Card</th><th>Stream</th><th>Level</th><th>Amount</th><th>Status</th></tr>
               </thead>
               <tbody id="commissionTableBody">
-                <tr><td colspan="7" style="text-align:center; color:var(--muted);">No commissions yet. Start referring friends to earn!</td></tr>
+                <tr><td colspan="6" style="text-align:center; color:var(--muted); padding:32px 16px;">No commissions yet. Start referring friends to earn!</td></tr>
               </tbody>
             </table>
           </div>
@@ -411,29 +413,14 @@
     }
 
       const STATUS_GROUPS = {
-        confirmed: ["CONFIRMED", "WITHDRAWABLE"],
-        CONFIRMED: ["CONFIRMED", "WITHDRAWABLE"],
-        WITHDRAWABLE: ["CONFIRMED", "WITHDRAWABLE"],
-        pending: ["PENDING_7_DAY", "LOCKED_ACB"],
-        PENDING: ["PENDING_7_DAY", "LOCKED_ACB"],
-        blocked: ["PAY_ONCE_BLOCKED"],
-        PAY_ONCE_BLOCKED: ["PAY_ONCE_BLOCKED"]
-      };
-
-    const STATUS_LABEL = {
-      CONFIRMED: "CONFIRMED ✓",
-      WITHDRAWABLE: "CONFIRMED ✓",
-      PENDING_7_DAY: "PENDING (7-DAY)",
-      LOCKED_ACB: "LOCKED (ACB)",
-      PAY_ONCE_BLOCKED: "PAY-ONCE BLOCKED"
+      withdrawable: ["CONFIRMED", "WITHDRAWABLE"],
+      WITHDRAWABLE: ["CONFIRMED", "WITHDRAWABLE"],
+      CONFIRMED: ["CONFIRMED", "WITHDRAWABLE"],
+      pending: ["PENDING_7_DAY", "LOCKED_ACB", "PENDING_SETTLEMENT", "PIN_GATE_INACTIVE", "PENDING"],
+      PENDING: ["PENDING_7_DAY", "LOCKED_ACB", "PENDING_SETTLEMENT", "PIN_GATE_INACTIVE", "PENDING"],
+      blocked: ["PAY_ONCE_BLOCKED"],
+      PAY_ONCE_BLOCKED: ["PAY_ONCE_BLOCKED"]
     };
-
-    function badgeFor(status) {
-      if (status === "CONFIRMED" || status === "WITHDRAWABLE") return "success";
-      if (status === "PAY_ONCE_BLOCKED") return "blocked";
-      if (status === "LOCKED_ACB") return "danger";
-      return "pending";
-    }
 
     function renderTable() {
       const stream = document.getElementById('filterStream').value;
@@ -446,28 +433,9 @@
         filtered = filtered.filter(c => group.includes(c.status));
       }
 
-      const tbody = document.getElementById('commissionTableBody');
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:32px;">No commissions generated for this ID yet.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = filtered.map(c => {
-        const cardBadge = c.cardNumber
-          ? `<strong>${c.cardNumber}</strong> <span style="font-size:11px; opacity:0.7;">(${c.cardType || 'MAIN'})</span>`
-          : '—';
-        return `
-        <tr data-stream="${c.stream}" data-status="${c.status}">
-          <td>${formatDate(c.createdAt)}</td>
-          <td>${cardBadge}</td>
-          <td>${c.stream}</td>
-          <td>Level ${c.level || '-'}</td>
-          <td>${c.description || c.stream + ' commission'}</td>
-          <td>+${formatINR(c.amountPaise)}</td>
-          <td><span class="badge ${badgeFor(c.status)}">${STATUS_LABEL[c.status] || c.status}</span></td>
-        </tr>`;
-      }).join('');
+      CommissionUI.renderCommissionsTable(filtered, 'commissionTableBody', {
+        emptyMessage: 'No commissions generated for this ID yet.'
+      });
     }
 
     document.getElementById('filterStream').addEventListener('change', renderTable);
