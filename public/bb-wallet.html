@@ -578,53 +578,60 @@
     els.filterStatus.addEventListener("change", applyFilters);
 
     async function load() {
-      const [profile, wallet, ledger] = await Promise.all([
-        apiCall('/members/profile'),
-        apiCall('/wallet/balance'),
-        apiCall('/wallet/ledger')
-      ]);
+      await MemberShell.safeLoad('historyBody', async () => {
+        const [profile, wallet, ledger] = await Promise.all([
+          apiCall('/members/profile'),
+          apiCall('/wallet/balance'),
+          apiCall('/wallet/ledger')
+        ]);
 
-      document.getElementById('loadingIndicator').classList.add('hidden');
-      document.getElementById('walletContent').classList.remove('hidden');
+        // Unified Member Shell Identity Renderer
+        const identityRes = await initMemberIdentity({ profile, loginContext: wallet?.loginContext });
+        const loginCtx = identityRes?.loginContext || profile?.loginContext;
+        const activeCard = loginCtx?.cardNumber || profile?.memberCode;
+        const isSub = loginCtx?.isSubCard || false;
+        const ownerCode = loginCtx?.ownerMemberCode || profile?.memberCode;
 
-      // Unified Member Shell Identity Renderer
-      const identityRes = await initMemberIdentity({ profile, loginContext: wallet?.loginContext });
-      const loginCtx = identityRes?.loginContext || profile?.loginContext;
-      const activeCard = loginCtx?.cardNumber || profile?.memberCode;
-      const isSub = loginCtx?.isSubCard || false;
-      const ownerCode = loginCtx?.ownerMemberCode || profile?.memberCode;
+        const balance = wallet?.balancePaise || 0;
+        state.withdrawablePaise = balance;
+        state.cumulativeConfirmedPaise = balance;
+        if (els.amount) els.amount.max = balance / 100;
 
-      const balance = wallet?.balancePaise || 0;
-      state.withdrawablePaise = balance;
-      state.cumulativeConfirmedPaise = balance;
-      els.amount.max = balance / 100;
+        document.getElementById('totalBalance').textContent = formatINR(balance);
+        document.getElementById('withdrawableBalance').textContent = formatINR(balance);
+        document.getElementById('confirmedBalance').textContent = formatINR(balance);
+        document.getElementById('pendingBalance').textContent = 'Rs.0.00';
+        document.getElementById('lockedBalance').textContent = 'Rs.0.00';
+        document.getElementById('autopoolAmt').textContent = formatINR(balance);
+        document.getElementById('mysystemAmt').textContent = 'Rs.0.00';
+        document.getElementById('setukoshAmt').textContent = 'Rs.0.00';
+        document.getElementById('subrebirthAmt').textContent = 'Rs.0.00';
 
-      document.getElementById('totalBalance').textContent = formatINR(balance);
-      document.getElementById('withdrawableBalance').textContent = formatINR(balance);
-      document.getElementById('confirmedBalance').textContent = formatINR(balance);
-      document.getElementById('pendingBalance').textContent = 'Rs.0.00';
-      document.getElementById('lockedBalance').textContent = 'Rs.0.00';
-      document.getElementById('autopoolAmt').textContent = formatINR(balance);
-      document.getElementById('mysystemAmt').textContent = 'Rs.0.00';
-      document.getElementById('setukoshAmt').textContent = 'Rs.0.00';
-      document.getElementById('subrebirthAmt').textContent = 'Rs.0.00';
+        if (ledger && ledger.length > 0) {
+          els.historyBody.innerHTML = ledger.map(e => {
+            const stream = e.source || 'wallet';
+            const status = e.type === 'CREDIT' ? 'confirmed' : 'completed';
+            return `<tr data-stream="${stream.toLowerCase()}" data-status="${status}">
+              <td>${formatDate(e.createdAt)}</td>
+              <td>${e.type}</td>
+              <td>${stream}</td>
+              <td>${e.description || '-'}</td>
+              <td>${e.type === 'CREDIT' ? '+' : '-'}${formatINR(e.amountPaise)}</td>
+              <td><span class="badge ${status}">${status.toUpperCase()}</span></td>
+            </tr>`;
+          }).join('');
+        } else {
+          els.historyBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">No transactions recorded in wallet ledger yet.</td></tr>`;
+        }
 
-      if (ledger && ledger.length > 0) {
-        els.historyBody.innerHTML = ledger.map(e => {
-          const stream = e.source || 'wallet';
-          const status = e.type === 'CREDIT' ? 'confirmed' : 'completed';
-          return `<tr data-stream="${stream.toLowerCase()}" data-status="${status}">
-            <td>${formatDate(e.createdAt)}</td>
-            <td>${e.type}</td>
-            <td>${stream}</td>
-            <td>${e.description || '-'}</td>
-            <td>${e.type === 'CREDIT' ? '+' : '-'}${formatINR(e.amountPaise)}</td>
-            <td><span class="badge ${status}">${status.toUpperCase()}</span></td>
-          </tr>`;
-        }).join('');
-      }
-
-      update();
+        update();
+      }, {
+        loaderEl: 'loadingIndicator',
+        contentEl: 'walletContent',
+        colspan: 6,
+        emptyHtml: `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">No transactions recorded in wallet ledger yet.</td></tr>`,
+        errorText: 'Failed to load wallet data. Please refresh.'
+      });
     }
 
     load();

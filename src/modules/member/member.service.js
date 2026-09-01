@@ -91,7 +91,11 @@ async function getMemberProfile(memberId, loginContext) {
     where: { id: memberId },
     include: {
       mainWallet: true,
-      idCards: true,
+      idCards: {
+        include: {
+          autoPoolNode: true
+        }
+      },
       vouchers: true
     }
   });

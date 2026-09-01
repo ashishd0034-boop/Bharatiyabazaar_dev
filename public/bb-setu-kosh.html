@@ -292,13 +292,13 @@
     }
 
     async function initSetuKoshPage() {
-      const token = getMemberToken();
-      if (!token) {
-        logout();
-        return;
-      }
+      await MemberShell.safeLoad("referralBonusesBody", async () => {
+        const token = getMemberToken();
+        if (!token) {
+          logout();
+          return;
+        }
 
-      try {
         const [profRes, cntRes] = await Promise.all([
           fetch("/api/members/profile", { headers: { "Authorization": `Bearer ${token}` } }),
           fetch("/api/setu-kosh/counter", { headers: { "Authorization": `Bearer ${token}` } })
@@ -316,15 +316,19 @@
           await initMemberIdentity({ profile: profData.data });
         }
 
-        if (cntData.success) {
+        if (cntData.success && cntData.data) {
           renderCounter(cntData.data);
           renderReferralBonuses(cntData.data.referralBonuses || []);
+        } else {
+          renderReferralBonuses([]);
         }
 
         await loadTreeData();
-      } catch (err) {
-        console.error("Failed to load Setu Kosh data:", err);
-      }
+      }, {
+        colspan: 6,
+        emptyHtml: `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--muted);">No vendor referral bonuses earned yet. Refer local stores to start earning 0.25% on every customer purchase!</td></tr>`,
+        errorText: "Failed to load Setu Kosh data. Please refresh."
+      });
     }
 
     function renderCounter(data) {
@@ -363,12 +367,11 @@
     }
 
     async function loadTreeData() {
-      const rootPos = document.getElementById("treeRootPos").value || 1;
-      const container = document.getElementById("treeViewContainer");
-      container.innerHTML = "Loading Setu Kosh Tree...";
+      await MemberShell.safeLoad("treeViewContainer", async () => {
+        const rootPos = document.getElementById("treeRootPos").value || 1;
+        const container = document.getElementById("treeViewContainer");
 
-      const token = getMemberToken();
-      try {
+        const token = getMemberToken();
         const res = await fetch(`/api/setu-kosh/tree?root=${rootPos}&depth=10`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
@@ -382,9 +385,9 @@
           </div>
           <div>${renderTreeBranch(t.tree, 0)}</div>
         `;
-      } catch (err) {
-        container.innerHTML = `<span style="color:var(--danger);">${escapeHtml(err.message)}</span>`;
-      }
+      }, {
+        errorText: "Failed to load Setu Kosh Tree Explorer. Please check node position."
+      });
     }
 
     function renderTreeBranch(node, depth) {

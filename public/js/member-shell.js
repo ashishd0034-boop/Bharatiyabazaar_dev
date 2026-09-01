@@ -181,6 +181,62 @@
     setStoredLoginContext(newContext);
   }
 
+  /**
+   * Safe asynchronous loader with complete lifecycle management.
+   * Guarantees that no container is left in an indefinite "Loading..." state.
+   *
+   * @param {string|HTMLElement} target - Element or Element ID to manage content for.
+   * @param {Function} asyncFn - Async function returning data or rendering content.
+   * @param {Object} [options] - Options:
+   *   @param {string|HTMLElement} [options.loaderEl] - Optional separate loader element/ID to hide in finally.
+   *   @param {string|HTMLElement} [options.contentEl] - Optional separate content element/ID to unhide.
+   *   @param {string} [options.emptyText] - Default empty state message.
+   *   @param {string} [options.emptyHtml] - Custom empty state HTML.
+   *   @param {string} [options.errorText] - Custom error message prefix.
+   *   @param {number} [options.colspan] - Table colspan if target is a tbody.
+   */
+  async function safeLoad(target, asyncFn, options = {}) {
+    const el = typeof target === "string" ? document.getElementById(target) : target;
+    const loader = typeof options.loaderEl === "string" ? document.getElementById(options.loaderEl) : options.loaderEl;
+    const content = typeof options.contentEl === "string" ? document.getElementById(options.contentEl) : options.contentEl;
+
+    try {
+      const result = await asyncFn();
+      if (content) content.classList.remove("hidden");
+
+      if (el && result !== undefined) {
+        if (Array.isArray(result) && result.length === 0) {
+          const colspan = options.colspan ? ` colspan="${options.colspan}"` : "";
+          const isTable = el.tagName === "TBODY" || el.tagName === "TABLE";
+          const emptyMsg = options.emptyText || "No records found.";
+          const emptyHtml = options.emptyHtml || (isTable
+            ? `<tr><td${colspan} style="text-align:center; padding:20px; color:var(--muted, #64748b);">${emptyMsg}</td></tr>`
+            : `<div style="text-align:center; padding:20px; color:var(--muted, #64748b);">${emptyMsg}</div>`);
+          el.innerHTML = emptyHtml;
+        }
+      }
+      return result;
+    } catch (err) {
+      console.error("[safeLoad error]", err);
+      if (content) content.classList.remove("hidden");
+      if (el) {
+        const colspan = options.colspan ? ` colspan="${options.colspan}"` : "";
+        const isTable = el.tagName === "TBODY" || el.tagName === "TABLE";
+        const errMsg = options.errorText || `Failed to load data: ${err.message || "Please refresh."}`;
+        const errorHtml = isTable
+          ? `<tr><td${colspan} style="text-align:center; padding:20px; color:var(--danger, #dc2626);">⚠️ ${errMsg}</td></tr>`
+          : `<div style="text-align:center; padding:20px; color:var(--danger, #dc2626);">⚠️ ${errMsg}</div>`;
+        el.innerHTML = errorHtml;
+      }
+      return null;
+    } finally {
+      if (loader) {
+        loader.classList.add("hidden");
+        loader.style.display = "none";
+      }
+    }
+  }
+
   const MemberShell = {
     API_BASE,
     getMemberToken,
@@ -191,7 +247,8 @@
     logout,
     handleLogout,
     renderIdentity,
-    initMemberIdentity
+    initMemberIdentity,
+    safeLoad
   };
 
   global.MemberShell = MemberShell;
@@ -201,4 +258,5 @@
   global.handleLogout = handleLogout;
   global.initMemberIdentity = initMemberIdentity;
   global.setLoginContext = setLoginContext;
+  global.safeLoad = safeLoad;
 })(typeof window !== "undefined" ? window : global);

@@ -842,117 +842,124 @@
     }
 
     async function loadRebirthPage() {
-      const [profile, apData, wallet] = await Promise.all([
-        apiCall('/members/profile'),
-        apiCall('/members/autopool-tree'),
-        apiCall('/wallet/balance')
-      ]);
+      await MemberShell.safeLoad('rebirthTableBody', async () => {
+        const [profile, apData, wallet] = await Promise.all([
+          apiCall('/members/profile'),
+          apiCall('/members/autopool-tree'),
+          apiCall('/wallet/balance')
+        ]);
 
-      if (!profile) return;
+        if (!profile) return;
 
-      // Unified Member Shell Identity Renderer
-      const identityRes = await initMemberIdentity({ profile, loginContext: wallet?.loginContext });
-      const loginCtx = identityRes?.loginContext || profile?.loginContext;
-      const displayName = profile.name || 'Member';
-      const activeCardNum = loginCtx?.cardNumber || profile.memberCode;
-      const isSub = loginCtx?.isSubCard || false;
+        // Unified Member Shell Identity Renderer
+        const identityRes = await initMemberIdentity({ profile, loginContext: wallet?.loginContext });
+        const loginCtx = identityRes?.loginContext || profile?.loginContext;
+        const displayName = profile.name || 'Member';
+        const activeCardNum = loginCtx?.cardNumber || profile.memberCode;
+        const isSub = loginCtx?.isSubCard || false;
 
-      document.getElementById('topbarSubtitle').textContent = `${displayName} · ${activeCardNum} · Rebirth Cycle & Vouchers`;
+        document.getElementById('topbarSubtitle').textContent = `${displayName} · ${activeCardNum} · Rebirth Cycle & Vouchers`;
 
-      // 2. SUB Login Context Banner
-      if (isSub) {
-        const subBanner = document.getElementById('subLoginBanner');
-        subBanner.innerHTML = `🔑 You are logged in via <strong>${loginCtx.cardNumber}</strong> (${loginCtx.cardType} card of ${loginCtx.ownerMemberCode}) — viewing shared member account.`;
-        subBanner.style.display = 'block';
-      }
-
-      // 3. Pool Status & Stats
-      const myStats = apData?.myStats;
-      const levelStatus = apData?.levelStatus || [];
-
-      if (myStats) {
-        document.getElementById('statPosition').textContent = '#' + myStats.position;
-        document.getElementById('statCash').textContent = formatINR(myStats.cashEarnedPaise);
-        document.getElementById('statRebirths').textContent = `${myStats.rebirthIds || 0} / 4`;
-        document.getElementById('statVouchers').textContent = formatINR(myStats.vouchersPaise);
-
-        // Calculate progress in current 8-level cycle (254 downline positions)
-        let totalFilledInCycle = 0;
-        let currentFillingLevel = 1;
-        let currentLvlFilled = 0;
-        let currentLvlSize = 2;
-
-        for (const ls of levelStatus) {
-          totalFilledInCycle += ls.filled;
-          if (!ls.complete && currentFillingLevel === 1) {
-            currentFillingLevel = ls.level;
-            currentLvlFilled = ls.filled;
-            currentLvlSize = ls.size;
-          }
+        // 2. SUB Login Context Banner
+        if (isSub) {
+          const subBanner = document.getElementById('subLoginBanner');
+          subBanner.innerHTML = `🔑 You are logged in via <strong>${loginCtx.cardNumber}</strong> (${loginCtx.cardType} card of ${loginCtx.ownerMemberCode}) — viewing shared member account.`;
+          subBanner.style.display = 'block';
         }
 
-        const pct = Math.min(Math.round((totalFilledInCycle / 254) * 100), 100);
-        document.getElementById('poolProgressBar').style.width = `${Math.max(pct, 2)}%`;
-        document.getElementById('poolProgressText').textContent = 
-          `${totalFilledInCycle} / 254 downline positions filled · Level ${currentFillingLevel > 1 ? currentFillingLevel - 1 : 0} complete · Level ${currentFillingLevel} filling (${currentLvlFilled}/${currentLvlSize} IDs)`;
-        
-        document.getElementById('poolStatusHeading').textContent = 
-          `AutoPool Position #${myStats.position} — ${pct >= 100 ? 'CYCLE COMPLETE 🎉' : 'BUILDING UP (IN PROGRESS)'}`;
-      }
+        // 3. Pool Status & Stats
+        const myStats = apData?.myStats;
+        const levelStatus = apData?.levelStatus || [];
 
-      // 4. Rebirth Cards Table
-      const rebirthCards = (profile.idCards || []).filter(c => c.type === 'REBIRTH');
-      const breakdown = wallet?.breakdown || [];
-      const rebirthTableBody = document.getElementById('rebirthTableBody');
+        if (myStats) {
+          document.getElementById('statPosition').textContent = '#' + myStats.position;
+          document.getElementById('statCash').textContent = formatINR(myStats.cashEarnedPaise);
+          document.getElementById('statRebirths').textContent = `${myStats.rebirthIds || 0} / 4`;
+          document.getElementById('statVouchers').textContent = formatINR(myStats.vouchersPaise);
 
-      if (rebirthCards.length > 0) {
-        rebirthTableBody.innerHTML = rebirthCards.map(c => {
-          const cardBreakdown = breakdown.find(b => b.cardNumber === c.cardNumber);
-          const totalEarned = cardBreakdown ? cardBreakdown.totalPaise : 0;
-          return `
+          // Calculate progress in current 8-level cycle (254 downline positions)
+          let totalFilledInCycle = 0;
+          let currentFillingLevel = 1;
+          let currentLvlFilled = 0;
+          let currentLvlSize = 2;
+
+          for (const ls of levelStatus) {
+            totalFilledInCycle += ls.filled;
+            if (!ls.complete && currentFillingLevel === 1) {
+              currentFillingLevel = ls.level;
+              currentLvlFilled = ls.filled;
+              currentLvlSize = ls.size;
+            }
+          }
+
+          const pct = Math.min(Math.round((totalFilledInCycle / 254) * 100), 100);
+          document.getElementById('poolProgressBar').style.width = `${Math.max(pct, 2)}%`;
+          document.getElementById('poolProgressText').textContent = 
+            `${totalFilledInCycle} / 254 downline positions filled · Level ${currentFillingLevel > 1 ? currentFillingLevel - 1 : 0} complete · Level ${currentFillingLevel} filling (${currentLvlFilled}/${currentLvlSize} IDs)`;
+          
+          document.getElementById('poolStatusHeading').textContent = 
+            `AutoPool Position #${myStats.position} — ${pct >= 100 ? 'CYCLE COMPLETE 🎉' : 'BUILDING UP (IN PROGRESS)'}`;
+        }
+
+        // 4. Rebirth Cards Table
+        const rebirthCards = (profile.idCards || []).filter(c => c.type === 'REBIRTH');
+        const breakdown = wallet?.breakdown || [];
+        const rebirthTableBody = document.getElementById('rebirthTableBody');
+
+        if (rebirthCards.length > 0) {
+          rebirthTableBody.innerHTML = rebirthCards.map(c => {
+            const cardBreakdown = breakdown.find(b => b.cardNumber === c.cardNumber);
+            const totalEarned = cardBreakdown ? cardBreakdown.totalPaise : 0;
+            const globalPos = c.autoPoolNode?.globalPosition || c.autoPoolPosition || '—';
+            return `
+              <tr>
+                <td><strong style="font-family:monospace; font-size:13.5px; color:var(--navy);">${c.cardNumber}</strong></td>
+                <td><span class="badge info">REBIRTH</span></td>
+                <td>#${globalPos}</td>
+                <td style="color:var(--teal); font-weight:600;">+${formatINR(totalEarned)}</td>
+                <td><span class="badge success" style="font-size:11px;">ACB not required</span></td>
+                <td><span class="badge success">${c.status || 'ACTIVE'}</span></td>
+                <td>${formatDate(c.createdAt)}</td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          rebirthTableBody.innerHTML = `
             <tr>
-              <td><strong>${c.cardNumber}</strong></td>
-              <td><span class="badge info">REBIRTH</span></td>
-              <td>#${c.autoPoolNode?.globalPosition || '—'}</td>
-              <td style="color:var(--teal); font-weight:600;">+${formatINR(totalEarned)}</td>
-              <td><span class="badge ${mainCard?.acbStatus ? 'success' : 'pending'}">${mainCard?.acbStatus ? 'Unlocked (Main ACB)' : 'Locked'}</span></td>
-              <td><span class="badge success">${c.status || 'ACTIVE'}</span></td>
-              <td>${formatDate(c.createdAt)}</td>
+              <td colspan="7" class="empty-state">
+                🌱 <strong>No Rebirth IDs generated yet.</strong><br/>
+                Your first Rebirth ID (RB series) will be automatically created when AutoPool Level 4 (16 positions) completes!
+              </td>
             </tr>
           `;
-        }).join('');
-      } else {
-        rebirthTableBody.innerHTML = `
-          <tr>
-            <td colspan="7" class="empty-state">
-              🌱 <strong>No Rebirth IDs generated yet.</strong><br/>
-              Your first Rebirth ID (RB series) will be automatically created when AutoPool Level 4 (16 positions) completes!
-            </td>
-          </tr>
-        `;
-      }
+        }
 
-      // 5. Vouchers Table
-      const vouchers = profile.vouchers || [];
-      const v5 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_5');
-      const v6 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_6');
-      const v7 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_7');
+        // 5. Vouchers Table
+        const vouchers = profile.vouchers || [];
+        const v5 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_5');
+        const v6 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_6');
+        const v7 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_7');
 
-      if (v5) {
-        document.getElementById('v5Code').textContent = v5.id.slice(0, 10).toUpperCase();
-        document.getElementById('v5Status').innerHTML = `<span class="badge success">${v5.status}</span>`;
-        document.getElementById('v5Expiry').textContent = formatDate(v5.expiresAt);
-      }
-      if (v6) {
-        document.getElementById('v6Code').textContent = v6.id.slice(0, 10).toUpperCase();
-        document.getElementById('v6Status').innerHTML = `<span class="badge success">${v6.status}</span>`;
-        document.getElementById('v6Expiry').textContent = formatDate(v6.expiresAt);
-      }
-      if (v7) {
-        document.getElementById('v7Code').textContent = v7.id.slice(0, 10).toUpperCase();
-        document.getElementById('v7Status').innerHTML = `<span class="badge success">${v7.status}</span>`;
-        document.getElementById('v7Expiry').textContent = formatDate(v7.expiresAt);
-      }
+        if (v5) {
+          document.getElementById('v5Code').textContent = v5.id.slice(0, 10).toUpperCase();
+          document.getElementById('v5Status').innerHTML = `<span class="badge success">${v5.status}</span>`;
+          document.getElementById('v5Expiry').textContent = formatDate(v5.expiresAt);
+        }
+        if (v6) {
+          document.getElementById('v6Code').textContent = v6.id.slice(0, 10).toUpperCase();
+          document.getElementById('v6Status').innerHTML = `<span class="badge success">${v6.status}</span>`;
+          document.getElementById('v6Expiry').textContent = formatDate(v6.expiresAt);
+        }
+        if (v7) {
+          document.getElementById('v7Code').textContent = v7.id.slice(0, 10).toUpperCase();
+          document.getElementById('v7Status').innerHTML = `<span class="badge success">${v7.status}</span>`;
+          document.getElementById('v7Expiry').textContent = formatDate(v7.expiresAt);
+        }
+      }, {
+        colspan: 7,
+        emptyHtml: `<tr><td colspan="7" class="empty-state">🌱 <strong>No Rebirth IDs generated yet.</strong><br/>Your first Rebirth ID (RB series) will be automatically created when AutoPool Level 4 (16 positions) completes!</td></tr>`,
+        errorText: 'Failed to load Rebirth IDs. Please refresh.'
+      });
     }
 
     document.addEventListener('DOMContentLoaded', loadRebirthPage);

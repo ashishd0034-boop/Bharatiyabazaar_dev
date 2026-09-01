@@ -709,67 +709,70 @@
     let globalTreeRef = null;
 
     async function load() {
-      const token = getMemberToken();
-      if (!token) { logout(); return; }
+      await MemberShell.safeLoad('levelTableBody', async () => {
+        const token = getMemberToken();
+        if (!token) { logout(); return; }
 
-      const [profile, data] = await Promise.all([
-        apiCall('/members/profile'),
-        apiCall('/members/autopool-tree')
-      ]);
+        const [profile, data] = await Promise.all([
+          apiCall('/members/profile'),
+          apiCall('/members/autopool-tree')
+        ]);
 
-      document.getElementById('loadingIndicator').classList.add('hidden');
-      document.getElementById('poolContent').classList.remove('hidden');
+        // Unified Member Shell Identity Renderer
+        const identityRes = await initMemberIdentity({ profile });
+        const loginCtx = identityRes?.loginContext || profile?.loginContext;
+        const activeCard = loginCtx?.cardNumber || profile?.memberCode;
+        const isSub = loginCtx?.isSubCard || false;
+        const ownerCode = loginCtx?.ownerMemberCode || profile?.memberCode;
 
-      // Unified Member Shell Identity Renderer
-      const identityRes = await initMemberIdentity({ profile });
-      const loginCtx = identityRes?.loginContext || profile?.loginContext;
-      const activeCard = loginCtx?.cardNumber || profile?.memberCode;
-      const isSub = loginCtx?.isSubCard || false;
-      const ownerCode = loginCtx?.ownerMemberCode || profile?.memberCode;
+        if (profile) {
+          myId = profile.id;
+        }
 
-      if (profile) {
-        myId = profile.id;
-      }
+        if (isSub) {
+          document.getElementById('pageHeaderTitle').textContent = `AutoPool (${activeCard})`;
+          document.getElementById('pageHeaderSub').textContent = `The global 8-level binary pool for ${activeCard} (owner ${ownerCode})`;
+        }
 
-      if (isSub) {
-        document.getElementById('pageHeaderTitle').textContent = `AutoPool (${activeCard})`;
-        document.getElementById('pageHeaderSub').textContent = `The global 8-level binary pool for ${activeCard} (owner ${ownerCode})`;
-      }
+        if (!data || !data.myStats) {
+          document.getElementById('myTreeContainer').innerHTML = '<div class="loading">No pool position yet.</div>';
+          return;
+        }
 
-      if (!data || !data.myStats) {
-        document.getElementById('myTreeContainer').innerHTML = '<div class="loading">No pool position yet.</div>';
-        return;
-      }
+        const { globalTree, myTree, myStats, levelStatus } = data;
+        activeTree = myTree;
+        activeTreeKey = 'myTree';
+        globalTreeRef = globalTree;
 
-      const { globalTree, myTree, myStats, levelStatus } = data;
-      activeTree = myTree;
-      activeTreeKey = 'myTree';
-      globalTreeRef = globalTree;
+        document.getElementById('myPosition').textContent = '#' + myStats.position;
+        document.getElementById('myLevel').textContent = 'Level ' + myStats.level;
+        document.getElementById('totalInPool').textContent = myStats.totalInPool;
+        document.getElementById('cashEarned').textContent = formatINR(myStats.cashEarnedPaise);
+        document.getElementById('rebirthIds').textContent = myStats.rebirthIds;
+        document.getElementById('vouchers').textContent = formatINR(myStats.vouchersPaise);
 
-      document.getElementById('myPosition').textContent = '#' + myStats.position;
-      document.getElementById('myLevel').textContent = 'Level ' + myStats.level;
-      document.getElementById('totalInPool').textContent = myStats.totalInPool;
-      document.getElementById('cashEarned').textContent = formatINR(myStats.cashEarnedPaise);
-      document.getElementById('rebirthIds').textContent = myStats.rebirthIds;
-      document.getElementById('vouchers').textContent = formatINR(myStats.vouchersPaise);
+        renderActiveTree();
+        if (myTree && myTree.filled) renderDetail(myTree);
 
-      renderActiveTree();
-      if (myTree && myTree.filled) renderDetail(myTree);
+        document.getElementById('globalTreeContainer').innerHTML = `<div class="chakra"><ul>${renderNode(globalTree, 0)}</ul></div>`;
 
-      document.getElementById('globalTreeContainer').innerHTML = `<div class="chakra"><ul>${renderNode(globalTree, 0)}</ul></div>`;
-
-      let rows = '';
-      for (const ls of levelStatus) {
-        const meta = LEVEL_META[ls.level];
-        const status = ls.complete
-          ? '<span class="badge success">COMPLETE ✓</span>'
-          : ls.filled > 0
-            ? `<span class="badge info">FILLING · ${ls.filled}/${ls.size}</span>`
-            : '<span class="badge pending">PENDING</span>';
-        rows += `<tr><td>L${ls.level}</td><td>${ls.size}</td><td>${status}</td><td>${meta.cash}</td><td>${meta.voucher}</td><td>${meta.rebirth}</td></tr>`;
-      }
-      rows += `<tr style="background:#f8fafc; font-weight:700;"><td>TOTAL</td><td>254 + 1 root</td><td>—</td><td>Rs.800</td><td>Rs.600</td><td>4 rebirth IDs</td></tr>`;
-      document.getElementById('levelTableBody').innerHTML = rows;
+        let rows = '';
+        for (const ls of levelStatus) {
+          const meta = LEVEL_META[ls.level];
+          const status = ls.complete
+            ? '<span class="badge success">COMPLETE ✓</span>'
+            : ls.filled > 0
+              ? `<span class="badge info">FILLING · ${ls.filled}/${ls.size}</span>`
+              : '<span class="badge pending">PENDING</span>';
+          rows += `<tr><td>L${ls.level}</td><td>${ls.size}</td><td>${status}</td><td>${meta.cash}</td><td>${meta.voucher}</td><td>${meta.rebirth}</td></tr>`;
+        }
+        rows += `<tr style="background:#f8fafc; font-weight:700;"><td>TOTAL</td><td>254 + 1 root</td><td>—</td><td>Rs.800</td><td>Rs.600</td><td>4 rebirth IDs</td></tr>`;
+        document.getElementById('levelTableBody').innerHTML = rows;
+      }, {
+        loaderEl: 'loadingIndicator',
+        contentEl: 'poolContent',
+        errorText: 'Failed to load AutoPool journey. Please refresh.'
+      });
     }
 
     load();

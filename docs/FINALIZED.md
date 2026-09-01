@@ -81,3 +81,13 @@
   - `PAY_ONCE_BLOCKED`: Displays `Already rewarded for Level N`.
 - **Dashboard Affordance**: Displays the 10 most recent commissions with an explicit footer indicating `Showing X of N commissions` and a direct link to `bb-commissions.html` (`View all N commissions →`).
 
+---
+
+## 9. Systemic Loader Resilience & Zero-Infinite-Spinner Contract
+- **No Unguarded Loaders**: Every asynchronous data container across all member and admin pages must implement structured lifecycle management (`loading` $\to$ `content` | `empty` | `error`).
+- **Guaranteed Spinner Dismissal**: In `MemberShell.safeLoad()`, loaders, overlays, and skeleton indicators must unconditionally hide in `finally`.
+- **Defensive Error & Empty States**:
+  - Empty datasets must render explicit, actionable empty states (e.g. `🌱 No Rebirth IDs generated yet.`).
+  - Network or rendering errors must replace placeholder/loading DOM with clear error alerts containing refresh guidance, and never freeze on `"Loading..."`.
+
+

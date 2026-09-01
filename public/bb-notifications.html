@@ -201,13 +201,13 @@
     }
 
     async function initNotifications() {
-      const token = getMemberToken();
-      if (!token) {
-        logout();
-        return;
-      }
+      await MemberShell.safeLoad("notificationsContainer", async () => {
+        const token = getMemberToken();
+        if (!token) {
+          logout();
+          return;
+        }
 
-      try {
         const [profRes, notifRes] = await Promise.all([
           fetch("/api/members/profile", { headers: { "Authorization": `Bearer ${token}` } }),
           fetch("/api/members/notifications", { headers: { "Authorization": `Bearer ${token}` } })
@@ -225,15 +225,12 @@
           await initMemberIdentity({ profile: profData.data });
         }
 
-        if (notifData.success) {
-          allNotifications = notifData.data || [];
-          renderFilteredFeed();
-        }
-      } catch (err) {
-        document.getElementById("notificationsContainer").innerHTML = `
-          <div class="empty-box" style="color:var(--danger);">${escapeHtml(err.message)}</div>
-        `;
-      }
+        allNotifications = notifData.success ? (notifData.data || []) : [];
+        renderFilteredFeed();
+      }, {
+        emptyHtml: '<div class="empty-box">No activity notifications recorded yet.</div>',
+        errorText: 'Failed to load notifications feed. Please refresh.'
+      });
     }
 
     function filterCategory(cat) {

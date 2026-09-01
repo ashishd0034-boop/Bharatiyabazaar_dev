@@ -576,81 +576,84 @@
     document.getElementById('profileModal').addEventListener('click', (e) => { if (e.target.id === 'profileModal') closeProfileModal(); });
 
     async function loadTree() {
-      const token = getMemberToken();
-      if (!token) { logout(); return; }
+      await MemberShell.safeLoad('treeInner', async () => {
+        const token = getMemberToken();
+        if (!token) { logout(); return; }
 
-      const [profile, data] = await Promise.all([
-        apiCall('/members/profile'),
-        apiCall('/members/my-system-tree')
-      ]);
+        const [profile, data] = await Promise.all([
+          apiCall('/members/profile'),
+          apiCall('/members/my-system-tree')
+        ]);
 
-      document.getElementById('loadingIndicator').classList.add('hidden');
-      document.getElementById('treeContent').classList.remove('hidden');
+        // Unified Member Shell Identity Renderer
+        const identityRes = await initMemberIdentity({ profile });
+        const loginCtx = identityRes?.loginContext || profile?.loginContext;
+        const activeCard = loginCtx?.cardNumber || profile?.memberCode;
+        const isSub = loginCtx?.isSubCard || false;
+        const ownerCode = loginCtx?.ownerMemberCode || profile?.memberCode;
 
-      // Unified Member Shell Identity Renderer
-      const identityRes = await initMemberIdentity({ profile });
-      const loginCtx = identityRes?.loginContext || profile?.loginContext;
-      const activeCard = loginCtx?.cardNumber || profile?.memberCode;
-      const isSub = loginCtx?.isSubCard || false;
-      const ownerCode = loginCtx?.ownerMemberCode || profile?.memberCode;
+        if (profile) {
+          myMemberCode = profile.memberCode || null;
+        }
 
-      if (profile) {
-        myMemberCode = profile.memberCode || null;
-      }
+        if (isSub) {
+          document.getElementById('pageHeaderTitle').textContent = `My Network (${activeCard})`;
+          document.getElementById('pageHeaderSub').textContent = `Viewing binary referral subtree rooted at ${activeCard} (owner ${ownerCode})`;
+        }
 
-      if (isSub) {
-        document.getElementById('pageHeaderTitle').textContent = `My Network (${activeCard})`;
-        document.getElementById('pageHeaderSub').textContent = `Viewing binary referral subtree rooted at ${activeCard} (owner ${ownerCode})`;
-      }
+        if (data?.isRebirth || profile?.activeCard?.type === 'REBIRTH' || loginCtx?.cardType === 'REBIRTH') {
+          document.getElementById('treeInner').innerHTML = `
+            <div class="loading" style="padding:40px; text-align:center;">
+              <div style="font-size:36px; margin-bottom:12px;">🌀</div>
+              <h3 style="margin-bottom:8px; color:var(--navy); font-size:18px;">Rebirth IDs participate exclusively in AutoPool</h3>
+              <p style="color:var(--muted); margin-bottom:16px; font-size:14px;">Rebirth IDs do not have a binary referral tree in MY SYSTEM.</p>
+              <a href="/bb-autopool.html" class="topbar-btn primary" style="display:inline-block; text-decoration:none; padding:8px 18px; border-radius:8px;">View your AutoPool journey →</a>
+            </div>`;
+          document.getElementById('statLeft').textContent = '0';
+          document.getElementById('statRight').textContent = '0';
+          document.getElementById('statTotal').textContent = '0';
+          document.getElementById('statLeftDirect').textContent = 'Direct: —';
+          document.getElementById('statRightDirect').textContent = 'Direct: —';
+          const statAcb = document.getElementById('statAcb');
+          statAcb.textContent = 'AutoPool Only';
+          statAcb.style.color = 'var(--muted)';
+          return;
+        }
 
-      if (data?.isRebirth || profile?.activeCard?.type === 'REBIRTH' || loginCtx?.cardType === 'REBIRTH') {
-        document.getElementById('treeInner').innerHTML = `
-          <div class="loading" style="padding:40px; text-align:center;">
-            <div style="font-size:36px; margin-bottom:12px;">🌀</div>
-            <h3 style="margin-bottom:8px; color:var(--navy); font-size:18px;">Rebirth IDs participate exclusively in AutoPool</h3>
-            <p style="color:var(--muted); margin-bottom:16px; font-size:14px;">Rebirth IDs do not have a binary referral tree in MY SYSTEM.</p>
-            <a href="/bb-autopool.html" class="topbar-btn primary" style="display:inline-block; text-decoration:none; padding:8px 18px; border-radius:8px;">View your AutoPool journey →</a>
-          </div>`;
-        document.getElementById('statLeft').textContent = '0';
-        document.getElementById('statRight').textContent = '0';
-        document.getElementById('statTotal').textContent = '0';
-        document.getElementById('statLeftDirect').textContent = 'Direct: —';
-        document.getElementById('statRightDirect').textContent = 'Direct: —';
+        if (!data || !data.tree) {
+          document.getElementById('treeInner').innerHTML =
+            '<div class="loading">No network data yet. Refer friends to build your tree!</div>';
+          return;
+        }
+
+        treeData = data;
+        const { tree, stats } = data;
+
+        document.getElementById('statLeft').textContent = stats.leftLegSize;
+        document.getElementById('statRight').textContent = stats.rightLegSize;
+        document.getElementById('statTotal').textContent = stats.totalNetwork;
+        document.getElementById('statLeftDirect').textContent = 'Direct: ' + (stats.hasDirectLeft ? '✓ Filled' : '— Empty');
+        document.getElementById('statRightDirect').textContent = 'Direct: ' + (stats.hasDirectRight ? '✓ Filled' : '— Empty');
+
+        const acbCard = document.getElementById('acbCard');
         const statAcb = document.getElementById('statAcb');
-        statAcb.textContent = 'AutoPool Only';
-        statAcb.style.color = 'var(--muted)';
-        return;
-      }
+        if (stats.acbStatus) {
+          statAcb.textContent = '✓ Unlocked';
+          statAcb.style.color = 'var(--success)';
+          acbCard.classList.add('acb-yes');
+        } else {
+          statAcb.textContent = 'Pending';
+          statAcb.style.color = 'var(--warning)';
+          acbCard.classList.add('acb-no');
+        }
 
-      if (!data || !data.tree) {
-        document.getElementById('treeInner').innerHTML =
-          '<div class="loading">No network data yet. Refer friends to build your tree!</div>';
-        return;
-      }
-
-      treeData = data;
-      const { tree, stats } = data;
-
-      document.getElementById('statLeft').textContent = stats.leftLegSize;
-      document.getElementById('statRight').textContent = stats.rightLegSize;
-      document.getElementById('statTotal').textContent = stats.totalNetwork;
-      document.getElementById('statLeftDirect').textContent = 'Direct: ' + (stats.hasDirectLeft ? '✓ Filled' : '— Empty');
-      document.getElementById('statRightDirect').textContent = 'Direct: ' + (stats.hasDirectRight ? '✓ Filled' : '— Empty');
-
-      const acbCard = document.getElementById('acbCard');
-      const statAcb = document.getElementById('statAcb');
-      if (stats.acbStatus) {
-        statAcb.textContent = '✓ Unlocked';
-        statAcb.style.color = 'var(--success)';
-        acbCard.classList.add('acb-yes');
-      } else {
-        statAcb.textContent = 'Pending';
-        statAcb.style.color = 'var(--warning)';
-        acbCard.classList.add('acb-no');
-      }
-
-      renderTree();
-      renderDetail(tree.id);
+        renderTree();
+        renderDetail(tree.id);
+      }, {
+        loaderEl: 'loadingIndicator',
+        contentEl: 'treeContent',
+        errorText: 'Failed to load network tree. Please refresh.'
+      });
     }
 
     loadTree();
