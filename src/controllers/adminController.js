@@ -649,7 +649,14 @@ async function listMembersReq(req, res, next) {
     // Defense-in-depth: Never expose passwordHash in member list
     const sanitizedMembers = members.map(m => {
       const { passwordHash, ...rest } = m;
-      return rest;
+      const ownedCards = (m.idCards || []).filter(c => c.type === "MAIN" || c.type === "SUB");
+      const rebirthCards = (m.idCards || []).filter(c => c.type === "REBIRTH");
+      return {
+        ...rest,
+        cardsCount: ownedCards.length,
+        ownedCardsCount: ownedCards.length,
+        rebirthCardsCount: rebirthCards.length
+      };
     });
 
     res.json({ success: true, data: { members: sanitizedMembers, total } });

@@ -431,7 +431,7 @@
                 ${escapeHtml(m.kycTier || 'TIER_1')} · ${escapeHtml(m.kycStatus || 'PENDING')}
               </span>
             </td>
-            <td><span class="badge admin">${(m.idCards || []).length} ID(s)</span></td>
+            <td><span class="badge admin">${m.cardsCount ?? (m.idCards || []).filter(c => c.type !== 'REBIRTH').length} ID(s)</span></td>
             <td><strong style="color:var(--teal);">${formatCurrency(m.mainWallet?.balancePaise || 0)}</strong></td>
             <td><span class="badge ${m.status === 'ACTIVE' ? 'success' : 'danger'}">${escapeHtml(m.status || 'ACTIVE')}</span></td>
             <td>${formatDate(m.createdAt)}</td>
