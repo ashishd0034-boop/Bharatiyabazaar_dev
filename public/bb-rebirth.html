@@ -901,8 +901,9 @@
             `AutoPool Position #${myStats.position} — ${pct >= 100 ? 'CYCLE COMPLETE 🎉' : 'BUILDING UP (IN PROGRESS)'}`;
         }
 
-        // 4. Rebirth Cards Table
-        const rebirthCards = (profile.idCards || []).filter(c => c.type === 'REBIRTH');
+        // 4. Rebirth Cards Table (Attributed strictly to active card)
+        const activeCardId = loginCtx?.loginCardId || profile.activeCard?.id;
+        const rebirthCards = (profile.idCards || []).filter(c => c.type === 'REBIRTH' && c.earnedByIdCardId === activeCardId);
         const breakdown = wallet?.breakdown || [];
         const rebirthTableBody = document.getElementById('rebirthTableBody');
 
@@ -927,33 +928,47 @@
           rebirthTableBody.innerHTML = `
             <tr>
               <td colspan="7" class="empty-state">
-                🌱 <strong>No Rebirth IDs generated yet.</strong><br/>
-                Your first Rebirth ID (RB series) will be automatically created when AutoPool Level 4 (16 positions) completes!
+                🌱 <strong>No Rebirth IDs generated for this card yet.</strong><br/>
+                Rebirth IDs (RB series) will be automatically created under this card when its AutoPool Level 4 (16 positions) completes!
               </td>
             </tr>
           `;
         }
 
-        // 5. Vouchers Table
-        const vouchers = profile.vouchers || [];
-        const v5 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_5');
-        const v6 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_6');
-        const v7 = vouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_7');
+        // 5. Vouchers Table (Attributed strictly to active card)
+        const cardVouchers = (profile.vouchers || []).filter(v => v.idCardId === activeCardId);
+        const v5 = cardVouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_5');
+        const v6 = cardVouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_6');
+        const v7 = cardVouchers.find(v => v.sourceType === 'AUTOPOOL_LEVEL_7');
 
         if (v5) {
           document.getElementById('v5Code').textContent = v5.id.slice(0, 10).toUpperCase();
           document.getElementById('v5Status').innerHTML = `<span class="badge success">${v5.status}</span>`;
           document.getElementById('v5Expiry').textContent = formatDate(v5.expiresAt);
+        } else {
+          document.getElementById('v5Code').textContent = '—';
+          document.getElementById('v5Status').innerHTML = `<span class="badge pending">Pending — Level not reached</span>`;
+          document.getElementById('v5Expiry').textContent = '—';
         }
+
         if (v6) {
           document.getElementById('v6Code').textContent = v6.id.slice(0, 10).toUpperCase();
           document.getElementById('v6Status').innerHTML = `<span class="badge success">${v6.status}</span>`;
           document.getElementById('v6Expiry').textContent = formatDate(v6.expiresAt);
+        } else {
+          document.getElementById('v6Code').textContent = '—';
+          document.getElementById('v6Status').innerHTML = `<span class="badge pending">Pending — Level not reached</span>`;
+          document.getElementById('v6Expiry').textContent = '—';
         }
+
         if (v7) {
           document.getElementById('v7Code').textContent = v7.id.slice(0, 10).toUpperCase();
           document.getElementById('v7Status').innerHTML = `<span class="badge success">${v7.status}</span>`;
           document.getElementById('v7Expiry').textContent = formatDate(v7.expiresAt);
+        } else {
+          document.getElementById('v7Code').textContent = '—';
+          document.getElementById('v7Status').innerHTML = `<span class="badge pending">Pending — Level not reached</span>`;
+          document.getElementById('v7Expiry').textContent = '—';
         }
       }, {
         colspan: 7,

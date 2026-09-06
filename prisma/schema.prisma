@@ -48,6 +48,10 @@ model MemberIdCard {
   status               String   @default("ACTIVE") // ACTIVE, INACTIVE
   acbStatus            Boolean  @default(false)
   acbUnlockedAt        DateTime?  // 🆕 ADDED THIS LINE — tracks when ACB unlocked
+  earnedByIdCardId     String?
+  earnedByCard         MemberIdCard?   @relation("EarnedRebirthCards", fields: [earnedByIdCardId], references: [id])
+  earnedRebirthCards   MemberIdCard[]  @relation("EarnedRebirthCards")
+  vouchers             Voucher[]       @relation("CardVouchers")
   autoPoolNode         AutoPoolNode?
   mySystemNode         MySystemNode?
   commissionEntries    CommissionEntry[]
@@ -58,6 +62,7 @@ model MemberIdCard {
   updatedAt            DateTime @updatedAt
 
   @@index([memberId])
+  @@index([earnedByIdCardId])
 }
 
 model AutoPoolNode {
@@ -177,17 +182,19 @@ model PayOnceLedger {
 }
 
 model Voucher {
-  id             String    @id @default(cuid())
+  id             String        @id @default(cuid())
   memberId       String
   idCardId       String?
+  idCard         MemberIdCard? @relation("CardVouchers", fields: [idCardId], references: [id])
   sourceType     String
   faceValuePaise Int
-  status         String    @default("ACTIVE")
-  issuedAt       DateTime  @default(now())
+  status         String        @default("ACTIVE")
+  issuedAt       DateTime      @default(now())
   expiresAt      DateTime
   redeemedAt     DateTime?
-  member         Member    @relation(fields: [memberId], references: [id])
+  member         Member        @relation(fields: [memberId], references: [id])
 
+  @@index([idCardId])
   @@map("vouchers")
 }
 

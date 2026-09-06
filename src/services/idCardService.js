@@ -87,7 +87,14 @@ async function purchaseIds(memberId, count, sponsorIdCardId = null, sponsorSide 
       }
 
       const idCard = await tx.memberIdCard.create({
-        data: { memberId: item.memberId, cardNumber, type: item.type, status: "ACTIVE", acbStatus: false }
+        data: {
+          memberId: item.memberId,
+          cardNumber,
+          type: item.type,
+          earnedByIdCardId: item.earnedByIdCardId || null,
+          status: "ACTIVE",
+          acbStatus: false
+        }
       });
 
       await tx.autoPoolNode.create({

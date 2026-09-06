@@ -129,7 +129,8 @@ async function getMemberProfile(memberId, loginContext) {
       id: activeCard.id,
       cardNumber: activeCard.cardNumber,
       type: activeCard.type,
-      acbStatus: activeCard.acbStatus
+      acbStatus: activeCard.acbStatus,
+      earnedByIdCardId: activeCard.earnedByIdCardId || null
     } : null,
     loginContext: resolvedLoginContext
   };

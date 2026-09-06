@@ -29,6 +29,7 @@ async function checkAndProcessRebirths(tx, newlyPlacedGlobalPosition) {
             ancestorPos: ancestorPos,
             depthLevel: ancestorNode.depthLevel,
             completedLevel: L,
+            earnedByIdCardId: ancestorNode.idCardId,
             // Rebirth properties:
             type: "REBIRTH",
             sponsorIdCardId: null,

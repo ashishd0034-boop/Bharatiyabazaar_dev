@@ -90,4 +90,14 @@
   - Empty datasets must render explicit, actionable empty states (e.g. `🌱 No Rebirth IDs generated yet.`).
   - Network or rendering errors must replace placeholder/loading DOM with clear error alerts containing refresh guidance, and never freeze on `"Loading..."`.
 
+---
+
+## 10. Per-Card Rebirth & Voucher Attribution
+- **Attribution Invariant**: A rebirth card (`REBIRTH` type) and a product voucher are attributed strictly to the SPECIFIC card (`MAIN` or `SUB` or `REBIRTH`) whose global AutoPool level completion earned it.
+- **No MAIN Accumulation**: The `MAIN` card view never accumulates `SUB`-earned rebirths or vouchers. Each card context (`MAIN` / `SUB` / `REBIRTH`) displays ONLY its own earned rebirth cards and product vouchers.
+- **Member Ownership & Unified Wallet**: Member-level ownership remains unchanged. All cash commissions flow to the member's unified wallet, but reward attribution and card view filtering are strictly card-scoped.
+- **Voucher Issuance**: AutoPool Level 5, Level 6, and Level 7 completions each issue a ₹200 product voucher with `idCardId` pointing directly to the earning card.
+- **Data Model**: `MemberIdCard.earnedByIdCardId` tracks the earning card foreign key; `Voucher.idCardId` tracks the earning card foreign key.
+
+
 
