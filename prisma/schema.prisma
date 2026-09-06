@@ -142,6 +142,8 @@ model LedgerEntry {
   balanceBeforePaise Int
   wallet             Wallet   @relation(fields: [walletId], references: [id])
 
+  @@index([walletId])
+  @@index([createdAt])
   @@map("ledger_entries")
 }
 
@@ -208,7 +210,9 @@ model Withdrawal {
   rejectionReason  String?
   member           Member    @relation(fields: [memberId], references: [id])
 
-  @@index([idCardId]) // 🆕 Added for query performance
+  @@index([memberId])
+  @@index([status])
+  @@index([idCardId])
   @@map("withdrawals")
 }
 
@@ -261,6 +265,8 @@ model VendorSale {
   createdAt      DateTime @default(now())
   vendor         Vendor   @relation(fields: [vendorId], references: [id])
 
+  @@index([vendorId])
+  @@index([createdAt])
   @@map("vendor_sales")
 }
 
@@ -284,6 +290,8 @@ model VendorSettlement {
   settledAt            DateTime?
   vendor               Vendor    @relation(fields: [vendorId], references: [id])
 
+  @@index([vendorId])
+  @@index([status])
   @@map("vendor_settlements")
 }
 

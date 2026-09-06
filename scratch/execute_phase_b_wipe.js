@@ -1,3 +1,8 @@
+if (process.env.NODE_ENV !== "development" && process.env.ALLOW_PROD_RESET !== "true") {
+  console.error("🚨 FATAL: Database reset blocked. Must be NODE_ENV=development or ALLOW_PROD_RESET=true.");
+  process.exit(1);
+}
+
 const prisma = require("../src/lib/prisma");
 const bcrypt = require("bcrypt");
 const request = require("supertest");

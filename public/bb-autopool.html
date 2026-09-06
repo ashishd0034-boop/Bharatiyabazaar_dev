@@ -355,7 +355,7 @@
   </div>
 
   <script>
-    const API_BASE = 'http://localhost:4000/api';
+    const API_BASE = window.MemberShell?.API_BASE || '/api';
     function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
     function formatINR(paise) { return 'Rs.' + (Number(paise) / 100).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
     function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }

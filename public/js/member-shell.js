@@ -3,7 +3,7 @@
  * Single source of truth for member authentication, session hygiene, and sidebar identity rendering.
  */
 (function (global) {
-  const API_BASE = "http://localhost:4000/api";
+  const API_BASE = "/api";
 
   function getMemberToken() {
     return localStorage.getItem("jwt_token") || localStorage.getItem("bb_token") || "";
