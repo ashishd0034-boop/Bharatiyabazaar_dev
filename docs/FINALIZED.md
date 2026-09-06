@@ -99,5 +99,16 @@
 - **Voucher Issuance**: AutoPool Level 5, Level 6, and Level 7 completions each issue a ₹200 product voucher with `idCardId` pointing directly to the earning card.
 - **Data Model**: `MemberIdCard.earnedByIdCardId` tracks the earning card foreign key; `Voucher.idCardId` tracks the earning card foreign key.
 
+### 10.5 Cross-Page Stat Parity Invariant
+Every member view rendering AutoPool rewards (Dashboard, AutoPool Chakra, Rebirth IDs, Commissions History, Hindi Dashboard) must display strictly identical scoped figures for the active card login context:
+1. **Derivation Formula**:
+   - **Primary**: `myStats` from `/api/members/autopool-tree` (`myStats.rebirthIds`, `myStats.vouchersPaise`, `myStats.cashEarnedPaise`).
+   - **Fallback**: Card-filtered profile collections (`profile.vouchers.filter(v => v.idCardId === activeCardId)` and `profile.idCards.filter(c => c.type === 'REBIRTH' && c.earnedByIdCardId === activeCardId)`).
+2. **No Member-Wide Reward Aggregation**: No page may render member-wide aggregate counts for Rebirth IDs or Vouchers. Each card view (`MAIN`, `SUB`, `REBIRTH`) reflects solely its own earned rewards.
+3. **Unified Cash Wallet Independence**: The cash balance in the member wallet remains member-unified by design (all cards feed the central wallet balance), while AutoPool reward stats (rebirth IDs and vouchers) maintain strict per-card isolation across all UI views.
+4. **Parity Contract**:
+   `Dashboard (apRebirth, apCash) === AutoPool (rebirthIds, vouchers, cashEarned) === Rebirth (statRebirths, statVouchers) === Commissions (rebirthIds, voucherEarned) === Hindi (valRebirthCount, valVouchersEarned)`.
+
+
 
 

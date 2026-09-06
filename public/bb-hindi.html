@@ -304,11 +304,12 @@
       }
 
       try {
-        const [profileRes, walletRes, cardsRes, setuRes] = await Promise.all([
+        const [profileRes, walletRes, cardsRes, setuRes, apRes] = await Promise.all([
           fetch("/api/members/profile", { headers: { "Authorization": `Bearer ${token}` } }),
           fetch("/api/wallets/summary", { headers: { "Authorization": `Bearer ${token}` } }),
           fetch("/api/id-cards/my-cards", { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch("/api/setu-kosh/counter", { headers: { "Authorization": `Bearer ${token}` } })
+          fetch("/api/setu-kosh/counter", { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch("/api/members/autopool-tree", { headers: { "Authorization": `Bearer ${token}` } })
         ]);
 
         if (profileRes.status === 401 || walletRes.status === 401) {
@@ -320,6 +321,7 @@
         const walletData = await walletRes.json();
         const cardsData = await cardsRes.json();
         const setData = await setuRes.json();
+        const apData = apRes.ok ? await apRes.json() : null;
 
         if (profileData.success && profileData.data) {
           await initMemberIdentity({ profile: profileData.data });
@@ -329,7 +331,7 @@
           renderWallet(walletData.data);
         }
         if (cardsData.success) {
-          renderCards(cardsData.data);
+          renderCards(cardsData.data, profileData?.data, apData?.data?.myStats);
         }
         if (setData.success) {
           renderSetu(setData.data);
@@ -367,7 +369,7 @@
       document.getElementById("valMySystemHold").textContent = formatCurrency(wallet.onHoldCommissionsPaise || 0);
     }
 
-    function renderCards(cardsList) {
+    function renderCards(cardsList, profile, apStats) {
       const list = Array.isArray(cardsList) ? cardsList : (cardsList.idCards || []);
       const tbody = document.getElementById("idCardsTableBody");
       if (!list || list.length === 0) {
@@ -375,9 +377,21 @@
         return;
       }
 
-      let rebirths = 0;
+      const activeCardId = profile?.activeCard?.id || list.find(c => c.type === 'MAIN')?.id;
+      let rebirthsCount = 0;
+      let vouchersPaise = 0;
+
+      if (apStats) {
+        rebirthsCount = apStats.rebirthIds || 0;
+        vouchersPaise = apStats.vouchersPaise || 0;
+      } else {
+        const cardRebirths = list.filter(c => c.type === 'REBIRTH' && c.earnedByIdCardId === activeCardId);
+        const cardVouchers = (profile?.vouchers || []).filter(v => v.idCardId === activeCardId);
+        rebirthsCount = cardRebirths.length;
+        vouchersPaise = cardVouchers.reduce((s, v) => s + (v.faceValuePaise || 0), 0);
+      }
+
       tbody.innerHTML = list.map(c => {
-        if (c.type === "REBIRTH") rebirths++;
         return `
           <tr>
             <td><strong>${escapeHtml(c.cardNumber)}</strong></td>
@@ -389,7 +403,8 @@
         `;
       }).join("");
 
-      document.getElementById("valRebirthCount").textContent = `${rebirths} IDs`;
+      document.getElementById("valRebirthCount").textContent = `${rebirthsCount} IDs`;
+      document.getElementById("valVouchersEarned").textContent = formatCurrency(vouchersPaise);
     }
 
     function renderSetu(setu) {

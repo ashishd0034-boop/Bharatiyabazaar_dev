@@ -374,9 +374,10 @@
       const token = getMemberToken();
       if (!token) { logout(); return; }
 
-      const [profile, commissions] = await Promise.all([
+      const [profile, commissions, apData] = await Promise.all([
         apiCall('/members/profile'),
-        apiCall('/wallet/commissions?limit=200')
+        apiCall('/wallet/commissions?limit=200'),
+        apiCall('/members/autopool-tree')
       ]);
 
       document.getElementById('loadingIndicator').classList.add('hidden');
@@ -394,6 +395,20 @@
         document.getElementById('pageHeaderSub').textContent = `Earning streams for ${activeCard} (owner ${ownerCode})`;
       }
 
+      // Per-card AutoPool stats (FINALIZED.md §10.5 Cross-Page Stat Parity)
+      const myStats = apData?.myStats;
+      const activeCardId = loginCtx?.loginCardId || profile?.activeCard?.id;
+      if (myStats) {
+        document.getElementById('voucherEarned').textContent = formatINR(myStats.vouchersPaise);
+        document.getElementById('rebirthIds').textContent = myStats.rebirthIds || 0;
+      } else {
+        const cardVouchers = (profile?.vouchers || []).filter(v => v.idCardId === activeCardId);
+        const voucherSum = cardVouchers.reduce((s, v) => s + (v.faceValuePaise || 0), 0);
+        const cardRebirths = (profile?.idCards || []).filter(c => c.type === 'REBIRTH' && c.earnedByIdCardId === activeCardId);
+        document.getElementById('voucherEarned').textContent = formatINR(voucherSum);
+        document.getElementById('rebirthIds').textContent = cardRebirths.length;
+      }
+
       allCommissions = commissions || [];
 
       if (allCommissions.length > 0) {
@@ -405,7 +420,6 @@
         document.getElementById('totalEarned').textContent = formatINR(total);
         document.getElementById('confirmedEarned').textContent = formatINR(confirmed);
         document.getElementById('pendingEarned').textContent = formatINR(pending);
-        document.getElementById('voucherEarned').textContent = 'Rs.0.00';
         document.getElementById('setuKoshTotal').textContent = formatINR(setuKosh);
       }
 
